@@ -171,20 +171,23 @@ def generate_dashboard_v2(df, state, prices, filename="index.html"):
     add_info_marker(fig, 2, 1, "<b>Attribution</b><br>Contribution nette en Euros par position.")
 
     # --- CHART 4: ALPHA vs BENCHMARK (Line) ---
-    # Correction : Appel avec la date de début pour aligner les courbes
     start_date = df['Date'].iloc[0]
     bench = get_benchmark_data(start_date)
 
-    if bench is not None:
-        # On s'assure que le bench commence bien à la date souhaitée (slicing de sécurité)
+    # MODIFICATION ICI : On vérifie que bench n'est pas None ET n'est pas vide
+    if bench is not None and not bench.empty:
+        # On s'assure que le bench commence bien à la date souhaitée
         bench = bench[bench.index >= pd.to_datetime(start_date)]
-        # Normalisation base 0
-        b_norm = (bench / bench.iloc[0] - 1) * 100
 
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Return_Pct'], name="Portfolio",
-                                 line=dict(color=C_GREEN, width=2)), row=2, col=2)
-        fig.add_trace(go.Scatter(x=bench.index, y=b_norm, name="MSCI World Index",
-                                 line=dict(color=C_PURPLE, width=1, dash='dot')), row=2, col=2)
+        # Seconde sécurité : est-ce qu'il reste des données après le filtre de date ?
+        if not bench.empty:
+            b_norm = (bench / bench.iloc[0] - 1) * 100
+
+            fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Return_Pct'], name="Portfolio",
+                                     line=dict(color=C_GREEN, width=2)), row=2, col=2)
+            fig.add_trace(go.Scatter(x=bench.index, y=b_norm, name="MSCI World Index",
+                                     line=dict(color=C_PURPLE, width=1, dash='dot')), row=2, col=2)
+
     add_info_marker(fig, 2, 2, "<b>Alpha Generation</b><br>Capacité à battre l'indice de référence (MSCI World).")
 
     # --- CHART 5: RISK PROFILE (Full Width Area) ---
