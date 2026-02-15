@@ -205,7 +205,7 @@ def generate_dashboard_v2(df, state, prices, filename="index.html"):
         font=dict(family="Courier New, monospace", size=10, color=C_TEXT),
         # Titre Principal
         title=dict(
-            text=f"<span style='color:{C_ORANGE}; font-size:22px; letter-spacing:3px;'>INVESTMENT MEMORANDUM</span> <span style='font-size:12px; color:{C_GREY}'>| ONE-PAGE REPORT</span>",
+            text=f"<span style='color:{C_ORANGE}; font-size:22px; letter-spacing:3px;'>DASHBOARD PEA</span> <span style='font-size:12px; color:{C_GREY}'>| KPIs</span>",
             y=0.98
         ),
         showlegend=False,
