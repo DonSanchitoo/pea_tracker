@@ -2,38 +2,41 @@ name: PEA Weekly Tracker
 
 on:
   schedule:
-    - cron: '0 9 * * 1' # Lundi 9h00 UTC
+    - cron: '0 9 * * 1'
   workflow_dispatch:
 
 jobs:
   run-tracker:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
+
     steps:
-      - name: Checkout repository
+      - name: Checkout du code
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Configuration de Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
-        run: pip install yfinance pandas
+      - name: Installation des bibliothèques
+        run: |
+          pip install yfinance pandas matplotlib
 
-      - name: Run Script
+      - name: Exécution du script de suivi
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
         run: python pea_tracker.py
 
-      - name: Commit and push if CSV changed
+      - name: Sauvegarde des modifications (CSV et Graphique)
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git add pea_history.csv
-          git commit -m "Update PEA history [skip ci]" || exit 0
+          git add portfolio_state.csv pea_history.csv chart.png
+          # On commit seulement s'il y a des changements pour éviter les erreurs
+          git commit -m "Mise à jour hebdomadaire des données [skip ci]" || echo "Aucune modification à commiter"
           git push
-          
