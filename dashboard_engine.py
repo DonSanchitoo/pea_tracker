@@ -29,7 +29,7 @@ def get_benchmark_data():
 
 def calculate_kpis(df):
     """Calcule CAGR, MDD, Volatilité et Alpha"""
-    if len(df) < 2: return 0, 0, 0, 0, pd.Series()
+    if len(df) < 2: return 0, 0, 0, 0, pd.Series(dtype=float)
 
     # 1. CAGR (Croissance Annuelle)
     days = (pd.to_datetime(df['Date'].iloc[-1]) - pd.to_datetime(df['Date'].iloc[0])).days
@@ -59,15 +59,37 @@ def calculate_kpis(df):
 
 def add_info_marker(fig, row, col, text, title_text):
     """Ajoute le bouton 'i' et l'explication (Gère l'exception du Pie Chart)"""
+
+    # --- CAS SPÉCIAL : PIE CHART (Row 2, Col 1) ---
     if row == 2 and col == 1:
         fig.add_annotation(
             xref="paper", yref="paper",
-            x=0.02, y=0.83,
+            x=0.02, y=0.83,  # Position manuelle car pas d'axes
             text=f"<b>{title_text}</b>",
             font=dict(color=C_ORANGE, size=14, family="Courier New"),
             showarrow=False
         )
+        # Pas de bouton info interactif sur le Pie Chart pour éviter le bug domain
         return
+
+    # --- CAS STANDARD (Tous les autres graphiques) ---
+    # Cette partie manquait dans ton code !
+
+    # 1. Le Marqueur Interactif (Gros point Cyan)
+    fig.add_trace(go.Scatter(
+        x=[None], y=[None], mode='markers',
+        marker=dict(size=15, color=C_CYAN, symbol='circle'),
+        name="INFO", showlegend=False, hoverinfo='text', hovertext=text
+    ), row=row, col=col)
+
+    # 2. Etiquette visuelle "[ ? ]"
+    # On utilise "x domain" pour placer le bouton en haut à droite du graphique
+    fig.add_annotation(
+        xref=f"x domain", yref=f"y domain",
+        x=0.98, y=1.1, text="[ ? ]",
+        font=dict(color=C_CYAN, size=12, weight="bold"), showarrow=False,
+        row=row, col=col, hovertext=text
+    )
 
 
 def generate_dashboard_v2(df, state, prices, filename="index.html"):
@@ -79,72 +101,54 @@ def generate_dashboard_v2(df, state, prices, filename="index.html"):
     gains = [(state.loc[t, "Quantity"] * prices[t]) - state.loc[t, "Total_Invested"] for t in labels]
 
     # STRUCTURE COMPLEXE (Grille)
-    rows = 4 + len(labels)
+    titles_list = ["", "",  # Vide pour les KPIs
+                   "ALLOCATION D'ACTIFS", "CROISSANCE PATRIMOINE",
+                   "CONTRIBUTION P&L (EUR)", "PERFORMANCE vs MONDE",
+                   "HISTORIQUE DES CHUTES (Drawdown)"] + [f"ANALYSE TECHNIQUE : {t}" for t in labels]
+
+    # --- B. CRÉATION DE LA GRILLE ---
     fig = make_subplots(
-        rows=rows, cols=2,
+        rows=4 + len(labels), cols=2,
         column_widths=[0.35, 0.65],
-        row_heights=[0.12, 0.22, 0.22, 0.15] + [0.20] * len(labels),
+        row_heights=[0.12, 0.22, 0.22, 0.15] + [0.25] * len(labels),
         specs=[[{"type": "domain", "colspan": 2}, None],  # 1. KPIs
                [{"type": "domain"}, {"type": "xy"}],  # 2. Pie + Value
-               [{"type": "xy"}, {"type": "xy"}],  # 3. Bar Gains + Perf vs Bench
+               [{"type": "xy"}, {"type": "xy"}],  # 3. Bar Gains + Perf
                [{"type": "xy", "colspan": 2}, None]] +  # 4. Drawdown
               [[{"type": "xy", "colspan": 2}, None]] * len(labels),  # 5+. Candles
-        vertical_spacing=0.05
+        subplot_titles=titles_list,  # TITRES AUTOMATIQUES
+        vertical_spacing=0.06
     )
 
     # --- 1. KPIs HEADERS (AVEC ECHELLES DE VALEUR) ---
     kpis = [
         (df['Total_Value'].iloc[-1], "VALEUR NETTE",
-         "<b>TOTAL PORTEFEUILLE</b><br>" +
-         "Somme de votre cash investi et de vos gains.<br>" +
-         "Montant disponible aujourd'hui.",
-         C_GREEN, "€"),
-
+         "<b>TOTAL PORTEFEUILLE</b><br>Somme cash investi + gains.<br>Montant disponible.", C_GREEN, "€"),
         (cagr, "CAGR (Annuel)",
-         "<b>RENDEMENT ANNUALISÉ</b><br>" +
-         "Moyenne de croissance par an (lissée).<br><br>" +
-         "<b>Comparaison</b><br>" +
-         "🔴 < 3% : Niveau Livret A<br>" +
-         "🟡 4% à 7% : Bon rendement<br>" +
-         "🟢 > 8% : Excellent",
-         C_CYAN, "%"),
-
+         "<b>RENDEMENT ANNUALISÉ</b><br>🔴 < 3% : Faible<br>🟡 4-7% : Bon<br>🟢 > 8% : Excellent", C_CYAN, "%"),
         (alpha, "ALPHA (vs Monde)",
-         "<b>SURPERFORMANCE</b><br>" +
-         "Comparaison face à un ETF Monde (CW8).<br><br>" +
-         "<b>Lecture :</b><br>" +
-         "🟢 Positif : Bravo, on bat le marché !<br>" +
-         "🔴 Négatif : Un ETF fait mieux.<br>" +
-         "<i>Cherchez l'Alpha est difficile sur le long terme.</i>",
-         C_PURPLE, "% pts"),
-
+         "<b>SURPERFORMANCE</b><br>🟢 Positif : Vous battez le marché<br>🔴 Négatif : ETF fait mieux", C_PURPLE, "% pts"),
         (mdd, "MAX DRAWDOWN",
-         "<b>RISQUE MAXIMUM</b><br>" +
-         "La chute la plus violente subie depuis un sommet historique.<br><br>" +
-         "<b>Échelle:</b><br>" +
-         "🟢 0% à -10% : Normal<br>" +
-         "🟡 -10% à -20% : Correction de marché <br>" +
-         "🔴 Au-delà de -20% : Krach",
-         C_RED, "%"),
-
+         "<b>RISQUE MAX</b><br>🟢 0 à -10% : Normal<br>🟡 -10 à -20% : Correction<br>🔴 > -20% : Krach", C_RED, "%"),
         (vol, "VOLATILITÉ",
-         "<b>NERVOSITÉ (Risque)</b><br>" +
-         "Amplitude des mouvements quotidiens.<br><br>" +
-         "<b>Interprétation :</b><br>" +
-         "🟢 < 10% : Calme<br>" +
-         "🟡 10% à 15% : Standard<br>" +
-         "🔴 > 20% : Agressif",
-         "#f1c40f", "%")
+         "<b>NERVOSITÉ</b><br>🟢 < 10% : Calme<br>🔴 > 20% : Agressif", "#f1c40f", "%")
     ]
+
+    # CETTE BOUCLE MANQUAIT DANS TON CODE :
+    for i, (val, name, info, color, suffix) in enumerate(kpis):
+        pos_x = (i / len(kpis)) + 0.1
+        fig.add_annotation(
+            xref="paper", yref="paper", x=pos_x, y=0.98,
+            text=f"<span style='font-size:11px; color:{C_GREY}'>{name}</span><br><span style='font-size:22px; color:{color}'><b>{val:,.2f}{suffix}</b></span>",
+            showarrow=False, align="center", hovertext=info
+        )
 
     # --- 2. ALLOCATION & VALEUR ---
     # Pie
     fig.add_trace(go.Pie(labels=labels, values=values, hole=.6,
                          marker=dict(colors=['#2c3e50', '#34495e', '#576574', '#8395a7']),
                          textinfo='percent', hoverinfo='label+value+percent'), row=2, col=1)
-    add_info_marker(fig, 2, 1,
-                    "<b>Répartition :</b><br>Pourcentage de chaque actif du portefeuille.<br>Vérifiez qu'aucune ligne ne dépasse 30% pour limiter le risque.",
-                    "ALLOCATION")
+    add_info_marker(fig, 2, 1, "<b>Répartition du risque :</b><br>Pourcentage de chaque actif.", "ALLOCATION")
 
     # Area Chart (Value)
     fig.add_trace(
@@ -152,39 +156,31 @@ def generate_dashboard_v2(df, state, prices, filename="index.html"):
         row=2, col=2)
     fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Value'], name="Valeur", fill='tonexty',
                              line=dict(color=C_GREEN, width=1.5)), row=2, col=2)
-    add_info_marker(fig, 2, 2,
-                    "<b>Création de Richesse :</b><br>Zone Grise = Effort d'épargne.<br>Zone Verte = Les intérêts composés.<br>L'écart grandissant est votre enrichissement.",
+    add_info_marker(fig, 2, 2, "<b>Patrimoine :</b><br>Zone Grise = Votre argent.<br>Zone Verte = Intérêts composés.",
                     "PATRIMOINE")
 
     # --- 3. GAINS & BENCHMARK ---
     # Bar Chart (P&L)
     fig.add_trace(go.Bar(x=labels, y=gains, marker_color=[C_GREEN if g > 0 else C_RED for g in gains], name="P/L"),
                   row=3, col=1)
-    add_info_marker(fig, 3, 1,
-                    "<b>Contribution en Euros :</b><br>Performance par actif.",
-                    "P&L NET (EUR)")
+    add_info_marker(fig, 3, 1, "<b>P&L Net :</b><br>Gains ou pertes en Euros.", "P&L NET (EUR)")
 
     # Perf vs Benchmark
     bench = get_benchmark_data()
     if bench is not None:
-        # Normalisation pour comparer base 0
         b_norm = (bench / bench.iloc[0] - 1) * 100
-        # On aligne les dates (simplification graphique)
         fig.add_trace(
             go.Scatter(x=df['Date'], y=df['Total_Return_Pct'], name="Mon PEA", line=dict(color=C_GREEN, width=2)),
             row=3, col=2)
         fig.add_trace(
             go.Scatter(x=bench.index, y=b_norm, name="MSCI World", line=dict(color=C_PURPLE, width=1, dash='dot')),
             row=3, col=2)
-    add_info_marker(fig, 3, 2,
-                    "<b>Le Match vs Le Marché :</b><br>Ligne Verte = Votre Performance.<br>Ligne Violette = ETF Monde.<br>Si la verte est au-dessus = gestion bonne.",
-                    "PERF vs MONDE")
+    add_info_marker(fig, 3, 2, "<b>Le Match :</b><br>Verte = Vous.<br>Violette = Le Marché.", "PERF vs MONDE")
 
     # --- 4. RISQUE (DRAWDOWN) ---
     fig.add_trace(go.Scatter(x=df['Date'], y=drawdown_series * 100, fill='tozeroy', name="Drawdown",
                              line=dict(color=C_RED, width=1)), row=4, col=1)
-    add_info_marker(fig, 4, 1,
-                    "<b>Stress Test (Drawdown) :</b><br>Si la courbe touche 0 = record historique.<br> -10%, -> +11% pour revenir à l'équilibre.",
+    add_info_marker(fig, 4, 1, "<b>Stress Test :</b><br>Distance par rapport au record historique.",
                     "HISTORIQUE DES CHUTES")
 
     # --- 5+. CHANDELIERS & PRU ---
@@ -192,24 +188,27 @@ def generate_dashboard_v2(df, state, prices, filename="index.html"):
         row_idx = 5 + i
         hist = yf.Ticker(t).history(period="6mo")
 
-        # Candles
+        # 1. Bougies
         fig.add_trace(go.Candlestick(
             x=hist.index, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'],
             name=t, increasing_line_color=C_GREEN, decreasing_line_color=C_RED
         ), row=row_idx, col=1)
 
-        # Ligne de PRU
+        # 2. Ligne PRU (Seulement si logique)
         my_pru = pru_list[t]
-        fig.add_trace(go.Scatter(
-            x=[hist.index[0], hist.index[-1]], y=[my_pru, my_pru],
-            mode='lines', line=dict(color=C_CYAN, width=1, dash='dash'), name="PRU"
-        ), row=row_idx, col=1)
+        if my_pru > 1:
+            fig.add_trace(go.Scatter(
+                x=[hist.index[0], hist.index[-1]], y=[my_pru, my_pru],
+                mode='lines', line=dict(color=C_CYAN, width=1, dash='dash'), name="PRU"
+            ), row=row_idx, col=1)
 
-        # Info
-        txt = f"<b>{t} :</b><br>Ligne Bleue = Prix d'Achat (PRU).<br>bougies sont au-dessus : <b>Zone de Gain</b>.<br>Si les bougies sont en dessous : <b>Zone de Perte</b>."
-        add_info_marker(fig, row_idx, 1, txt, f"TECHNIQUE : {t}")
+        # 3. Info Bulle
+        add_info_marker(fig, row_idx, 1, f"Analyse de {t}.<br>Ligne Bleue = PRU ({my_pru:.2f}€).", "")
 
     # --- STYLE ---
+    # Force tous les titres en ORANGE
+    fig.update_annotations(font=dict(color=C_ORANGE, size=14, family="Courier New"))
+
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor=C_BG, plot_bgcolor=C_PAPER,
@@ -218,7 +217,8 @@ def generate_dashboard_v2(df, state, prices, filename="index.html"):
         showlegend=False,
         height=1400 + (300 * len(labels)),
         margin=dict(l=20, r=20, t=80, b=20),
-        hovermode="x unified"
+        hovermode="x unified",
+        hoverlabel=dict(bgcolor="#2d3436", font_size=12, font_family="Courier New")
     )
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor=C_GRID, rangeslider_visible=False)
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor=C_GRID)
