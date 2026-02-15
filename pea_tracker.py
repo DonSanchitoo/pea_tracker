@@ -45,7 +45,7 @@ def create_visuals():
     df = pd.read_csv(HISTORY_FILE)
     if len(df) < 2: return False
 
-    # 1. Graphique Statique (Performance %)
+    # 1. Graphique Statique Global
     sns.set_theme(style="whitegrid")
     plt.figure(figsize=(10, 5))
     sns.lineplot(data=df, x='Date', y='Total_Return_Pct', color='#2c3e50', linewidth=2)
@@ -56,24 +56,24 @@ def create_visuals():
     plt.savefig("chart.png", dpi=120)
     plt.close()
 
-    # 2. Tableau de bord interactif (Accumulation Capital vs Valeur)
-    fig = make_subplots(rows=len(TICKERS) + 1, cols=1,
-                        subplot_titles=["Accumulation : Capital Investi vs Valeur Totale (EUR)"] + [
-                            f"Historique Prix : {t}" for t in TICKERS],
-                        vertical_spacing=0.05)
-
-    # Graphique de synthèse Patrimonio
-    fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Invested'], name="Argent Investi",
-                             line=dict(color='#7f8c8d', dash='dash')), row=1, col=1)
-    fig.add_trace(
-        go.Scatter(x=df['Date'], y=df['Total_Value'], name="Valeur PEA", fill='tonexty', line=dict(color='#2c3e50')),
-        row=1, col=1)
-
+    # 2. Planche de graphiques individuels (PNG pour mobile)
+    fig, axes = plt.subplots(len(TICKERS), 1, figsize=(10, 3 * len(TICKERS)))
+    if len(TICKERS) == 1: axes = [axes]
     for i, t in enumerate(TICKERS):
-        fig.add_trace(go.Scatter(x=df['Date'], y=df[t], name=t, line=dict(width=2)), row=i + 2, col=1)
+        sns.lineplot(data=df, x='Date', y=t, ax=axes[i], color='#2c3e50')
+        axes[i].set_title(f"Historique Prix : {t}", fontsize=10, fontweight='bold')
+        axes[i].set_ylabel("EUR")
+        axes[i].tick_params(axis='x', rotation=45)
+    plt.tight_layout()
+    plt.savefig("details.png", dpi=100)
+    plt.close()
 
-    fig.update_layout(height=250 * (len(TICKERS) + 1), template="plotly_white", showlegend=False)
-    fig.write_html("dashboard_interactif.html")
+    # 3. Tableau de bord interactif (HTML pour PC)
+    plotly_fig = make_subplots(rows=1, cols=1)
+    plotly_fig.add_trace(
+        go.Scatter(x=df['Date'], y=df['Total_Value'], name="Valeur PEA", fill='tonexty', line=dict(color='#2c3e50')))
+    plotly_fig.update_layout(template="plotly_white", title="Analyse Patrimoniale")
+    plotly_fig.write_html("dashboard_interactif.html")
     return True
 
 
@@ -117,7 +117,9 @@ def send_email(h_html, g_html, perf, val, invested):
     msg['From'] = os.environ['EMAIL_USER']
     msg['To'] = os.environ['EMAIL_RECEIVER']
 
-    image_cid = "perf_chart"
+    cid_global = "perf_global"
+    cid_details = "perf_details"
+
     html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; padding: 20px; line-height: 1.5;">
@@ -142,18 +144,26 @@ def send_email(h_html, g_html, perf, val, invested):
             {g_html}
         </table>
 
-        <div style="margin-top: 20px;"><img src="cid:{image_cid}" style="width: 100%; max-width: 600px;"></div>
-        <p style="font-size: 11px; color: #666; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">Rapport automatique. Dashboard interactif joint en piece jointe.</p>
+        <h3 style="font-size: 16px; margin-top: 20px;">Evolution Globale (%)</h3>
+        <img src="cid:{cid_global}" style="width: 100%; max-width: 600px;">
+
+        <h3 style="font-size: 16px; margin-top: 20px;">Historique par Actif (Prix)</h3>
+        <img src="cid:{cid_details}" style="width: 100%; max-width: 600px;">
+
+        <p style="font-size: 11px; color: #666; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">Rapport genere automatiquement.</p>
     </body>
     </html>"""
 
     msg.add_alternative(html, subtype='html')
-    with open("chart.png", 'rb') as img:
-        msg.get_payload()[0].add_related(img.read(), maintype='image', subtype='png', cid=f"<{image_cid}>")
+
+    # Intégration des deux images
+    for cid, filename in [(cid_global, "chart.png"), (cid_details, "details.png")]:
+        with open(filename, 'rb') as img:
+            msg.get_payload()[0].add_related(img.read(), maintype='image', subtype='png', cid=f"<{cid}>")
 
     if os.path.exists("dashboard_interactif.html"):
         with open("dashboard_interactif.html", "rb") as f:
-            msg.add_attachment(f.read(), maintype='text', subtype='html', filename="Analyse_Interactive.html")
+            msg.add_attachment(f.read(), maintype='text', subtype='html', filename="Analyse_PC.html")
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as s:
         s.login(os.environ['EMAIL_USER'], os.environ['EMAIL_PASS'])
