@@ -13,11 +13,15 @@ TICKERS = list(MONTHLY_INVESTMENTS.keys())
 STATE_FILE = "portfolio_state.csv"
 HISTORY_FILE = "pea_history.csv"
 
-# --- COULEURS BLOOMBERG ---
-BB_ORANGE = "#ff793f"
-BB_BLACK = "#1e1e1e"
-BB_GREEN = "#2ecc71"
-BB_RED = "#ff5252"
+# --- PALETTE "PRO TERMINAL" ---
+C_BLACK = "#000000"
+C_DARK_GREY = "#121212"
+C_GRID = "#2a2a2a"
+C_TEXT = "#e0e0e0"
+C_GREEN = "#00ff41"  # Vert Terminal
+C_RED = "#ff2a2a"  # Rouge Alerte
+C_ORANGE = "#ff9f43"  # Couleur Accent
+C_BLUE = "#0abde3"
 
 
 def get_portfolio_state():
@@ -42,64 +46,71 @@ def create_dashboard(df, state, prices):
     # Données
     labels = TICKERS
     values = [state.loc[t, "Quantity"] * prices[t] for t in TICKERS]
+    gains = [(state.loc[t, "Quantity"] * prices[t]) - state.loc[t, "Total_Invested"] for t in TICKERS]
 
     # Structure Dashboard
     fig = make_subplots(
         rows=len(TICKERS) + 2, cols=2,
-        column_widths=[0.4, 0.6],
-        row_heights=[0.3, 0.3] + [0.25] * len(TICKERS),
-        specs=[[{"type": "domain"}, {"type": "scatter"}],
-               [{"type": "bar"}, {"type": "scatter"}]] + [[{"type": "candlestick", "colspan": 2}, None]] * len(TICKERS),
-        subplot_titles=("ALLOCATION D'ACTIFS", "VALORISATION DU PORTEFEUILLE",
-                        "GAIN NET PAR ACTIF (EUR)", "PERFORMANCE CUMULEE (%)")
+        column_widths=[0.35, 0.65],
+        row_heights=[0.35, 0.35] + [0.3] * len(TICKERS),
+        specs=[[{"type": "domain"}, {"type": "xy"}],
+               [{"type": "xy"}, {"type": "xy"}]] + [[{"type": "xy", "colspan": 2}, None]] * len(TICKERS),
+        subplot_titles=("ALLOCATION ACTIFS", "VALORISATION DU CAPITAL",
+                        "P&L NET (EUR)", "PERFORMANCE HISTORIQUE (%)")
                        + tuple(f"ANALYSE TECHNIQUE : {t}" for t in TICKERS),
-        vertical_spacing=0.04
+        vertical_spacing=0.06
     )
 
-    # 1. Pie Chart (Répartition)
-    fig.add_trace(
-        go.Pie(labels=labels, values=values, hole=.5, marker=dict(colors=['#34495e', '#576574', '#8395a7', '#c8d6e5'])),
-        row=1, col=1)
+    # 1. Donut Chart (Répartition) - Style minimaliste
+    fig.add_trace(go.Pie(labels=labels, values=values, hole=.6,
+                         marker=dict(colors=['#2c3e50', '#34495e', '#576574', '#8395a7', '#95a5a6'],
+                                     line=dict(color=C_BLACK, width=2)),
+                         textinfo='label+percent', hoverinfo='label+value+percent'), row=1, col=1)
 
-    # 2. Courbe Patrimoine (Investi vs Valeur)
+    # 2. Area Chart (Investi vs Valeur) - Lignes fines et précises
     fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Invested'], name="CAPITAL INVESTI",
-                             line=dict(color='#7f8c8d', width=1, dash='dot')), row=1, col=2)
-    fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Value'], name="VALEUR LIQUIDATIVE", fill='tonexty',
-                             line=dict(color=BB_ORANGE, width=2)), row=1, col=2)
+                             line=dict(color='#636e72', width=1, dash='dash')), row=1, col=2)
+    fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Value'], name="VALEUR MARCHÉ", fill='tonexty',
+                             fillcolor='rgba(255, 159, 67, 0.1)',  # Transparence subtile
+                             line=dict(color=C_ORANGE, width=1.5)), row=1, col=2)
 
-    # 3. Bar Chart (Gains)
-    gains = [(state.loc[t, "Quantity"] * prices[t]) - state.loc[t, "Total_Invested"] for t in TICKERS]
-    fig.add_trace(
-        go.Bar(x=labels, y=gains, marker_color=[BB_GREEN if g > 0 else BB_RED for g in gains], name="P/L EUR"), row=2,
-        col=1)
+    # 3. Bar Chart (Gains) - Barres fines
+    fig.add_trace(go.Bar(x=labels, y=gains, marker_color=[C_GREEN if g > 0 else C_RED for g in gains],
+                         marker_line_width=0, opacity=0.9, name="GAIN NET"), row=2, col=1)
 
-    # 4. Perf %
-    fig.add_trace(
-        go.Scatter(x=df['Date'], y=df['Total_Return_Pct'], name="PERFORMANCE %", line=dict(color=BB_GREEN, width=2)),
-        row=2, col=2)
+    # 4. Perf % - Ligne néon
+    fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Return_Pct'], name="ROI %",
+                             line=dict(color=C_GREEN, width=1.5), mode='lines'), row=2, col=2)
 
-    # 5. Chandeliers
+    # 5. Chandeliers - Style Pro
     for i, t in enumerate(TICKERS):
         hist = yf.Ticker(t).history(period="6mo")
         fig.add_trace(
             go.Candlestick(x=hist.index, open=hist['Open'], high=hist['High'], low=hist['Low'], close=hist['Close'],
                            name=t,
-                           increasing_line_color=BB_GREEN, decreasing_line_color=BB_RED), row=i + 3, col=1)
+                           increasing_line_color=C_GREEN, decreasing_line_color=C_RED,
+                           increasing_fillcolor=C_GREEN, decreasing_fillcolor=C_RED), row=i + 3, col=1)
 
-    # STYLE BLOOMBERG TERMINAL (DARK)
+    # STYLE GLOBAL "TERMINAL"
     fig.update_layout(
         template="plotly_dark",
-        paper_bgcolor="#000000",
-        plot_bgcolor="#121212",
-        font=dict(family="Courier New, monospace", size=12, color="#ecf0f1"),
-        title_text="<b style='color:#ff793f'>BLOOMBERG TERMINAL</b> | PORTFOLIO ANALYTICS",
-        title_font_size=20,
+        paper_bgcolor=C_BLACK,
+        plot_bgcolor=C_DARK_GREY,
+        font=dict(family="Courier New, monospace", size=11, color=C_TEXT),
+        title_text=f"<span style='color:{C_ORANGE}; font-size:20px; letter-spacing:3px;'>GESTION PEA</span> <span style='color:#666'>| SYSTEME D'ANALYSE</span>",
         showlegend=False,
-        height=400 * (len(TICKERS) + 2),
-        margin=dict(l=40, r=40, t=80, b=40)
+        height=450 * (len(TICKERS) + 2),
+        margin=dict(l=30, r=30, t=80, b=30),
+        hovermode="x unified"  # LE CROSSHAIR PRO
     )
-    # Suppression du range slider pour le look pro
-    fig.update_xaxes(rangeslider_visible=False)
+
+    # Configuration des axes (Grilles fines)
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor=C_GRID, zeroline=False, showspikes=True, spikethickness=1,
+                     spikedash='solid', spikecolor='#666', spikesnap='cursor')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor=C_GRID, zeroline=False, showspikes=True, spikethickness=1,
+                     spikedash='solid', spikecolor='#666')
+    fig.update_xaxes(rangeslider_visible=False)  # Pas de slider moche en bas
+
     fig.write_html("index.html")
 
 
@@ -122,9 +133,9 @@ def run_tracker():
         p = h['Close'].iloc[-1]
         prices[t] = p
         perf_7j = ((p - h['Close'].iloc[-5]) / h['Close'].iloc[-5]) * 100
-        # Lignes du tableau (HTML pur)
-        color = "green" if perf_7j >= 0 else "red"
-        h_rows += f"<tr><td style='border:1px solid #ddd; padding:8px;'><b>{t}</b></td><td style='border:1px solid #ddd; padding:8px;'>{p:.2f} €</td><td style='border:1px solid #ddd; padding:8px; color:{color};'><b>{perf_7j:+.2f}%</b></td></tr>"
+        # HTML Mail
+        color = "#009933" if perf_7j >= 0 else "#cc0000"
+        h_rows += f"<tr><td style='border-bottom:1px solid #ddd; padding:8px;'><b>{t}</b></td><td style='border-bottom:1px solid #ddd; padding:8px;'>{p:.2f} €</td><td style='border-bottom:1px solid #ddd; padding:8px; color:{color};'><b>{perf_7j:+.2f}%</b></td></tr>"
 
     state = update_portfolio(state, prices)
     for t in TICKERS:
@@ -134,9 +145,8 @@ def run_tracker():
         total_i += inv
         p_tot = ((val - inv) / inv * 100) if inv > 0 else 0
         gain_eur = val - inv
-        # Lignes du tableau (HTML pur)
-        color_p = "green" if p_tot >= 0 else "red"
-        g_rows += f"<tr><td style='border:1px solid #ddd; padding:8px;'><b>{t}</b></td><td style='border:1px solid #ddd; padding:8px;'>{inv:.2f} €</td><td style='border:1px solid #ddd; padding:8px; color:{color_p};'>{gain_eur:+.2f} €</td><td style='border:1px solid #ddd; padding:8px; color:{color_p};'><b>{p_tot:+.2f}%</b></td></tr>"
+        color_p = "#009933" if p_tot >= 0 else "#cc0000"
+        g_rows += f"<tr><td style='border-bottom:1px solid #ddd; padding:8px;'><b>{t}</b></td><td style='border-bottom:1px solid #ddd; padding:8px;'>{inv:.2f} €</td><td style='border-bottom:1px solid #ddd; padding:8px; color:{color_p};'>{gain_eur:+.2f} €</td><td style='border-bottom:1px solid #ddd; padding:8px; color:{color_p};'><b>{p_tot:+.2f}%</b></td></tr>"
 
     perf_g = round(((total_v - total_i) / total_i * 100), 2) if total_i > 0 else 0
     new_row = {"Date": datetime.now().strftime("%Y-%m-%d"), "Total_Invested": round(total_i, 2),
@@ -152,93 +162,74 @@ def run_tracker():
 
 def send_email(h_html, g_html, perf, p7, p90, p365, val, inv):
     msg = EmailMessage()
-    msg['Subject'] = f"MARKET UPDATE - {datetime.now().strftime('%d/%m/%Y')}"
+    msg['Subject'] = f"SYNTHESE PEA - {datetime.now().strftime('%d/%m/%Y')}"
     msg['From'] = os.environ['EMAIL_USER'];
     msg['To'] = os.environ['EMAIL_RECEIVER']
     dash_url = f"https://{os.environ['GITHUB_ACTOR']}.github.io/{os.environ['GITHUB_REPOSITORY'].split('/')[-1]}/"
 
-    # STYLE CSS BLOOMBERG MAIL
-    table_style = "width:100%; border-collapse:collapse; margin-top:10px; font-size:13px;"
-    th_style = "background-color:black; color:white; padding:10px; text-align:left; border:1px solid black;"
+    # CSS Mail
+    th_style = "background-color:#1a1a1a; color:white; padding:10px; text-align:left; font-size:12px; font-weight:normal; letter-spacing:1px;"
 
     html = f"""
-    <html><body style="font-family: 'Arial', sans-serif; color: #333; padding: 0; margin:0; background-color:#f4f4f4;">
+    <html><body style="font-family: Arial, sans-serif; color: #333; margin:0; padding:0; background-color:#f4f4f4;">
 
-        <div style="background-color:black; color:white; padding:15px; text-align:center;">
-            <h2 style="margin:0; font-family:'Courier New', monospace; letter-spacing:2px; color:#ff793f;">BLOOMBERG <span style="color:white;">REPORT</span></h2>
+        <div style="background-color:black; padding:20px; text-align:center; border-bottom: 3px solid #ff9f43;">
+            <span style="color:white; font-family:'Courier New', monospace; font-size:24px; font-weight:bold; letter-spacing:2px;">GESTION PEA</span>
         </div>
 
-        <div style="padding:20px; background-color:white; max-width:650px; margin:20px auto; border:1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <div style="max-width:600px; margin:20px auto; background:white; padding:20px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
 
-            <h3 style="border-bottom: 2px solid #ff793f; padding-bottom: 5px; margin-top:0;">1. SYNTHÈSE PATRIMONIALE</h3>
-            <div style="display:flex; justify-content:space-between; background:#f9f9f9; padding:15px; border:1px solid #ddd;">
-                <div>
-                    <span style="font-size:11px; color:#666; text-transform:uppercase;">Valeur Actuelle</span><br>
-                    <span style="font-size:18px; font-weight:bold;">{val:,.2f} EUR</span>
-                </div>
-                <div>
-                    <span style="font-size:11px; color:#666; text-transform:uppercase;">Investissement Total</span><br>
-                    <span style="font-size:18px; font-weight:bold;">{inv:,.2f} EUR</span>
-                </div>
-                <div>
-                    <span style="font-size:11px; color:#666; text-transform:uppercase;">Plus-Value Latente</span><br>
-                    <span style="font-size:18px; font-weight:bold; color:{'#27ae60' if (val - inv) >= 0 else '#c0392b'};">{(val - inv):+,.2f} EUR</span>
-                </div>
-            </div>
+            <h3 style="margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px; font-size:14px; color:#666;">SYNTHÈSE PATRIMONIALE</h3>
 
-            <table style="{table_style} text-align:center;">
-                <thead>
-                    <tr>
-                        <th style="{th_style} text-align:center;">7 JOURS</th>
-                        <th style="{th_style} text-align:center;">TRIMESTRE</th>
-                        <th style="{th_style} text-align:center;">1 AN</th>
-                        <th style="{th_style} text-align:center; background-color:#ff793f;">GLOBAL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="font-weight:bold; font-size:14px; background-color:#fcfcfc;">
-                        <td style="padding:10px; border:1px solid #ddd; color:{'green' if p7 >= 0 else 'red'}">{p7:+.2f}%</td>
-                        <td style="padding:10px; border:1px solid #ddd; color:{'green' if p90 >= 0 else 'red'}">{p90:+.2f}%</td>
-                        <td style="padding:10px; border:1px solid #ddd; color:{'green' if p365 >= 0 else 'red'}">{p365:+.2f}%</td>
-                        <td style="padding:10px; border:1px solid #ddd; color:{'green' if perf >= 0 else 'red'}">{perf:+.2f}%</td>
-                    </tr>
-                </tbody>
+            <table width="100%" cellspacing="0" cellpadding="10" style="background-color:#f8f9fa; border:1px solid #ddd; text-align:center; margin-bottom:20px;">
+                <tr>
+                    <td width="33%" style="border-right:1px solid #ddd;">
+                        <div style="font-size:10px; color:#666; text-transform:uppercase;">VALEUR</div>
+                        <div style="font-size:16px; font-weight:bold; color:#000;">{val:,.2f} €</div>
+                    </td>
+                    <td width="33%" style="border-right:1px solid #ddd;">
+                        <div style="font-size:10px; color:#666; text-transform:uppercase;">INVESTI</div>
+                        <div style="font-size:16px; font-weight:bold; color:#000;">{inv:,.2f} €</div>
+                    </td>
+                    <td width="33%">
+                        <div style="font-size:10px; color:#666; text-transform:uppercase;">PLUS-VALUE</div>
+                        <div style="font-size:16px; font-weight:bold; color:{'#009933' if (val - inv) >= 0 else '#cc0000'};">{(val - inv):+,.2f} €</div>
+                    </td>
+                </tr>
             </table>
 
-            <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px; margin-top:30px;">2. MOUVEMENTS HEBDOMADAIRES</h3>
-            <table style="{table_style}">
-                <thead>
-                    <tr>
-                        <th style="{th_style}">ACTIF</th>
-                        <th style="{th_style}">PRIX (EUR)</th>
-                        <th style="{th_style}">VAR. 7J (%)</th>
-                    </tr>
-                </thead>
+            <table width="100%" cellspacing="0" cellpadding="8" style="margin-bottom:30px; border-collapse:collapse;">
+                <tr style="background-color:#1a1a1a; color:white; font-size:11px;">
+                    <th width="25%">7 JOURS</th>
+                    <th width="25%">TRIMESTRE</th>
+                    <th width="25%">1 AN</th>
+                    <th width="25%" style="background-color:#ff9f43;">GLOBAL</th>
+                </tr>
+                <tr style="text-align:center; font-size:14px; font-weight:bold; background-color:#fff; border-bottom:1px solid #ccc;">
+                    <td style="padding:10px; color:{'#009933' if p7 >= 0 else '#cc0000'}">{p7:+.2f}%</td>
+                    <td style="padding:10px; color:{'#009933' if p90 >= 0 else '#cc0000'}">{p90:+.2f}%</td>
+                    <td style="padding:10px; color:{'#009933' if p365 >= 0 else '#cc0000'}">{p365:+.2f}%</td>
+                    <td style="padding:10px; background-color:#fff3e0; color:{'#d35400' if perf >= 0 else '#c0392b'}">{perf:+.2f}%</td>
+                </tr>
+            </table>
+
+            <div style="font-size:14px; margin-bottom:5px; font-weight:bold;">MARCHÉ (7J)</div>
+            <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse; margin-bottom:20px; font-size:13px;">
+                <thead><tr><th style="{th_style}">ACTIF</th><th style="{th_style}">PRIX</th><th style="{th_style}">VAR.</th></tr></thead>
                 <tbody>{h_html}</tbody>
             </table>
 
-            <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px; margin-top:30px;">3. POSITIONS & RENDEMENTS</h3>
-            <table style="{table_style}">
-                <thead>
-                    <tr>
-                        <th style="{th_style}">ACTIF</th>
-                        <th style="{th_style}">PRU TOTAL</th>
-                        <th style="{th_style}">GAIN (EUR)</th>
-                        <th style="{th_style}">PERF (%)</th>
-                    </tr>
-                </thead>
+            <div style="font-size:14px; margin-bottom:5px; font-weight:bold;">POSITIONS</div>
+            <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse; margin-bottom:30px; font-size:13px;">
+                <thead><tr><th style="{th_style}">ACTIF</th><th style="{th_style}">INVESTI</th><th style="{th_style}">GAIN</th><th style="{th_style}">ROI</th></tr></thead>
                 <tbody>{g_html}</tbody>
             </table>
 
-            <div style="margin-top:30px; text-align:center;">
-                <a href="{dash_url}" style="background-color:#ff793f; color:white; padding:15px 30px; text-decoration:none; font-weight:bold; border-radius:3px; display:inline-block;">
-                    ACCÉDER AU TERMINAL INTERACTIF &rarr;
+            <div style="text-align:center;">
+                <a href="{dash_url}" style="background-color:#1a1a1a; color:white; padding:12px 25px; text-decoration:none; font-family:'Courier New', monospace; font-weight:bold; font-size:14px; border:1px solid #ff9f43;">
+                    >> ACCÉDER AU TERMINAL
                 </a>
             </div>
-
-            <p style="text-align:center; font-size:10px; color:#999; margin-top:20px;">
-                Données fournies par Yahoo Finance. Généré automatiquement via GitHub Actions.
-            </p>
         </div>
     </body></html>"""
     msg.add_alternative(html, subtype='html')
