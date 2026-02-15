@@ -125,3 +125,24 @@ Pour ton information, la performance affichée dans le mail et le graphique est 
 $$\text{Performance} = \left( \frac{\text{Valeur Totale du Portefeuille} - \text{Total Investi}}{\text{Total Investi}} \right) \times 100$$
 
 > **Rappel** : Pour toute modification manuelle, fais-la sur ton PC, puis envoie-la sur GitHub (`git push`). Le robot reprendra sa routine dès le lundi suivant.
+
+
+# Gestion des Achats Ponctuels (Hors DCA)
+
+Pour intégrer un achat réalisé manuellement (hors automatisme du 16 du mois), aucune modification du code Python n'est requise. Il suffit de mettre à jour le registre d'état pour que le prochain rapport intègre vos nouvelles parts.
+
+## Procédure de mise à jour manuelle
+
+Le script utilise le fichier `portfolio_state.csv` comme source de vérité pour vos possessions. Si vous effectuez un achat (exemple : 1 action Air Liquide à 170 € frais inclus) :
+
+1. **Ouverture du fichier** : Ouvrez `portfolio_state.csv` avec un éditeur de texte ou Excel.
+2. **Identification** : Repérez la ligne correspondant à l'actif, ici `AI.PA`.
+3. **Mise à jour des quantités** : Modifiez la valeur `Quantity`. 
+   * *Exemple : passez de 1.0 à 2.0.*
+4. **Mise à jour de l'investissement** : Ajoutez le prix d'achat (frais inclus) au montant `Total_Invested` existant.
+   * *Calcul : $158.87 + 170.00 = 328.87$*
+5. **Synchronisation** : Enregistrez le fichier et poussez la modification sur votre dépôt GitHub :
+   ```bash
+   git add portfolio_state.csv
+   git commit -m "MAJ : Achat ponctuel AI.PA"
+   git push

@@ -8,35 +8,33 @@ on:
 jobs:
   run-tracker:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
     steps:
-      - name: Checkout du code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Configuration de Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Installation des bibliothèques
-        run: |
-          pip install yfinance pandas matplotlib
+      - name: Install dependencies
+        run: pip install yfinance pandas matplotlib seaborn plotly
 
-      - name: Exécution du script de suivi
+      - name: Run Tracker
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
         run: python pea_tracker.py
 
-      - name: Sauvegarde des modifications (CSV et Graphique)
+      - name: Save Data Only
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git add portfolio_state.csv pea_history.csv chart.png
-          # On commit seulement s'il y a des changements pour éviter les erreurs
-          git commit -m "Mise à jour hebdomadaire des données [skip ci]" || echo "Aucune modification à commiter"
+          # On ajoute uniquement les fichiers de données
+          git add portfolio_state.csv pea_history.csv
+          git commit -m "Update PEA data [skip ci]" || echo "No changes"
           git push
