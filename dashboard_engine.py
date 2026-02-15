@@ -58,30 +58,16 @@ def calculate_kpis(df):
 
 
 def add_info_marker(fig, row, col, text, title_text):
-    """Ajoute le bouton 'i' et l'explication"""
-    # Titre de la section avec icône
-    fig.add_annotation(
-        xref=f"x{row} domain" if row == 1 else f"x{row} domain",  # Subtilité Plotly
-        yref=f"y{row} domain" if row > 1 else "y domain",
-        x=0, y=1.1, text=f"<b>{title_text}</b>",
-        font=dict(color=C_ORANGE, size=14, family="Courier New"),
-        showarrow=False, row=row, col=col
-    )
-    # Marqueur interactif
-    fig.add_trace(go.Scatter(
-        x=[None], y=[None], mode='markers',
-        marker=dict(size=12, color=C_CYAN, symbol='circle-open'),
-        name="INFO", showlegend=False, hoverinfo='text', hovertext=text
-    ), row=row, col=col)
-
-    # "Faux" bouton visuel pour guider la souris
-    fig.add_annotation(
-        xref=f"x{row} domain", yref=f"y{row} domain" if row > 1 else "y domain",
-        x=0.98, y=1.1, text="ⓘ INFO",
-        font=dict(color=C_CYAN, size=10), showarrow=False,
-        row=row, col=col,
-        hovertext=text
-    )
+    """Ajoute le bouton 'i' et l'explication (Gère l'exception du Pie Chart)"""
+    if row == 2 and col == 1:
+        fig.add_annotation(
+            xref="paper", yref="paper",
+            x=0.02, y=0.83,
+            text=f"<b>{title_text}</b>",
+            font=dict(color=C_ORANGE, size=14, family="Courier New"),
+            showarrow=False
+        )
+        return
 
 
 def generate_dashboard_v2(df, state, prices, filename="index.html"):
