@@ -103,6 +103,7 @@ MONTHLY_INVESTMENTS = {
     "NOUVEL_ACTIF.PA": 100,  # Ajouter la ligne ici (0 si pas de DCA)
     ...
 }
+```
 ---
 
 ## 3. Synthèse des opérations
