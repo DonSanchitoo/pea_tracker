@@ -17,10 +17,17 @@ C_PURPLE = "#a29bfe"  # Benchmark
 C_GREY = "#636e72"  # Neutre
 
 
-def get_benchmark_data():
+# --- CORRECTION 1 : BENCHMARK DYNAMIQUE ---
+def get_benchmark_data(start_date=None):
     try:
         # Benchmark: MSCI World (CW8.PA)
-        bench = yf.Ticker("CW8.PA").history(period="1y")
+        # Si une date est fournie, on s'aligne, sinon 1 an par défaut
+        if start_date:
+            # On convertit en string YYYY-MM-DD au cas où
+            start_str = pd.to_datetime(start_date).strftime('%Y-%m-%d')
+            bench = yf.Ticker("CW8.PA").history(start=start_str)
+        else:
+            bench = yf.Ticker("CW8.PA").history(period="1y")
         return bench['Close']
     except:
         return None
@@ -44,7 +51,10 @@ def calculate_kpis(df):
     volatility = df['pct_change'].std() * (252 ** 0.5)
 
     # 4. Alpha (vs Monde)
-    bench = get_benchmark_data()
+    # Correction : On passe la date de début du portfolio pour avoir une comparaison juste
+    start_date = df['Date'].iloc[0]
+    bench = get_benchmark_data(start_date)
+
     alpha = 0
     if bench is not None and not bench.empty:
         bench_perf = (bench.iloc[-1] - bench.iloc[0]) / bench.iloc[0]
@@ -74,15 +84,23 @@ def add_info_marker(fig, row, col, text):
     )
 
 
+# --- CORRECTION 2 : MAPPING DES AXES PLOTLY ---
 def get_axis_index(row, col):
-    # Mapping manuel pour grille 3x2 fixe
-    # Ligne 1: Col 1 (Pie/Domain) / Col 2 (xy2)
-    # Ligne 2: Col 1 (xy3) / Col 2 (xy4)
-    # Ligne 3: Col 1 (xy5 - colspan)
-    if row == 1 and col == 2: return "2"
-    if row == 2 and col == 1: return "3"
-    if row == 2 and col == 2: return "4"
-    if row == 3: return "5"
+    # Mapping corrigé : Le Pie Chart (1,1) ne consomme pas d'axe XY.
+    # L'indexation XY commence donc au graphique suivant (1,2).
+
+    # Ligne 1, Col 2 -> C'est le 1er graph XY -> "" (vide = axis 1)
+    if row == 1 and col == 2: return ""
+
+    # Ligne 2, Col 1 -> C'est le 2ème graph XY -> "2"
+    if row == 2 and col == 1: return "2"
+
+    # Ligne 2, Col 2 -> C'est le 3ème graph XY -> "3"
+    if row == 2 and col == 2: return "3"
+
+    # Ligne 3 (Colspan) -> C'est le 4ème graph XY -> "4"
+    if row == 3: return "4"
+
     return ""
 
 
@@ -153,9 +171,16 @@ def generate_dashboard_v2(df, state, prices, filename="index.html"):
     add_info_marker(fig, 2, 1, "<b>Attribution</b><br>Contribution nette en Euros par position.")
 
     # --- CHART 4: ALPHA vs BENCHMARK (Line) ---
-    bench = get_benchmark_data()
+    # Correction : Appel avec la date de début pour aligner les courbes
+    start_date = df['Date'].iloc[0]
+    bench = get_benchmark_data(start_date)
+
     if bench is not None:
+        # On s'assure que le bench commence bien à la date souhaitée (slicing de sécurité)
+        bench = bench[bench.index >= pd.to_datetime(start_date)]
+        # Normalisation base 0
         b_norm = (bench / bench.iloc[0] - 1) * 100
+
         fig.add_trace(go.Scatter(x=df['Date'], y=df['Total_Return_Pct'], name="Portfolio",
                                  line=dict(color=C_GREEN, width=2)), row=2, col=2)
         fig.add_trace(go.Scatter(x=bench.index, y=b_norm, name="MSCI World Index",
