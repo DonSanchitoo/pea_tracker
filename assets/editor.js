@@ -523,6 +523,9 @@
       ${field('Actus : mots-clés FR', `<input name="news_fr" value="${esc(a && a.news ? a.news.fr : '')}">`)}
       ${field('Actus : mots-clés EN', `<input name="news_en" value="${esc(a && a.news ? a.news.en : '')}">`)}
       ${field('Répartition géographique', `<input name="zones" value="${esc(a ? Object.entries(a.zones || {}).map(([k, v]) => `${k}:${v}`).join('; ') : '')}">`, 'format « Zone:poids; Zone:poids »')}
+      ${field('Pays (indicatif, pour la carte)', `<input name="countries" value="${esc(a ? Object.entries(a.countries || {}).map(([k, v]) => `${k}:${v}`).join('; ') : '')}">`, 'ex. « États-Unis:71; Japon:5,6 » ; ETF : complété par justETF')}
+      ${field('Secteurs (indicatif)', `<input name="sectors" value="${esc(a ? Object.entries(a.sectors || {}).map(([k, v]) => `${k}:${v}`).join('; ') : '')}">`, 'ex. « Technologie:26; Finance:17 » ; action : « Énergie:100 »')}
+      ${field('Symbole TradingView', `<input name="tv_symbol" value="${esc(a ? a.tv_symbol || '' : '')}" placeholder="auto (EURONEXT:XXX)">`)}
       <div class="field"><label>Taxe TTF</label><label class="check-row"><input type="checkbox" name="ttf" ${a && a.ttf ? 'checked' : ''}> Action française soumise à la TTF</label></div>
       ${e ? '' : `${field('Créer un plan (€/mois, optionnel)', `<input type="number" step="1" min="0" name="plan_amount" value="">`)}${field('Jour du plan', `<input type="number" min="1" max="28" name="plan_day" value="16">`)}${field('Première exécution', `<input type="date" name="plan_start" value="${today()}">`)}`}
       </form><div class="actions"><button class="btn primary" data-act="save-ligne">Enregistrer</button><button class="btn" data-act="cancel">Annuler</button></div></div></div>` : '';
@@ -541,6 +544,8 @@
     f.account.value = a.account; f.kind.value = a.kind; f.asset_class.value = a.asset_class; f.ter.value = a.ter || 0; f.ttf.checked = !!a.ttf;
     f.news_fr.value = (a.news || {}).fr || ''; f.news_en.value = (a.news || {}).en || '';
     f.zones.value = Object.entries(a.zones || {}).map(([k, v]) => `${k}:${v}`).join('; ');
+    f.countries.value = Object.entries(a.countries || {}).map(([k, v]) => `${k}:${v}`).join('; ');
+    f.sectors.value = Object.entries(a.sectors || {}).map(([k, v]) => `${k}:${v}`).join('; ');
   }
   async function saveLigne() {
     const f = $('#f-ligne');
@@ -556,6 +561,11 @@
       slot: prev.slot || nextSlot(), zones: Object.keys(zones).length ? zones : (f.account.value === 'CRYPTO' ? { 'Crypto (hors zone)': 100 } : { Autres: 100 }),
       ttf: f.ttf.checked, news: { fr: f.news_fr.value.trim() || `"${f.short.value.trim()}"`, en: f.news_en.value.trim() || `"${f.short.value.trim()}"` },
     });
+    const kv = (txt) => { const o = {}; txt.split(';').forEach((z) => { const [k, v] = z.split(':'); if (k && k.trim() && numIn(v) != null) o[k.trim()] = numIn(v); }); return o; };
+    const cs = kv(f.countries.value), ss = kv(f.sectors.value);
+    if (Object.keys(cs).length) a.countries = cs; else delete a.countries;
+    if (Object.keys(ss).length) a.sectors = ss; else delete a.sectors;
+    if (f.tv_symbol.value.trim()) a.tv_symbol = f.tv_symbol.value.trim().toUpperCase(); else delete a.tv_symbol;
     const st = numIn(f.staking.value);
     if (st) a.staking = Object.assign({}, prev.staking || {}, { rate: st / 100, since: (prev.staking && prev.staking.since) || today() }); else delete a.staking;
     cfg.assets[t] = a;

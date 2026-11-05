@@ -192,10 +192,15 @@ Ratio d'information = (ta perf annualisée − MSCI World annualisé) / tracking
   <p>Quantité, PRU et performance identiques à la fiche TR. « 1 jour » et « 1 sem. » = variation du cours, pas de ta position. « Gain total » inclut réalisé et dividendes. Clique une ligne pour voir son graphique et sa fiche.</p>
 
   <h3 id="graph-position">Graphique : cours et PRU</h3>
-  <p>Le cours (noir), ton PRU (orange, en escalier : il bouge à chaque achat) et tes achats (points bleus, au prix payé). Quand le cours est au-dessus du PRU, la ligne est en plus-value. Les points sous la courbe orange sont les achats qui ont fait baisser ton PRU.</p>
+  <p><b>Courbe</b> : le cours (noir), ton PRU (orange, en escalier : il bouge à chaque achat) et tes achats (points bleus, au prix payé). Quand le cours est au-dessus du PRU, la ligne est en plus-value.</p>
+  <p><b>Chandeliers</b> : une bougie par jour, semaine ou mois. Le corps va de l'ouverture à la clôture (creux = hausse, plein = baisse), les mèches montrent le plus haut et le plus bas. Ton PRU et tes achats sont superposés. Molette ou curseur du bas pour zoomer.</p>
+  <p><b>TradingView</b> : le graphique interactif de TradingView intégré (cotation différée de 15 minutes), avec indicateurs (moyennes mobiles, RSI…), outils de tracé et changement d'unité de temps. Le symbole est déduit du ticker (EURONEXT:DCAM, BITSTAMP:ETHEUR…) et modifiable dans « Mes données › Lignes ».</p>
 
   <h3 id="geographie">Exposition géographique (transparence)</h3>
   <p>Chaque ETF est éclaté selon les poids pays approximatifs de son indice (renseignés dans <code>config.json</code> : MSCI World ≈ 74 % Amérique du Nord, 16 % Europe, 5,5 % Japon ; MSCI EM Asia ≈ Chine, Taïwan, Inde, Corée). C'est une vue indicative, à ±2 points : les poids réels bougent chaque mois. Air Liquide et TotalEnergies sont classées France (siège) alors qu'elles réalisent la majorité de leurs ventes à l'étranger.</p>
+
+  <h3 id="secteurs">Secteurs et carte du PEA</h3>
+  <p>Chaque ETF est éclaté selon ses pays et secteurs. Source live : la fiche justETF de l'ETF (par ISIN), relue chaque semaine, qui donne les 4 premiers pays et secteurs à la date de mise à jour de l'émetteur (ex. « état au 30/09/2026 ») ; le reste est réparti selon la répartition indicative de l'indice (modifiable dans « Mes données › Lignes »). Les actions comptent pour leur secteur et leur pays de siège (Air Liquide : matériaux de base, France ; TotalEnergies : énergie, France). La carte colore chaque pays selon son poids dans le PEA (zoom à la molette, détail au survol) ; les petits territoires non dessinés sont listés sous la carte.</p>
 
   <h3 id="concentration">Concentration (nombre effectif de lignes)</h3>
   <div class="formula">HHI = Σ poids²          Nombre effectif = 1 / HHI</div>

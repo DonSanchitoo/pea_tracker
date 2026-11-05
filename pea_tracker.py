@@ -14,6 +14,7 @@ import sys
 import pandas as pd
 
 from tracker import catalog
+from tracker import exposure
 from tracker import ledger as lg
 from tracker import news as newsmod
 from tracker import params as pm
@@ -65,7 +66,10 @@ def run(args):
     panel = Panel(cfg, ledger, ohlc, actions, today)
     recon = pd.read_csv(RECON_FILE, dtype=str, keep_default_na=False) if os.path.exists(RECON_FILE) else None
     news = newsmod.update(cfg, panel, fetch=fetch)
-    data = report.build(cfg, ledger, panel, recon, warnings, now, params=params, news=news, planned=planned)
+    expo_live, w = exposure.update(cfg, fetch=fetch)  # pays / secteurs des ETF (justETF, hebdomadaire)
+    warnings += w
+    expo = exposure.effective(cfg, expo_live)
+    data = report.build(cfg, ledger, panel, recon, warnings, now, params=params, news=news, planned=planned, expo=expo)
     report.write_dashboard(data)
     report.write_history(panel)
     k = data["kpi"]

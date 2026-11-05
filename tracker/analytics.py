@@ -421,16 +421,31 @@ def position_series(panel):
                 marks.append(dict(date=r.date.strftime("%Y-%m-%d"), type=r.type, qty=float(r.quantity),
                                   amount=float(r.amount), price=round((float(r.amount) - float(r.taxes)) / float(r.quantity), 4),
                                   source=r.source))
+        oh = raw.loc[px.index]
         out[t] = dict(dates=[d.strftime("%Y-%m-%d") for d in px.index],
                       price=[round(float(v), 4) for v in px.values], pru=pru,
+                      ohlc=[[round(float(o), 4), round(float(c), 4), round(float(l), 4), round(float(h), 4)]
+                            for o, c, l, h in zip(oh["open"].values, oh["close"].values, oh["low"].values, oh["high"].values)],
+                      tv=tv_symbol(t, panel.assets[t]),
                       qty=[round(float(v), 6) for v in qty.values], marks=marks)
     return out
 
 
 # ----------------------------------------------------------------- allocation
 
-def allocation(panel, pos):
+def tv_symbol(t, a):
+    if a.get("tv_symbol"):
+        return a["tv_symbol"]
+    if t.endswith(".PA"):
+        return "EURONEXT:" + t[:-3]
+    if t.endswith("-EUR"):
+        return "COINBASE:" + t[:-4] + "EUR"
+    return t
+
+
+def allocation(panel, pos, expo=None):
     cfg = panel.cfg
+    expo = expo or {}
     open_pos = [p for p in pos if p["open"]]
     total = sum(p["value"] for p in open_pos)
     pea = [p for p in open_pos if p["account"] == "PEA"]
@@ -442,11 +457,16 @@ def allocation(panel, pos):
             g[p[key]] = g.get(p[key], 0) + p["value"]
         return [dict(label=k, value=v, weight=v / total if total else 0) for k, v in sorted(g.items(), key=lambda x: -x[1])]
 
-    zones = {}
-    for p in open_pos:
-        for z, w in panel.assets[p["ticker"]].get("zones", {}).items():
-            zones[z] = zones.get(z, 0) + p["value"] * w / 100
-    zones_l = [dict(label=k, value=v, weight=v / total) for k, v in sorted(zones.items(), key=lambda x: -x[1])]
+    def look(items, key, tot):
+        agg = {}
+        for p in items:
+            e = expo.get(p["ticker"]) or {}
+            src = e.get(key) or (panel.assets[p["ticker"]].get("zones", {}) if key == "zones" else {})
+            for k, w in src.items():
+                agg[k] = agg.get(k, 0) + p["value"] * w / 100
+        return [dict(label=k, value=v, weight=v / tot if tot else 0) for k, v in sorted(agg.items(), key=lambda x: -x[1]) if v > 0.005]
+
+    zones_l = look(open_pos, "zones", total)
 
     def conc(items, tot):
         w = [p["value"] / tot for p in items] if tot else []
@@ -468,6 +488,12 @@ def allocation(panel, pos):
         by_account=group(open_pos, "account"),
         by_class=group(open_pos, "asset_class"),
         by_zone=zones_l,
+        pea_countries=look(pea, "countries", pea_total),
+        pea_zones=look(pea, "zones", pea_total),
+        pea_sectors=look(pea, "sectors", pea_total),
+        total_sectors=look(open_pos, "sectors", total),
+        expo_sources=[dict(ticker=p["ticker"], short=p["short"], source=(expo.get(p["ticker"]) or {}).get("source", "indicatif"),
+                           url=(expo.get(p["ticker"]) or {}).get("url")) for p in open_pos],
         concentration=dict(total=conc(open_pos, total), pea=conc(pea, pea_total)),
         vs_plan=vs_plan,
         fee_year=sum(p["fee_year"] for p in open_pos),

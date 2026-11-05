@@ -1,0 +1,47 @@
+{
+ "DCAM.PA": {
+  "countries": {
+   "Autre": 16.44,
+   "Canada": 3.24,
+   "Grande-Bretagne": 3.6,
+   "Japon": 5.91,
+   "États-Unis": 70.81
+  },
+  "date": "30/09/2026",
+  "fetched_at": "2026-11-05 15:10 UTC",
+  "sectors": {
+   "Autre": 26.74,
+   "Finance": 17.22,
+   "Industrie": 9.32,
+   "Soins de santé": 8.95,
+   "Technologie": 37.77
+  },
+  "source": "justETF",
+  "url": "https://www.justetf.com/fr/etf-profile.html?isin=FR001400U5Q4"
+ },
+ "PAASI.PA": {
+  "fetched_at": "2026-11-05 15:10 UTC",
+  "source": null,
+  "url": "https://www.justetf.com/fr/etf-profile.html?isin=FR0013412012"
+ },
+ "WPEA.PA": {
+  "countries": {
+   "Autre": 16.44,
+   "Canada": 3.24,
+   "Grande-Bretagne": 3.6,
+   "Japon": 5.91,
+   "États-Unis": 70.81
+  },
+  "date": "30/09/2026",
+  "fetched_at": "2026-11-05 15:10 UTC",
+  "sectors": {
+   "Autre": 26.74,
+   "Finance": 17.22,
+   "Industrie": 9.32,
+   "Soins de santé": 8.95,
+   "Technologie": 37.77
+  },
+  "source": "justETF",
+  "url": "https://www.justetf.com/fr/etf-profile.html?isin=IE0002XZSHO1"
+ }
+}

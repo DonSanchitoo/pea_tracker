@@ -165,8 +165,12 @@
         <div class="panel"><div class="panel-b flush tbl-wrap" id="pos-table"></div></div>
         <div class="grid">
           <div class="panel c8">
-            <div class="panel-h"><h2 id="pos-title">Cours et PRU</h2><a class="help" href="aide.html#graph-position">?</a></div>
-            <div class="panel-b"><div class="legend" id="pos-legend"></div><div class="chart h340" id="pos-chart"></div></div>
+            <div class="panel-h"><h2 id="pos-title">Cours et PRU</h2>
+              <div class="filters">
+                <div class="seg" id="pos-mode"><button data-m="line" aria-pressed="true">Courbe</button><button data-m="candle" aria-pressed="false">Chandeliers</button><button data-m="tv" aria-pressed="false">TradingView</button></div>
+                <div class="seg" id="pos-int"><button data-i="D" aria-pressed="true">Jour</button><button data-i="W" aria-pressed="false">Semaine</button><button data-i="M" aria-pressed="false">Mois</button></div>
+                <a class="help" href="aide.html#graph-position">?</a></div></div>
+            <div class="panel-b"><div class="legend" id="pos-legend"></div><div class="chart h380" id="pos-chart"></div><div id="pos-tv" style="height:460px;display:none"></div><div class="note" id="pos-note"></div></div>
           </div>
           <div class="panel c4">
             <div class="panel-h"><h2>Fiche</h2></div>
@@ -187,9 +191,21 @@
             <div class="panel-h"><h2>Par classe d'actif</h2></div>
             <div class="panel-b" id="al-class"></div>
           </div>
-          <div class="panel c6">
-            <div class="panel-h"><h2>Exposition géographique (transparence) <a class="help" href="aide.html#geographie">?</a></h2><span class="sub">pondérations indicatives des indices</span></div>
+          <div class="panel c8">
+            <div class="panel-h"><h2>Carte de l'exposition géographique du PEA <a class="help" href="aide.html#geographie">?</a></h2><span class="sub">par transparence des ETF</span></div>
+            <div class="panel-b"><div class="chart h380" id="al-map"></div><div class="note" id="al-map-note"></div></div>
+          </div>
+          <div class="panel c4">
+            <div class="panel-h"><h2>Par zone</h2><span class="sub">consolidé</span></div>
             <div class="panel-b" id="al-zones"></div>
+          </div>
+          <div class="panel c6">
+            <div class="panel-h"><h2>Secteurs couverts par le PEA <a class="help" href="aide.html#secteurs">?</a></h2><span class="sub">par transparence des ETF</span></div>
+            <div class="panel-b" id="al-sectors"></div>
+          </div>
+          <div class="panel c6">
+            <div class="panel-h"><h2>Pays du PEA</h2><span class="sub">top 12</span></div>
+            <div class="panel-b" id="al-countries"></div>
           </div>
           <div class="panel c6">
             <div class="panel-h"><h2>PEA : répartition réelle vs versements du plan <a class="help" href="aide.html#derive">?</a></h2></div>

@@ -174,7 +174,7 @@ PRESETS = [
 ]
 
 
-def build(cfg, ledger, panel, recon_df, warnings, now, params=None, news=None, planned=None):
+def build(cfg, ledger, panel, recon_df, warnings, now, params=None, news=None, planned=None, expo=None):
     planned = planned or []
     rf = cfg["risk_free"]["rate"]
     scopes = [s for s in an.SCOPES if s in panel.s]
@@ -187,7 +187,7 @@ def build(cfg, ledger, panel, recon_df, warnings, now, params=None, news=None, p
         xirr[sc] = an.xirr_scope(panel, sc)
         if sc != "CRYPTO":
             ghosts_d[sc] = an.ghosts(panel, sc, rf)
-    alloc = an.allocation(panel, pos)
+    alloc = an.allocation(panel, pos, expo)
     plans = an.plans_info(panel, pos)
     divs = an.dividend_info(panel, pos)
     for d in divs["next"]:

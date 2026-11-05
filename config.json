@@ -46,6 +46,44 @@
       "news": {
         "fr": "\"MSCI World\" OR \"bourses mondiales\" OR \"marchés mondiaux\"",
         "en": "\"MSCI World\" OR \"global stocks\" OR \"world stocks\""
+      },
+      "countries": {
+        "États-Unis": 71,
+        "Japon": 5.6,
+        "Grande-Bretagne": 3.5,
+        "Canada": 3.1,
+        "France": 2.6,
+        "Suisse": 2.3,
+        "Allemagne": 2.2,
+        "Australie": 1.7,
+        "Pays-Bas": 1.2,
+        "Danemark": 0.8,
+        "Suède": 0.8,
+        "Italie": 0.7,
+        "Espagne": 0.7,
+        "Hong Kong": 0.5,
+        "Singapour": 0.4,
+        "Finlande": 0.25,
+        "Belgique": 0.25,
+        "Israël": 0.2,
+        "Norvège": 0.15,
+        "Irlande": 0.15,
+        "Nouvelle-Zélande": 0.1,
+        "Autriche": 0.05,
+        "Portugal": 0.05
+      },
+      "sectors": {
+        "Technologie": 26,
+        "Finance": 17,
+        "Industrie": 11,
+        "Soins de santé": 10,
+        "Biens de consommation non cycliques": 10,
+        "Télécommunication": 8,
+        "Biens de consommation cycliques": 6,
+        "Énergie": 3.5,
+        "Matériaux de base": 3.5,
+        "Services aux collectivités": 2.7,
+        "Immobilier": 2.3
       }
     },
     "PAASI.PA": {
@@ -69,6 +107,29 @@
       "news": {
         "fr": "\"marchés asiatiques\" OR \"Bourse de Shanghai\" OR \"Hang Seng\" OR \"Bourse de Taïwan\"",
         "en": "\"Asian stocks\" OR \"Asian markets\" OR \"Hang Seng\" OR \"emerging markets\""
+      },
+      "countries": {
+        "Chine": 28,
+        "Taïwan": 27,
+        "Inde": 24,
+        "Corée du Sud": 13,
+        "Indonésie": 3,
+        "Malaisie": 2.5,
+        "Thaïlande": 1.8,
+        "Philippines": 0.7
+      },
+      "sectors": {
+        "Technologie": 32,
+        "Finance": 22,
+        "Biens de consommation non cycliques": 13,
+        "Télécommunication": 10,
+        "Industrie": 6,
+        "Matériaux de base": 4,
+        "Biens de consommation cycliques": 4,
+        "Soins de santé": 4,
+        "Énergie": 2,
+        "Services aux collectivités": 1.5,
+        "Immobilier": 1.5
       }
     },
     "AI.PA": {
@@ -88,6 +149,12 @@
       "news": {
         "fr": "\"Air Liquide\"",
         "en": "\"Air Liquide\""
+      },
+      "countries": {
+        "France": 100
+      },
+      "sectors": {
+        "Matériaux de base": 100
       }
     },
     "TTE.PA": {
@@ -107,6 +174,12 @@
       "news": {
         "fr": "TotalEnergies",
         "en": "TotalEnergies"
+      },
+      "countries": {
+        "France": 100
+      },
+      "sectors": {
+        "Énergie": 100
       }
     },
     "ETH-EUR": {
@@ -130,7 +203,8 @@
       "staking": {
         "rate": 0.0232,
         "since": "2026-11-06"
-      }
+      },
+      "tv_symbol": "BITSTAMP:ETHEUR"
     },
     "WPEA.PA": {
       "name": "iShares MSCI World Swap PEA UCITS ETF Acc",
@@ -153,6 +227,44 @@
       "news": {
         "fr": "\"MSCI World\" OR \"bourses mondiales\" OR \"marchés mondiaux\"",
         "en": "\"MSCI World\" OR \"global stocks\" OR \"world stocks\""
+      },
+      "countries": {
+        "États-Unis": 71,
+        "Japon": 5.6,
+        "Grande-Bretagne": 3.5,
+        "Canada": 3.1,
+        "France": 2.6,
+        "Suisse": 2.3,
+        "Allemagne": 2.2,
+        "Australie": 1.7,
+        "Pays-Bas": 1.2,
+        "Danemark": 0.8,
+        "Suède": 0.8,
+        "Italie": 0.7,
+        "Espagne": 0.7,
+        "Hong Kong": 0.5,
+        "Singapour": 0.4,
+        "Finlande": 0.25,
+        "Belgique": 0.25,
+        "Israël": 0.2,
+        "Norvège": 0.15,
+        "Irlande": 0.15,
+        "Nouvelle-Zélande": 0.1,
+        "Autriche": 0.05,
+        "Portugal": 0.05
+      },
+      "sectors": {
+        "Technologie": 26,
+        "Finance": 17,
+        "Industrie": 11,
+        "Soins de santé": 10,
+        "Biens de consommation non cycliques": 10,
+        "Télécommunication": 8,
+        "Biens de consommation cycliques": 6,
+        "Énergie": 3.5,
+        "Matériaux de base": 3.5,
+        "Services aux collectivités": 2.7,
+        "Immobilier": 2.3
       }
     }
   },

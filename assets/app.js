@@ -19,7 +19,7 @@
   const state = {
     scope: D.meta.scopes.includes(store.get('pea-scope', 'TOTAL')) ? store.get('pea-scope', 'TOTAL') : 'TOTAL',
     period: store.get('pea-period', 'MAX'),
-    view: 'overview', ovMode: 'value', pos: null, pjH: 'mat',
+    view: 'overview', ovMode: 'value', pos: null, pjH: 'mat', posMode: store.get('pea-posmode', 'line'), posInt: 'D',
   };
   const charts = {};
 
@@ -489,9 +489,47 @@
     renderPositionChart(state.pos);
   }
 
+  function aggregate(dates, ohlc, step) {
+    if (step === 'D') return { dates, ohlc };
+    const out = { dates: [], ohlc: [] };
+    const key = (d) => (step === 'M' ? d.slice(0, 7) : (() => { const x = parseISO(d); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); return iso(x); })());
+    let cur = null, k0 = null;
+    dates.forEach((d, i) => {
+      const [o, c, l, h] = ohlc[i]; const k = key(d);
+      if (k !== k0) { if (cur) { out.dates.push(cur.d); out.ohlc.push([cur.o, cur.c, cur.l, cur.h]); } cur = { d, o, c, l, h }; k0 = k; }
+      else { cur.c = c; cur.l = Math.min(cur.l, l); cur.h = Math.max(cur.h, h); cur.d = d; }
+    });
+    if (cur) { out.dates.push(cur.d); out.ohlc.push([cur.o, cur.c, cur.l, cur.h]); }
+    return out;
+  }
+  function renderTradingView(t) {
+    const S = D.position_series[t];
+    const box = $('#pos-tv');
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    const sym = (S && S.tv) || t;
+    const key = sym + (dark ? 'd' : 'l');
+    if (box.dataset.k === key) return;
+    box.dataset.k = key;
+    box.innerHTML = '<div class="tradingview-widget-container" style="height:100%;width:100%"><div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div></div>';
+    const s = document.createElement('script');
+    s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+    s.async = true;
+    s.text = JSON.stringify({ symbol: sym, interval: { D: 'D', W: 'W', M: 'M' }[state.posInt] || 'D', timezone: 'Europe/Paris', theme: dark ? 'dark' : 'light', style: '1', locale: 'fr',
+      width: '100%', height: 460, allow_symbol_change: true, withdateranges: true, hide_side_toolbar: false, details: false, calendar: false, support_host: 'https://www.tradingview.com' });
+    box.firstElementChild.appendChild(s);
+    $('#pos-note').innerHTML = `Graphique TradingView en direct (cotation différée de 15 min) : ${esc(sym)}. <a href="https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}" target="_blank" rel="noopener">Ouvrir dans TradingView</a>. Ton PRU et tes achats sont dans les vues Courbe et Chandeliers.`;
+  }
+
   function renderPositionChart(t) {
     const p = D.positions.find((x) => x.ticker === t);
     const S = D.position_series[t];
+    $$('#pos-mode button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.m === state.posMode)));
+    $$('#pos-int button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.i === state.posInt)));
+    $('#pos-int').style.display = state.posMode === 'line' ? 'none' : '';
+    $('#pos-tv').style.display = state.posMode === 'tv' ? '' : 'none';
+    $('#pos-chart').style.display = state.posMode === 'tv' ? 'none' : '';
+    $('#pos-legend').style.display = state.posMode === 'tv' ? 'none' : '';
+    $('#pos-note').innerHTML = '';
     $('#pos-title').textContent = `${p.short} : cours et PRU`;
     const lg = D.transactions.filter((x) => x.ticker === t);
     $('#pos-detail').innerHTML = `<table class="t compact"><tbody>
@@ -503,8 +541,10 @@
         ['Plus-value réalisée', dEur(p.realized)], ['Dividendes', eur(p.dividends)], ['TTF payée', eur(p.taxes)],
         ['Gain total', dEur(p.pnl_total)], ['Frais courants (TER)', p.ter ? `${nf(2).format(p.ter)} % · ≈ ${eur(p.fee_year)} / an` : '–'], ['Opérations', String(lg.length)],
       ].map(([a, b]) => `<tr><td style="color:var(--muted)">${a}</td><td class="n" style="white-space:normal">${b}</td></tr>`).join('')}</tbody></table>`;
+    if (state.posMode === 'tv') { renderTradingView(t); return; }
     const c = mk('pos-chart');
     if (!c || !S) return;
+    if (state.posMode === 'candle' && S.ohlc) { renderCandles(c, p, S); return; }
     let i0 = 0;
     if (state.period !== 'MAX') i0 = idxFrom(S.dates, windowStart(S.dates[S.dates.length - 1], S.dates[0]));
     const ds = S.dates.slice(i0);
@@ -538,6 +578,45 @@
     }), true);
   }
 
+  function renderCandles(c, p, S) {
+    let i0 = 0;
+    if (state.period !== 'MAX') i0 = idxFrom(S.dates, windowStart(S.dates[S.dates.length - 1], S.dates[0]));
+    const agg = aggregate(S.dates.slice(i0), S.ohlc.slice(i0), state.posInt);
+    const pruAt = (d) => { const j = S.dates.indexOf(d); return j >= 0 ? S.pru[j] : null; };
+    const up = cv('--good'), down = cv('--critical');
+    const dec = p.price < 10 ? 3 : 2;
+    const buys = S.marks.filter((m) => (m.type === 'BUY' || m.type === 'TRANSFER_IN') && m.date >= agg.dates[0]);
+    legend('pos-legend', [{ label: 'Hausse (creux)', color: up, sq: true }, { label: 'Baisse (plein)', color: down, sq: true }, { label: 'PRU', color: slot(2) }, { label: 'Achats', color: slot(1), sq: true }]);
+    c.setOption({
+      animation: false,
+      textStyle: { fontFamily: cv('--font') || 'system-ui', color: cv('--text-2') },
+      grid: { left: 8, right: 14, top: 12, bottom: 56, containLabel: true },
+      tooltip: { trigger: 'axis', confine: true, axisPointer: { type: 'cross', lineStyle: { color: cv('--muted') } }, backgroundColor: cv('--surface'), borderColor: cv('--border-strong'),
+        textStyle: { color: cv('--text'), fontSize: 12 },
+        formatter: (ps) => {
+          const k = ps.find((x) => x.seriesType === 'candlestick'); if (!k) return '';
+          const [o, cl, l, h] = agg.ohlc[k.dataIndex]; const d = agg.dates[k.dataIndex];
+          const var_ = cl / o - 1;
+          let s = `<b>${state.posInt === 'D' ? dLong(d) : (state.posInt === 'W' ? 'Semaine du ' : '') + dLong(d)}</b><br>Ouverture ${eur(o, dec)} · Clôture ${eur(cl, dec)} <span class="${cls(var_)}">${pctS(var_)}</span><br>Plus haut ${eur(h, dec)} · Plus bas ${eur(l, dec)}`;
+          const pr = ps.find((x) => x.seriesName === 'PRU'); if (pr && pr.value != null) s += `<br>PRU ${eur(pr.value, dec)}`;
+          return s;
+        } },
+      xAxis: { type: 'category', data: agg.dates, boundaryGap: true, axisTick: { show: false }, axisLine: { lineStyle: { color: cv('--axis') } },
+        axisLabel: { color: cv('--muted'), fontSize: 11, hideOverlap: true, formatter: (v) => { const d = parseISO(v); return `${d.getDate()} ${MONTHS[d.getMonth()]}${state.posInt === 'M' || agg.dates.length > 200 ? ' ' + String(d.getFullYear()).slice(2) : ''}`; } } },
+      yAxis: yVal((v) => nf(dec > 2 ? 2 : 0).format(v) + '\u00a0€', { scale: true }),
+      dataZoom: [{ type: 'inside', start: agg.dates.length > 120 ? 100 - 12000 / agg.dates.length : 0, end: 100 },
+        { type: 'slider', height: 22, bottom: 8, borderColor: cv('--border'), fillerColor: hexA('#2a78d6', 0.12), textStyle: { color: cv('--muted') }, dataBackground: { lineStyle: { color: cv('--muted') }, areaStyle: { color: cv('--surface-3') } } }],
+      series: [
+        { name: p.short, type: 'candlestick', data: agg.ohlc, barMaxWidth: 12,
+          itemStyle: { color: cv('--surface'), color0: down, borderColor: up, borderColor0: down, borderWidth: 1.2 } },
+        { name: 'PRU', type: 'line', step: 'end', showSymbol: false, data: agg.dates.map(pruAt), lineStyle: { width: 2, color: slot(2) }, itemStyle: { color: slot(2) }, connectNulls: false, z: 3 },
+        { name: 'Achats', type: 'scatter', symbolSize: 9, z: 4, itemStyle: { color: slot(1), borderColor: cv('--surface'), borderWidth: 2 },
+          data: buys.map((m) => { const j = agg.dates.findIndex((d) => d >= m.date); return j >= 0 ? [j, m.price] : null; }).filter(Boolean) },
+      ],
+    }, true);
+    $('#pos-note').innerHTML = `Bougies ${state.posInt === 'D' ? 'journalières' : state.posInt === 'W' ? 'hebdomadaires' : 'mensuelles'} Euronext (ou ETH-EUR) : corps creux = hausse, plein = baisse. Molette ou curseur pour zoomer.`;
+  }
+
   // ------------------------------------------------------------ ALLOCATION
   function hbars(items, color, total) {
     const mx = Math.max(...items.map((i) => i.weight), 0.0001);
@@ -554,7 +633,10 @@
       </tbody></table>
       <div class="note">Concentration : nombre effectif de lignes <b>${num(A.concentration.total.n_eff, 1)}</b> (consolidé), <b>${num(A.concentration.pea.n_eff, 1)}</b> (PEA). <a href="aide.html#concentration">C'est quoi ?</a></div>`;
     $('#al-class').innerHTML = hbars(A.by_class, slot(1), tot);
-    $('#al-zones').innerHTML = hbars(A.by_zone, slot(1)) + '<div class="note">Transparence : chaque ETF est éclaté selon les poids pays approximatifs de son indice (config.json). Air Liquide et TotalEnergies sont comptées en France (siège), même si leur activité est mondiale.</div>';
+    $('#al-zones').innerHTML = hbars(A.by_zone, slot(1)) + '<div class="note">Air Liquide et TotalEnergies sont comptées en France (siège), même si leur activité est mondiale.</div>';
+    $('#al-sectors').innerHTML = hbars(A.pea_sectors || [], slot(1)) + `<div class="note">${sourcesNote(A)}</div>`;
+    $('#al-countries').innerHTML = hbars((A.pea_countries || []).slice(0, 12), slot(1));
+    renderMap(A);
     $('#al-plan').innerHTML = `<div class="legend"><span><i class="sq" style="background:${slot(1)}"></i>Réel (valeur)</span><span><i class="sq" style="background:${cv('--muted')}"></i>Part des versements du plan</span></div>` +
       A.vs_plan.map((r) => `<div style="padding:6px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;font-size:12px"><span>${esc(r.short)}</span><span class="num">${pct(r.actual, 1)} <span style="color:var(--muted)">/ ${pct(r.plan, 1)}</span></span></div>
         <div class="segbar thin" style="margin:4px 0 2px"><div style="flex:${r.actual};background:${slot(1)}"></div><div style="flex:${Math.max(1 - r.actual, 0)};background:var(--surface-3)"></div></div>
@@ -567,6 +649,49 @@
         <td>${p.suggest && p.residual_pct >= 0.05 ? p.suggest.map((s) => `${s.amount} € → ${s.shares} part${s.shares > 1 ? 's' : ''}`).join(' · ') : '<span style="color:var(--muted)">OK</span>'}</td></tr>`).join('')}
       <tr class="total"><td>Total par mois</td><td class="n">${eur(D.plans.reduce((a, p) => a + p.monthly, 0), 0)}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
       </tbody></table>`;
+  }
+
+  function sourcesNote(A) {
+    return 'Sources : ' + (A.expo_sources || []).filter((x) => x.ticker && D.assets[x.ticker] && D.assets[x.ticker].account === 'PEA')
+      .map((x) => `${esc(x.short)} : ${x.url && /justETF/.test(x.source) ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.source)}</a>` : esc(x.source)}`).join(' · ') +
+      '. justETF publie les 4 premiers pays et secteurs ; le reste suit la répartition indicative de l\'indice.';
+  }
+  // noms des pays (français, comme justETF) -> noms du fond de carte
+  const MAP_NAMES = { 'États-Unis': 'United States', 'Japon': 'Japan', 'Grande-Bretagne': 'United Kingdom', 'Canada': 'Canada', 'France': 'France', 'Suisse': 'Switzerland',
+    'Allemagne': 'Germany', 'Australie': 'Australia', 'Pays-Bas': 'Netherlands', 'Danemark': 'Denmark', 'Suède': 'Sweden', 'Italie': 'Italy', 'Espagne': 'Spain',
+    'Finlande': 'Finland', 'Belgique': 'Belgium', 'Israël': 'Israel', 'Norvège': 'Norway', 'Irlande': 'Ireland', 'Nouvelle-Zélande': 'New Zealand', 'Autriche': 'Austria',
+    'Portugal': 'Portugal', 'Chine': 'China', 'Taïwan': 'Taiwan', 'Inde': 'India', 'Corée du Sud': 'Korea', 'Indonésie': 'Indonesia', 'Malaisie': 'Malaysia',
+    'Thaïlande': 'Thailand', 'Philippines': 'Philippines', 'Brésil': 'Brazil', 'Mexique': 'Mexico', 'Afrique du Sud': 'South Africa', 'Arabie saoudite': 'Saudi Arabia',
+    'Pologne': 'Poland', 'Luxembourg': 'Luxembourg', 'Turquie': 'Turkey', 'Chili': 'Chile', 'Grèce': 'Greece', 'Vietnam': 'Vietnam' };
+  let worldLoading = null;
+  function loadWorld() {
+    if (window.echarts && echarts.getMap && echarts.getMap('world')) return Promise.resolve(true);
+    if (!worldLoading) worldLoading = fetch('https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/json/world.json').then((r) => r.json()).then((j) => { echarts.registerMap('world', j); return true; }).catch(() => false);
+    return worldLoading;
+  }
+  function renderMap(A) {
+    const list = A.pea_countries || [];
+    const note = $('#al-map-note');
+    const off = list.filter((x) => !MAP_NAMES[x.label]);
+    note.innerHTML = off.length ? `Hors carte (trop petits ou non localisables) : ${off.map((x) => `${esc(x.label)} ${pct(x.weight, 1)}`).join(', ')}.` : '';
+    loadWorld().then((ok) => {
+      const c = mk('al-map');
+      if (!c) return;
+      if (!ok) { c.clear(); note.innerHTML = 'Fond de carte indisponible (hors connexion) : voir « Pays du PEA ».'; return; }
+      const data = list.filter((x) => MAP_NAMES[x.label]).map((x) => ({ name: MAP_NAMES[x.label], value: +(x.weight * 100).toFixed(2), fr: x.label, eur: x.value }));
+      const max = Math.max(...data.map((d) => d.value), 1);
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+      c.setOption({
+        animation: false,
+        tooltip: { trigger: 'item', backgroundColor: cv('--surface'), borderColor: cv('--border-strong'), textStyle: { color: cv('--text'), fontSize: 12 },
+          formatter: (p) => (p.data ? `<b>${esc(p.data.fr)}</b><br>${nf(1).format(p.data.value)} % du PEA · ${eur(p.data.eur, 0)}` : `${esc(p.name)} : 0 %`) },
+        visualMap: { type: 'continuous', min: 0, max: Math.ceil(max), left: 8, bottom: 8, itemHeight: 110, calculable: false, text: [`${Math.ceil(max)} %`, '0 %'],
+          textStyle: { color: cv('--muted'), fontSize: 11 }, inRange: { color: dark ? ['#184f95', '#3987e5', '#9ec5f4'] : ['#cde2fb', '#5598e7', '#104281'] } },
+        series: [{ type: 'map', map: 'world', roam: true, scaleLimit: { min: 1, max: 8 }, zoom: 1.15, center: [15, 25],
+          itemStyle: { areaColor: cv('--surface-3'), borderColor: cv('--surface'), borderWidth: 0.6 },
+          emphasis: { label: { show: false }, itemStyle: { areaColor: cv('--s2') } }, select: { disabled: true }, data }],
+      }, true);
+    });
   }
 
   // ------------------------------------------------------------ CRYPTO
@@ -937,6 +1062,8 @@
   $$('#scope-seg button').forEach((b) => b.addEventListener('click', () => { state.scope = b.dataset.scope; store.set('pea-scope', state.scope); rerender(); }));
   $$('#period-seg button').forEach((b) => b.addEventListener('click', () => { state.period = b.dataset.period; store.set('pea-period', state.period); rerender(); }));
   $$('#ov-mode button').forEach((b) => b.addEventListener('click', () => { state.ovMode = b.dataset.mode; $$('#ov-mode button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); renderEvolution(); }));
+  $$('#pos-mode button').forEach((b) => b.addEventListener('click', () => { state.posMode = b.dataset.m; store.set('pea-posmode', state.posMode); if (state.pos) { const ch = charts['pos-chart']; if (ch) { ch.dispose(); delete charts['pos-chart']; } renderPositionChart(state.pos); } }));
+  $$('#pos-int button').forEach((b) => b.addEventListener('click', () => { state.posInt = b.dataset.i; $('#pos-tv').dataset.k = ''; if (state.pos) renderPositionChart(state.pos); }));
   $$('#pj-h button').forEach((b) => b.addEventListener('click', () => { state.pjH = b.dataset.h; $$('#pj-h button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); renderProjection(); }));
   ['#tx-acc', '#tx-type', '#tx-src'].forEach((s) => $(s).addEventListener('change', renderTransactions));
   $('#theme-btn').addEventListener('click', () => {
