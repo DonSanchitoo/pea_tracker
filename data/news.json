@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-05 14:23 UTC",
+ "updated_at": "2026-11-05 14:31 UTC",
  "errors": 0,
  "items": [
   {
@@ -8,7 +8,7 @@
    "url": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxNcFlkVW1ncWNrRlJkbzJQZl9raGRSZGJDbE9ldXM2eGVFUzl4enA0RFBlajhUbDd4SUZWWDM1TzdDbktyY2xMdGdQMGJvdmZpRDN4MVRaZ0ZZVjhjbFozcG1qVzl2UEJwcUpSXzZCLWttc3ZJUkFuOHhwR1htWHJBamkybXVteFBwM3pmdl9PSU1RMV9zb2tpTFdSRkFuODFEelRDWkdKZ2lpb1VXcmVsd0R1LXhaX0VRUm9UQzZuQU1XejNCOFZlcGU4RFNHcDYyWWR0TVVqOFl6VVh0SEQyRG12T2hlZjJqaEl3N2xvNUlxQQ?oc=5",
    "date": "2026-11-05T05:25:09Z",
    "lang": "fr",
-   "score": 32.94,
+   "score": 32.93,
    "tickers": [
     "MARCHE"
    ]
@@ -30,7 +30,18 @@
    "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQbWpBY1VHMFd5a2tJXzM1RFFFQTl5Y09aVDgza095UkJKVzNnQ3F4VW1pMzBEazJKMGhlS21zUEdCLXJPOVhWdXRnZmlLRHliMDdqYmt2b2ZWYk5FeW85VnBSalpRd1E5b3BVSUZDU2VLMUNiQm41YWw1SUgxV2dWaUFZUkI2MllhY0Z5ZkZHcWNuQmdCaHBKbVRhck1meTRz?oc=5",
    "date": "2026-11-04T23:54:37Z",
    "lang": "en",
-   "score": 32.6,
+   "score": 32.59,
+   "tickers": [
+    "MARCHE"
+   ]
+  },
+  {
+   "title": "China steps up defence of stock market in bid to revive AI boom",
+   "source": "Financial Times",
+   "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPMlNsXzl0WENfdF9YOGdmb1BtbW9yRm9QQ3NOVWRXQmNVTjEwcHFscXRHS2ZOYmVCSHdKeDk4cWJ4OHprVFNNQlNKaGFJTEl0bEpHMVFHdGtua3ktVFlBV0JpSmRJajVwVEhaSUtieVltTDYzVG1uZGo3ZG1UWUhIZkFXRHA?oc=5",
+   "date": "2026-11-04T13:14:01Z",
+   "lang": "en",
+   "score": 31.92,
    "tickers": [
     "MARCHE"
    ]
@@ -41,7 +52,7 @@
    "url": "https://news.google.com/rss/articles/CBMizgFBVV95cUxPZ1NtSEswUjAxVFo4THZDQml0R1JEZVNkLWlPQVBVTXNhX3ZpZU84cTN0a0dCck9rLU1hWU1BakhQVjNaUXJ0Rkw4eDJ1dWd5eXVzb2x6Zy14Rm1HSUd1TlpFcEFaaEpoTUFDUFk4LXZMallrQnBxdVRQMkYwLVRVOHQ4SmNwQkRlbWlNR0lxZ1VZckJwdVV5Z3lacVM2RUUwUHNNbE13MlVhejNoeXh0OW8xQnlaVEF2WUpsTGpGb19FMDZWZEtDT0ZIclNrUQ?oc=5",
    "date": "2026-11-04T09:21:00Z",
    "lang": "fr",
-   "score": 31.69,
+   "score": 31.68,
    "tickers": [
     "MARCHE",
     "DCAM.PA"
@@ -64,20 +75,9 @@
    "url": "https://news.google.com/rss/articles/CBMihAJBVV95cUxOOUM4WVhrVlVEQ3RLZGk1a2tObWJmanota2dMMXREeFY2SGF5YkkzSFNfUjdjYWJTY2k3b3NjemlOWmh6YVJrR1ByRDNLcy10ckpCQ2hNVEotWkZTODlySktNTEFQRWUyOHJKR2NHRGRsUDEzSWUwc3dHNkxYOEI2Mi1RbEktS1NUWkhiX1R5elJmMUsxNVpRMW9JT2RvcUpYeUp2a0JCakhTWWJLcWZ5REJaSkY3eVJOQnowc0U2QTEzcVNDd0RPY2lvVU5iU1U2NDFoOWV5S2tkWEw5RGtnWUNYTzA0amMtVm1lS2s1QjhrbG12RlJWMGlzWko2T1NoMXVHeg?oc=5",
    "date": "2026-11-03T18:29:12Z",
    "lang": "fr",
-   "score": 30.76,
+   "score": 30.75,
    "tickers": [
     "TTE.PA"
-   ]
-  },
-  {
-   "title": "Beijing Reins In IPO Rush After AI Concerns Hit Stock Market",
-   "source": "WSJ",
-   "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOdG14X1p2Yml1N0c0ZEdISnRrX3RwY19oVU9sVVJNS25PdThMSHVWNk1xSHR2WDlNNlJDV05nWHBaNjRud3dTMmdKdnhWSGpmY0FKQ3VEQWlLM2pPQUtsVWdBXzAtY3ZnUGNHbDBOYWx5WTJRZnR1V1o4dVFvTWloX19ZUHNFU3RmOS10aGRZTWxvMkdwektUbFV3cUozbGFLNUs1ZFNKWQ?oc=5",
-   "date": "2026-11-03T13:02:53Z",
-   "lang": "en",
-   "score": 30.42,
-   "tickers": [
-    "MARCHE"
    ]
   },
   {
@@ -97,7 +97,7 @@
    "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxQVTJOMUFjWUhxMTc0Rjc2aGJBQ3pXLUEzTUJDakhtbDR2QmFjYVdsNmo1LXBWS3ZvcDk5SlpZUFNfNm1lS0VReVJVM2tZcDFlQl9SdGh6bXl4VXU5eGlaamZYX3BnS0Nuc0xFeVVtMWZHSTBMTC0wZVpaU3dTenFUT2hMNHg?oc=5",
    "date": "2026-11-05T05:33:27Z",
    "lang": "en",
-   "score": 29.95,
+   "score": 29.94,
    "tickers": [
     "PAASI.PA"
    ]
@@ -119,7 +119,7 @@
    "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQcDNiSHhwUjBpRnJnUW4yZFM5NUp6QWlXOUJldXZ6ODRpZXdRbENpTFp3d2RJWG9tVVRTWXVzTDZQRjBLcXJOaU5EeWRBUTY2ZGJZQzJlaFVKaFJMckcwdkV2QTNSWFoyYkM4WFBlUEhwWThiS25XM2VObEJDalQyMmNLcmVPZXRBZmZNNVU3MWltVjRNNlZNcU1rcGFKLTNNWC05WDdhVGItRVpkTngxMw?oc=5",
    "date": "2026-11-02T17:16:12Z",
    "lang": "en",
-   "score": 29.18,
+   "score": 29.17,
    "tickers": [
     "TTE.PA"
    ]
@@ -130,7 +130,7 @@
    "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxPdFUxTE1vSEgtZUJNdnZzMTRBdEdlSndGYldsNmZWZXJBTWMwd3lwS1pKb0VWZHdRQW9uQUhialdZQ2ZWRWV1aTdBUnNjTlVfM0t3VUFqNEhvZjUycUFMX0pIVmRzcGJ0Zm1sTng4ME55U2tDQ1Joa1Y4bnVrcDRFekZSenB0WXRKaTZ5VVpSMDFLUkkwdEwyWk9ZY0NYNnVoUERBazVuNUJXdFhoSW5IdGpvb01yV2ZIRHU4VnA2U0RfZHd2a3R4bDlHaWFFaHBROHc?oc=5",
    "date": "2026-11-02T16:50:08Z",
    "lang": "fr",
-   "score": 29.15,
+   "score": 29.14,
    "tickers": [
     "MARCHE"
    ]
@@ -141,7 +141,7 @@
    "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxNTXJucEc2NkxlUVo3SWhBcHhqdU9WakFrODFKWEc3bjhBQXNmUnU0Y0xjVm9RdW8zbk05M29IZ2ZDSVFzVDI3MEVzT3ZDRmJjNnNJQVRQdHE1bWRRc2xxeFZqYVhPUGt2bnZvbEZNY1Ayd3ZKUF91UE16Nm1sN1ZGb2ZpdG1kUFRNaTBUT25KNWc5bHg3Y19lOEJzU1NiSjFQUy1fVVZJdnVTTHdNLXFEWFBiLVY?oc=5",
    "date": "2026-11-02T16:23:55Z",
    "lang": "en",
-   "score": 29.13,
+   "score": 29.12,
    "tickers": [
     "TTE.PA"
    ]
@@ -152,7 +152,7 @@
    "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNQ1g2VXJ1X0oxVjhEN2dQcmw5blNoUnd1TUhoRzlnYW52Uld4alVqS0VxSHpxSU9uMEZDZ0pYZlNiRkVzZzhZc0RoY2N3Y2JXaHZUVFFlTkNnX21kS2NGN2NwT2t6bjdkTHFHLU16OUFRMkptOGJpbUdteFF0bmYwN2NmR0tJcFYwak9wREJpNnhyUkZZYzZmeFNBU1pyYnJBYkNVRGZ4TWNMNXQ4QzZIVlR5ZlFCaDFaSUHSAb8BQVVfeXFMTW9Cb2ZNYkFvaHA4eUdxNDN2RGZnVWV3Z1hMak56TzZ1TUhSQ2xTbS1LQmFzdzRqVUdLaU5XNkNmYk9qV1pRakFQRFhPY0hzWDVMcmJTbkxPN3hmQ3ZGTGpJbUZmQWJpdjFmNDBjMzdrMmNmTXNmWmVuQ0VTZmZ5U08wTGNPRDZGazRVbzIwY1p6QjdIa2Z6U1hxczB2a0lxQ0pvU0k4T2c5OWJjM04zVzgwbWVVdGU1em02RGkxeG8?oc=5",
    "date": "2026-11-05T07:59:00Z",
    "lang": "fr",
-   "score": 29.1,
+   "score": 29.09,
    "tickers": [
     "AI.PA"
    ]
@@ -163,7 +163,7 @@
    "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxQd2M2U1Z4ejdLX3c0WjZSMXFIbF9IbVpnX3c2cFVlMzdfa0lENEwtRzJJMHdzUVhmbnljMHhMVEZZUDZtelNSREpMZldfc092S1dFMUdzVzJjNTFxX09YaV9OalplOXZ4US13RGs5a29sUU5qMHlTclUwdGxQbFNYVlBZaUx2cGpocjdXOUwwMnlpWWMweDFPdGZ6MHVlS0J4TUItU21fUQ?oc=5",
    "date": "2026-11-02T15:50:12Z",
    "lang": "en",
-   "score": 29.09,
+   "score": 29.08,
    "tickers": [
     "TTE.PA"
    ]
@@ -174,7 +174,7 @@
    "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxNWlBPdGZnUU9kcHdhejhmVlMzZDUzQVZ1cElQeWZSMW1JS1JXcGh0OUhuZGxmTEFUMHl1RTJINm5kdVd5SnZvTEJzNzlreTEyX3ZXYk5uRmVGeVNtdlZyMmxtSVhRRTJzellDRHI1V1NobXhqQjZnZTMxbUNFRVRFUHhEM051em54SklKOEk5VEtXc1VFc0p3cUxsNnU3eEZoRllMOTJMV1ppMFRfMFVjekhyUXVIUUFCTmxNMDI2a0V1TEExQjBMU1lVY2x2QVlnTzlBcjIzZENzZ1VfTXBz?oc=5",
    "date": "2026-11-04T10:01:43Z",
    "lang": "en",
-   "score": 28.73,
+   "score": 28.72,
    "tickers": [
     "PAASI.PA"
    ]
@@ -185,7 +185,7 @@
    "url": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxOb0VZQ05ENEc0M0M4MXFWejE1ZkplWHNJbW1ZWTFHWTc4aXFDWi10U2NWWW1pYWtSSktOTGtDTFl3blBrcENPS2dMQ3g4Qk5ZRUdDa2hCQXRRX09RejV6QjBvVU5jQ2pxWVRDSktQU1B0ZEJXSVNRNGF3TlpWR3VVejRzbzFXQ2RnZkhHMXZ0VmY5ZVF5a1YyTnlrbm1jUzJ3cWQ1UVE4WXA2WFRmVnlRdFNxdVJOcjJzbGduelIwbDRKUGRaT0ZsMDV2R1JMeW55NUpmX3QtTkV0UXFNbURPalpyRm9xa1E5SWM1czVDZ3FZeExw?oc=5",
    "date": "2026-11-02T06:30:08Z",
    "lang": "fr",
-   "score": 28.51,
+   "score": 28.5,
    "tickers": [
     "TTE.PA"
    ]
@@ -196,7 +196,7 @@
    "url": "https://news.google.com/rss/articles/CBMiggJBVV95cUxPenNOYk1CQ3lxTThBTVBMaTBYOFY2X2RwNEw3TzhlRFBjckFqRXJPREpSZGo2cDhEYjAyOVQ1b2hobEdfZGVQeDc2b1hqQkdYRzhybGJ4dXVXaHlSRnJzQUlPVFZic1VVSkNaczJYZC1mZGNnYlJpRDRkdEZaZ2pGc2o3ck5YVkNDS2hxQVAyYjh5aGVFSkwxVU1WckJNNVVyVGVfWDRneFhSYmVLWm15ZU5ZZ2lxTWlrZ0IzUVFHb2pZQ0szU283dVBUOTgtcXRhQmY3bGIzOG0tc21RZUZNVGs5QS1iejBBd25NOUR0blN4NmVQZ0d3bUx2aHdLMF9MSmfSAYICQVVfeXFMT3pzTmJNQkN5cU04QU1QTGkwWDhWNl9kcDRMN084ZURQY3JBakVyT0RKUmRqNnA4RGIwMjlUNW9oaGxHX2RlUHg3Nm9YakJHWEc4cmxieHV1V2h5UkZyc0FJT1RWYnNVVUpDWnMyWGQtZmRjZ2JSaUQ0ZHRGWmdqRnNqN3JOWFZDQ0tocUFQMmI4eWhlRUpMMVVNVnJCTTVVclRlX1g0Z3hYUmJlS1pteWVOWWdpcU1pa2dCM1FRR29qWUNLM1NvN3VQVDk4LXF0YUJmN2xiMzhtLXNtUWVGTVRrOUEtYnowQXduTTlEdG5TeDZlUGdHd21Mdmh3SzBfTEpn?oc=5",
    "date": "2026-11-04T21:46:51Z",
    "lang": "fr",
-   "score": 28.46,
+   "score": 28.45,
    "tickers": [
     "DCAM.PA"
    ]
@@ -207,7 +207,7 @@
    "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPbXpaWVRrQUkzYThuc1E5TnFCUXBTSTV2bHNaR1FhUmdEYnhjSHVneFdpbGhjeENwWlE2WVE1c3FCUV9qeGZzRGNoNFEzdERMblBDb005a2NBV3B2YzdfNF95dGtrVmxiNlJrNFU3UC1BTnZHcVh4a3hna25vdEFkSEtMUQ?oc=5",
    "date": "2026-11-02T00:46:14Z",
    "lang": "en",
-   "score": 28.15,
+   "score": 28.14,
    "tickers": [
     "DCAM.PA"
    ]
@@ -218,7 +218,7 @@
    "url": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxOR1ZsRnVzWjVfT19tVFdEY19RVVVyOXBQTWRjZUdyUFZtd2FLUWVwVHNWSHB6SVFBM2U3UEZOOEhHYzNTcHpkb0Q3azM0ZWM1UDRybzV6QmdCSTNTdDRFelo1LXNySlBnQlRldnM0VzJCRG9HOUw2UFFhZzREN1lyd1VrRGlmSGY3NW1CbHIySGctV3Bzcmp3b0ZCY2JhRlMzbFp0WjYxbWR6T3FERVdFU21nVTl3dU5jX3lsNGdRSmxtQ2xtemY3MkNRcnlwUEw2QW9oeUljVEVjQnpSZTVqa05mNNIB6AFBVV95cUxOazZpUE1iYWw3RDJORzJmVnZveVU4NmVBZG1uSHR3eWExWkZmRGFHVlhfYnlCc1VGUkpIOVR4Y1NraFNzNzlOQjVtR1BIMWQwVzNKXzRqcUw0TW1fWUh0bFpFbWEyWW52aWNRTVBhVnZoTmhqeENMSXFWZHFfRlNLYm8wOXZERlVzallpMTR1RmdoSjVQNlo0cnRpSFRxcXlXMjRpeGM2RENITjBqblY5blNqMTIxTHNTZFNWV3MxWGxaUXBYNmkyN1VScWIyVzVTXzJzdHhOVXctQ0c3MlBnYVhBZF9HWDBM?oc=5",
    "date": "2026-11-04T07:28:40Z",
    "lang": "fr",
-   "score": 27.57,
+   "score": 27.56,
    "tickers": [
     "TTE.PA"
    ]
@@ -229,7 +229,7 @@
    "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxQZGVWejZ2eDBjbmwtVmVuOS0zd2FUQjdCejUyOUd1NWJoMUZKQkxoUDh6a2RmWTlfU0trLWJJcUdfeldxd2ZLMFVBMGFrME01XzdFNjQ3dmg0RjItaFVQbFhZZ0ZIZXpSeS1Tbm01SnJnYWdlc1pwRG1TQTkzOTNHQ3RQeGI1ZC1ieTBrMFJNQVVRc3RaQWJjU2pKMjNGYUl5YmVYNFJn?oc=5",
    "date": "2026-11-04T03:18:00Z",
    "lang": "en",
-   "score": 27.31,
+   "score": 27.3,
    "tickers": [
     "PAASI.PA"
    ]
@@ -240,7 +240,7 @@
    "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxQeTJIREd1VmZRTkhBbExiQWZPSHBLb1h0d08wd2ZsVWlIVk9ZVWN4OG5BQTFTWDczLWZTLUVqaDJwZmxlMGptZnRBb1ZMZGZJX1didzViM1lBV1RpcXF1N3lLc010UnJvWF9ya0VGY05fb3ZldFZWb01tdFBOa2h2N3VNNDRRR0FtbTdGV1RzenlfVm5wcHNfU2o0UjlUb25sZnlDX1dkZ3lBcUVaVmRTaWUxaUtsMzRLdUVVRHhvOGV1RlNKOGVxcWNNVlhMZ2JVMUhISmtOOWU?oc=5",
    "date": "2026-11-03T10:49:53Z",
    "lang": "fr",
-   "score": 27.28,
+   "score": 27.27,
    "tickers": [
     "PAASI.PA"
    ]
@@ -251,7 +251,7 @@
    "url": "https://news.google.com/rss/articles/CBMijAJBVV95cUxQZzVQbS15TG9tRG5RMHIxWFJJdEhKVXJLQ2JjSzhNYmpDdFdGTDl3ekZ1R3ZyM0o0U0IyZlpweUg4eHJDQjNGdDQ5V1ZDUmJCLW1sZGxKdWFhRmhxSTJ2S3NHYlg0VWtMMnd0c21qdUVqUXNoRTFqcVd6MVNISjY3UUdTWmtJQzAtcHB0SExtLXNwZGNwZzhNbFlOdzlsVHZ6T1ZGcGVpYi1pWnkxMGg2bkJ2YUFPb2J4OGN1dlB0WVpaT2NyLXdwUXN1cHZ0QnN5T0hKLWRDcjlTbW1zNE5uSGZDZVBsd2hHcjB0SDlVTWVYQmdxd1lJUk9HQzBLQ29McC1mQ0E1TC1MZ1N00gGSAkFVX3lxTE1XVEhxbmlndE9ETUl0Mjc4OTFzNnp5aWs1YnU4ZDhYRG1NMG4wQklST3BlVlRiY2tMN3d1MWptczZpY3RUT1RtTm1vWjRWZWJQemJTOHV3SHdEZk1mbG5KS2JDTS11QmRVSmpxbUcwdnFqZEMwNUVqZkx3dDZjcVBYZjRIbmRtZDFzcElPNW01TUNSYXdmaUk1WkQtc09adFlwLXJFcmpqcHMxTUNtZmFJaEhfZWFRak9vR1ZmUGlNZVVCSUhBSXFnSmdtN05OZmZZUjVnbTY1cnkxVDZ2QnAteTF2S28wM2JwQURMaDh5TzRadHZ0NVBxaXZhdndlbnJXS0RoQWVoMGRqMlczU01MMFE?oc=5",
    "date": "2026-11-03T15:01:22Z",
    "lang": "fr",
-   "score": 26.54,
+   "score": 26.53,
    "tickers": [
     "DCAM.PA"
    ]
@@ -260,9 +260,9 @@
    "title": "ETHGas souhaite rapprocher Wall Street de l’Ethereum public en vendant des réservations anticipées de blocs",
    "source": "CoinDesk",
    "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxNTW9jRERQektIdTBaNGtuYTk5TVhJbHp5WUlaTmlhcWdTSWZsWjBXOVBfZTZVMWN0TVBRZk1LNjBlcHJHbnhHMnJteExRWnl4aGZhelVQTkVRRWFNTWx5ZmFoeHdmbUxaR2kyUUFxZnczWWZITldFVlRyc0JhWGphcjRjVDhtYThMeHEyOEluMG9QWlBtWDF5Q2tpOWhTaUh1TTFFZzFxdXh0Mm1hbXY2eENuTW1MaDh6XzVlNnlLb1FMMm1vRkVIc21lTVhpZUVEMm1HRlIzQnQ?oc=5",
-   "date": "2026-11-03T12:06:53Z",
+   "date": "2026-11-03T12:01:05Z",
    "lang": "fr",
-   "score": 26.36,
+   "score": 26.34,
    "tickers": [
     "ETH-EUR"
    ]
@@ -273,7 +273,7 @@
    "url": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxQNDhXWUYtdlNBdFFHdUljWkp0VU9lNzNtTFVteGd0M3pMQVRGdHp1NEFnMzRXNmcwR194Q2FXSE85ZldoclF0MXVGU2RnQ2U5UHhBSUZ0RnBQSExLUlR1ZklCRDJrQUlqb1lXVEtzbXZlekRkYWF6ckVqOHZqeDc1bTB4UWZUOUJjWS02V3dOa2FfbTJkNF8wSklVa0p4ZmRxWXVSNWt4ZDNqQ2VqeDU3T0pZYzRTeFRBc2FTMGhRR29fajNBcDM4SlJDa3ZoZW5aZmtJTUxfMDA4ZUxuMUNEUEhabw?oc=5",
    "date": "2026-11-03T10:02:21Z",
    "lang": "fr",
-   "score": 26.23,
+   "score": 26.22,
    "tickers": [
     "TTE.PA"
    ]
@@ -284,9 +284,20 @@
    "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPa05lclBTOURFMjRsVHFPcmtTTFpjMVVNb0p3dWd0MW1uOFhudGlOSFFiNkp1dG9JeHc0eG15NVdmRU1zaFgxb0tJQ3JMNFM2WTdDY3FoT0FrcjVFdWR3d2ZDT1pwUDN4bzFnLV9GMWpvbF9JN0I5eHhqRkkyTnVRZ0UyNUpWM3FXdTZlWkt3V3d6eE42eE04SG5yQzRnaHhjbXZ5RkowN2ppZGI2Y2pqNnJtdWxjR0drWnZIeQ?oc=5",
    "date": "2026-11-04T16:27:00Z",
    "lang": "en",
-   "score": 26.13,
+   "score": 26.12,
    "tickers": [
     "PAASI.PA"
+   ]
+  },
+  {
+   "title": "Le Bitcoin se maintient au-dessus de 80 000 $ tandis que Zcash progresse de 12 % dans le rebond post-électoral des cryptomonnaies",
+   "source": "CoinDesk",
+   "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNazQ3Z2NZSU1iejRWeUVWU3lfZFlkS3ZrUXM1OWFCdmRWWmthWlh6WXRQTkxobkJfVDFDeUdUbTl5RmE4bmppMEowSTJqREhBLW1nSUYyTi1Pb29iZHAtTlpIdlh3YjJxTWw1V202Y1RLdjdLTnVqTFRtU3YxWEJxMWFRYVJEcS1kMV9lZHFWbTN2RnRfRnJCYzQxekU1dUp0M09uX1BFTnhUM29nZTc0M29qM19EV1hGZVd6QkwzTVNmTTlp?oc=5",
+   "date": "2026-11-05T05:13:45Z",
+   "lang": "fr",
+   "score": 25.92,
+   "tickers": [
+    "ETH-EUR"
    ]
   },
   {
@@ -295,7 +306,7 @@
    "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9PX0ZJcWJiUjNReFdjX3NybjBlNkNfdF9vQ0hTU3g1ZzFLaG40NWlibV9mdFkwR2l3SlloUWpfS2VZcUJNS0tIbFJ4NUZZUmhRSy1yMl9CaUhOcnJCSUhBOTQzTDFxVkU4?oc=5",
    "date": "2026-11-05T12:30:48Z",
    "lang": "en",
-   "score": 25.38,
+   "score": 25.37,
    "tickers": [
     "ETH-EUR"
    ]
@@ -306,7 +317,7 @@
    "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPTXhZWHNYV2ZfWHlCMmxOM05OTHJUMlZzcWptOThObWFDdnRTXzJmSDBxLWp3Q3N4NkRQYzM1S2RNeDVReGVIWTNCWDFnUzRDTHdsQVR4cTdXQ2FnSWVWMjhFeGlIWVJCRWNHc1NWSWU4dlJpcTdDZ1YwQ0g0YzVZSzg3UzdIa2x0X1lVMjRPaWlzTE9FbEZOY1Y4MA?oc=5",
    "date": "2026-11-05T01:00:00Z",
    "lang": "en",
-   "score": 24.66,
+   "score": 24.65,
    "tickers": [
     "ETH-EUR"
    ]
@@ -317,7 +328,7 @@
    "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxQRTVIWFZ3Z1lpVC01ei13Wmo5RGdvakdRNlB2bEQ5US1IdjJOdzFIbHlDMXZCV1NCOTJsekhKbFIyR2xyby1zVnpnbE9TNVBzX0hoaEgwVUlSZFphQUxJYXVmdkF0aTVLYTVFSG1uX2NYdUl2VXdMUGx1WExGeVRrb28wYmQ5MG8yY2hzSEtVdWIwa3BwRFhHOXk2S3hCaThYbmpQM2pGNkpsU0NEeV9NQ0s4NGEtMUczeFUxRm04M3g0cE91ZFZkcUNtbWpBM3VlUjNVdDZYZU5ON3ZsLURz?oc=5",
    "date": "2026-10-30T12:15:08Z",
    "lang": "fr",
-   "score": 24.37,
+   "score": 24.36,
    "tickers": [
     "DCAM.PA"
    ]
@@ -328,7 +339,7 @@
    "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxQWkx3MUliUEVOWmxtNmRmYUc2ck81TTJHUWFqXy1EM3B5Vmw1bmQzSEgySVBPWVhvXzFXd0xyRXhCcXlPOUpWSjdBZTE2MWlZb1RpbUhxNnBnZS1DVFBYdzNoU1BMeWRpNFYxRlRVQWlXWHNfWmZuZUhCOGcwbGl0XzhiakF3T25hS2paY2NLZTNldlJkWkdxM1R6cl83blFYeGFFdEpZQQ?oc=5",
    "date": "2026-11-05T02:40:21Z",
    "lang": "fr",
-   "score": 23.77,
+   "score": 23.76,
    "tickers": [
     "PAASI.PA"
    ]
@@ -350,7 +361,7 @@
    "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNSDhVazhtSk1wN2FuM0dKREcyOEZGSjRiMW1LcDE1VkJfRl9aeEdLR1FpT0hPWE1LQXFEdXp6bFh6LXAtRng0Y0Z3RE80bzhDeHZIX3p1U2ZZRWhHVGRMd2o4elNHNzY3bG9xczZsNzY0MlVLcVhaSTAxSlVNYVVwY0NIdjVBLXItSUJodWhxbE53ZHBYNHBfZ3l6Zw?oc=5",
    "date": "2026-11-03T13:15:58Z",
    "lang": "en",
-   "score": 22.43,
+   "score": 22.42,
    "tickers": [
     "AI.PA"
    ]
@@ -361,7 +372,7 @@
    "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxPZmJQelVsQm5GMnJqZHZoUnR5WXQxel8tQXVkS25PdDh2VXdLVS1EWDFJdkk3d1V2Zjh2T0swSXM4b0FrM0hSYVBoQU56MU1PbG90M3B0X1NUOU9JVmF6M1pnTE5OUm1TZmtfVzBsLWMxRXZzQXRFaVFSdV9fSkh3aF9VREJpcmJ2bDJhTktkV0xyanE0LXFncTMxQUlUMnYwV1ZzLVBqNXNEYU5NZENfS2RvWUEwYmJFREpiWFl2dHliYUN0TkNLa3lvY0ZDaEUzQkYtU2ZYbVZnODJERnRfWg?oc=5",
    "date": "2026-11-01T23:00:00Z",
    "lang": "fr",
-   "score": 22.04,
+   "score": 22.03,
    "tickers": [
     "ETH-EUR"
    ]
@@ -372,7 +383,7 @@
    "url": "https://news.google.com/rss/articles/CBMirAJBVV95cUxNbTJabWFBdFVSNkpMQUtwLVVaWk1Rc0QtbDRWVUpCaUU0Z3VQRW5Gci0yY3A3VzhsY1BnTWFXNWstbVEyRjE2WU1Na1pMaTNhQl9NN29lOW1wRWRnTXpDQkJEUTFWZkd6dnR3YzFfZFk1Q1l1SXVHMXg4NFhRN0h0NTVIaFlmcVg2T0p4Z1F4U2M5Y1JOeTdGbEgyZkp2MUNhdzZsOHRpcnYzUUVyRzJuZjFBVmFmUGJXX1BMUjVtd045NVc0cEdpcENIV3BmOHFQUVBsd0xMdC16SlVrR0J2RGU2SjFVX2JMVmE5a3hidV9jLWZMVHgteGFZY1l5U21fWWRZdWVpQk5nNXVQYkw3U1IwaGx3b2habE9XaS1iN1oweE5KRUp3a01rNTk?oc=5",
    "date": "2026-11-05T10:20:58Z",
    "lang": "fr",
-   "score": 21.25,
+   "score": 21.24,
    "tickers": [
     "AI.PA"
    ]
@@ -383,7 +394,7 @@
    "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOY3o3azl3NkVaM29VRXdpaGJKQjBCakRvTUlvMDhaLWRJdU1lSmU1VGFhVTRudGdMbTF6ZHZTVDZHY3l3alFRYjFIWmFKcmFjLXViUXFiREtzOWhnUkVwYkRrbFNzelVWOGxPejEtZkxOYUpmRTRIYXpOMUsySU5tSlJ0S3RYRlQ2c3B0LVB3ZEROQmlOSlpQaVNQSDZZOU0xSDFuX3QzUkEwaHM3?oc=5",
    "date": "2026-11-02T14:35:00Z",
    "lang": "fr",
-   "score": 21.01,
+   "score": 21.0,
    "tickers": [
     "AI.PA"
    ]
@@ -394,7 +405,7 @@
    "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOUFFsWThkb0lKZ2dBRmIzSWh1YzVpMjdiR0IyNC0xd0VnaVhmbC1XRzJPVHA0cy03dWxPdG1VWHN1TUY0QTRHeGpVRXVkaUhBN3VJWlZMaXl5S19BSEl1aks4ZU9SRDNUWDZYZ3ZlNW5RSTZEc3h2YWRBcERFaklsSzRwbDU2dDJBNG15a1RWTEdUS3ZzeHZRVFEtVkRzRFdaTnNIb0hmdVNwU1ozU2JvdjhlX2N2THRzZlo5ZTRPa1N2YldpMDA3cWJ2YzQyRWQ0NVE?oc=5",
    "date": "2026-11-03T05:25:46Z",
    "lang": "fr",
-   "score": 20.94,
+   "score": 20.93,
    "tickers": [
     "PAASI.PA"
    ]
@@ -405,7 +416,7 @@
    "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPbnRCanFaOUFSZkxlUV9FdG9HVF9say16b1hzbks3bENiZ1RvSVl0ZHA1S3BELVk0YTBVamw1RmRJUGRXeExtUkVzT3l2LU5XUmxPZE1qN29jOGhBQy1YbTBlU2Y3Y2h6cnJCM0FCd2JhTEtrWTM0XzI3WkJQMFliWXlKTFVZTlFzaHJKalloYTY1Slg3NS1ySlRfWEF2ZG1URzFWT25fNUJoZVQydlUwMHVXVVYwTTB4alF4Uw?oc=5",
    "date": "2026-11-04T19:58:49Z",
    "lang": "en",
-   "score": 20.35,
+   "score": 20.34,
    "tickers": [
     "ETH-EUR"
    ]
@@ -416,7 +427,7 @@
    "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPTkp4TG9xc1lQZlRVMEthSjJRa1pWRnN5dTN3MExMbEFMaUVwZWE1WS1QZHF3enprRkVUanZzaW1VakJrSUQxYTZSdGsyLW5XbDl6ODltcDJ6S2Zsa2k4dTFNNEc1OEZteHRGeXNzeUU5NlBWeVBkVFdYVHB1ZTR6QTRMSi1RQUVkMi1RMVRsN0o0cmQ2ekY3cnRUMnNpX2M3X3FkZ3pDdXA3Q3hzYXVWRHhZNEwwcUMyeVZtNFlpN0x3Ny1vMWVZ?oc=5",
    "date": "2026-10-30T11:35:16Z",
    "lang": "fr",
-   "score": 20.33,
+   "score": 20.32,
    "tickers": [
     "ETH-EUR"
    ]
@@ -427,18 +438,7 @@
    "url": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxOV1l3OXVoNXBvcjhrOWRPVkZEM09xbWdxVlFuZlNkeXV4X1M3YjMwQjNyZkpSUG1VUzh6Y1dRWEhHWDV1QlZ3VS1RWkhZaF84c3lVdEkyNzM1R3otSjJyN3VvRU5aZjdYVlBzQmlUcnYtcFhmRzRCMGNCdmhhS2FEZ1IxWGZ0LUhxU3dlUWFiRzBLXzQ2R3VmX1BEaVNSOVpwbEFXNGY2QUNtWW0zc0RyY21PelZKMm1lQ2stNzcydzZqWUdTOXQwRUZBUU9QY09YMTlTeGE5VUdETy1FMmc?oc=5",
    "date": "2026-11-04T06:10:08Z",
    "lang": "en",
-   "score": 19.49,
-   "tickers": [
-    "ETH-EUR"
-   ]
-  },
-  {
-   "title": "Ethereum : Le réseau Aztec corrige une faille critique et double la vitesse des transactions privées",
-   "source": "Cointribune",
-   "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNZ0V3VG91MkRtNEk5R0FvLS1wbkJlMnRROFhLT2tmRmRER3ludkNNQVdhT0FnQ1Bxd0dsOXcxLWtfMS1RZC0xd2hUU0VqcDBOdElrM29vMEJuaEpnTnZacmdRTUdWejVtb0R3WTlqdWJadG1aQkQzYUtPUk55Tkh1SDlZckoydUdpZjcyWmo0TmRVUXN2WWxCTmttZHJnNHJMUXNkY3JaNjFKYmZsbk1vUFlSTzNyRE9oQVpOOHhpNUROMTZ3RWc?oc=5",
-   "date": "2026-11-03T17:00:00Z",
-   "lang": "fr",
-   "score": 18.66,
+   "score": 19.48,
    "tickers": [
     "ETH-EUR"
    ]
@@ -449,7 +449,7 @@
    "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPbktzUGkwekhvTi1za2JHOTN0S2VQaTRvdWtPR0VjejlmUWg4OTJXVUJhWkV2UnJFbUxPZEdYWEtZMzhKUTlkY096ai0tQXl1WXA4LTlRZnpnQlYwcU5FdWt4X1d6TEVWYXE1MTR3bXFvaGdDSTljRUtpdElJMHYzNG9BMHZ5alFJVFoyQWgwcG9Sc0tp?oc=5",
    "date": "2026-10-30T11:52:42Z",
    "lang": "en",
-   "score": 18.34,
+   "score": 18.33,
    "tickers": [
     "AI.PA"
    ]
@@ -471,7 +471,7 @@
    "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPS3ZYYUlLY1pkMkN1R2F1MllNb1JNa0R4V3Ftdy1FdFF1cTkwaWs3VjNrdlVHcDFzZ0xZM21mMHZ6LTF6R1drU0lyREJkZFFSRVF4U3NYbmxfRzZKQngxby1ZZmRmcERpS3ZHamsxLU55MnRDdVlKUTJRYmlLWXl4eG5JRkgwWTRsdTVjWEdhaXVzeUZyaTdzLVhxWEp0WnZlRnF4dWJRV0JrX2tHQkZNVQ?oc=5",
    "date": "2026-10-29T20:42:48Z",
    "lang": "en",
-   "score": 17.4,
+   "score": 17.39,
    "tickers": [
     "AI.PA"
    ]
@@ -482,20 +482,9 @@
    "url": "https://news.google.com/rss/articles/CBMi8gFBVV95cUxOdXhVNEFmM2FLbG01YTdBU0IxanJyUVQ4czdQbVZxeWkxUldXaDJVa0REQUhBZW5aekN6M1lOMUZORUJrOEpiMkQyTlJpeTJ3bEgxcjVZc3EwQW43cFlfUjgzYlZIUTMtY2p0dHk4cnFTSXhXZkZUclNZY2xwNVNaQ2FOWEJSSkMzTUZkdG1jdVdaN0FCODVZczRpdlpjQ0lfX3o1NnZXdktMX01lMDVYUFhRME9SdEk4T0l3dkpQM0NaR1psZFY5bHhYYzRRMUktU1E0SlpNY2ZqSlFhd1p1ZTljRTQxOXpQa0JFTnd4TnFUUQ?oc=5",
    "date": "2026-10-29T15:27:35Z",
    "lang": "fr",
-   "score": 17.07,
+   "score": 17.06,
    "tickers": [
     "PAASI.PA"
-   ]
-  },
-  {
-   "title": "Rice Market Outlook: Weather Risks vs. Comfortable Global Stocks — CMB News",
-   "source": "CMB News",
-   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxNSWxvNnRrTU9VeDN6dUM0NFA3Z1pSLUxBR2pTVS1xU0ZSb05QX2QtVFdEempNWmpEdFRtVU5oYW1waTM1Z3hucmNOYnVCOV93VkZwNzEyZ1VlWkFkS19Pc2M3a0U3LUFWbHN5VW43dXkwWnN4SmxyRXdJTVRZbXdiR0txc2hMTmlCQ2JXLXp2OHU3OU42dlR4SVV6NTVJQQ?oc=5",
-   "date": "2026-11-05T06:32:01Z",
-   "lang": "en",
-   "score": 17.01,
-   "tickers": [
-    "DCAM.PA"
    ]
   },
   {
@@ -510,12 +499,23 @@
    ]
   },
   {
+   "title": "Rice Market Outlook: Weather Risks vs. Comfortable Global Stocks — CMB News",
+   "source": "CMB News",
+   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxNSWxvNnRrTU9VeDN6dUM0NFA3Z1pSLUxBR2pTVS1xU0ZSb05QX2QtVFdEempNWmpEdFRtVU5oYW1waTM1Z3hucmNOYnVCOV93VkZwNzEyZ1VlWkFkS19Pc2M3a0U3LUFWbHN5VW43dXkwWnN4SmxyRXdJTVRZbXdiR0txc2hMTmlCQ2JXLXp2OHU3OU42dlR4SVV6NTVJQQ?oc=5",
+   "date": "2026-11-05T06:32:01Z",
+   "lang": "en",
+   "score": 17.0,
+   "tickers": [
+    "DCAM.PA"
+   ]
+  },
+  {
    "title": "Global stocks rally after U.S. midterms as investors reassess energy and AI risks",
    "source": "Oil & Gas 360",
    "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNMnJPcE4wLWhoTF8tQmFvNXNGMm0zaUlqYktrbkw1bUtxTXRYZklUaEJ6b0JMakh2blNneDBMY0YzWFFwbEVLMXIwbFdVMk9PcC02QW5Jd1RURWVuZGlRRjYwcjd0cDFhWE9PQnV6TEpmMi1tZEJZcGNGaTR4UWR2TFdmZFhKVDZ6MmVDVUw3SGR6WkQxQ09VdUthQ2NSUUNFanJ0dFNyM1A3MEFVNVMw?oc=5",
    "date": "2026-11-04T19:40:43Z",
    "lang": "en",
-   "score": 16.33,
+   "score": 16.32,
    "tickers": [
     "DCAM.PA"
    ]
