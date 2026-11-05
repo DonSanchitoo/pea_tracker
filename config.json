@@ -12,10 +12,12 @@
       "cash_reserve": {
         "amount": 37.08,
         "date": "2026-11-05",
-        "note": "Liquidités non investies du PEA relevées dans Trade Republic",
-        "include_dividends": true,
-        "include_sales": true
-      }
+        "note": "Total relevé : liquidités non investies du PEA (TR) et argent mis de côté",
+        "include_dividends": false,
+        "include_sales": true,
+        "adjustments": []
+      },
+      "dividends_reinvested": true
     },
     "CRYPTO": {
       "label": "Wallet Crypto",

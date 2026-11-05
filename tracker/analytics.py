@@ -153,6 +153,12 @@ class Panel:
         self.f_out = daily(lg["type"].isin(["SELL", "TRANSFER_OUT"]))
         self.d_div = daily(lg["type"] == "DIVIDEND") - daily(lg["type"] == "FEE")
         self.value = self.tl["qty"] * self.close[self.tickers]
+        # part des achats payée par des dividendes réinvestis (pas de l'argent versé)
+        from .ledger import dividend_reinvestment
+        self.reinv_row, self.div_pending = dividend_reinvestment(self.cfg, lg, self.trading_days)
+        rv = lg.assign(reinv=self.reinv_row)
+        rv = rv[rv["reinv"] > 0].pivot_table(index="date", columns="ticker", values="reinv", aggfunc="sum") if (rv["reinv"] > 0).any() else pd.DataFrame()
+        self.reinv = rv.reindex(self.cal).fillna(0.0).reindex(columns=self.tickers, fill_value=0.0)
 
     def scope_tickers(self, scope):
         if scope == "TOTAL":
@@ -168,6 +174,7 @@ class Panel:
             V = self.value[tk].sum(axis=1)
             F = (self.f_in[tk] - self.f_out[tk]).sum(axis=1)
             D = self.d_div[tk].sum(axis=1)
+            R = self.reinv[tk].sum(axis=1)  # dividendes réinvestis : flux interne, pas de l'argent versé
             Vp = V.shift(1).fillna(0.0)
             den = Vp + F
             num = V + D - Vp - F
@@ -178,9 +185,10 @@ class Panel:
             cost = self.tl["cost"][tk].sum(axis=1)
             self.s[sc] = dict(
                 V=V, F=F, D=D, r=r, I=idx, start=start,
-                invested=F.cumsum(), div=D.cumsum(), cost=cost,
+                invested=(F - R).cumsum(), F_ext=F - R, reinv=R.cumsum(), pending=D.cumsum() - R.cumsum(),
+                div=D.cumsum(), cost=cost,
                 realized=self.tl["realized"][tk].sum(axis=1),
-                cash_in=self.f_in[tk].sum(axis=1).cumsum(),
+                cash_in=(self.f_in[tk].sum(axis=1) - R).cumsum(),
                 pnl=V - F.cumsum() + D.cumsum(),
                 unreal=V - cost,
             )
@@ -312,7 +320,7 @@ def monthly_returns(panel, scope):
         end = min(m.end_time.normalize(), panel.today)
         i, p = _asof(I, end), _asof(P, end)
         out.append(dict(month=str(m), ret=i / prev_i - 1, pnl=p - prev_p,
-                        flows=float(s["F"][(s["F"].index.to_period("M") == m)].sum())))
+                        flows=float(s["F_ext"][(s["F_ext"].index.to_period("M") == m)].sum())))
         prev_i, prev_p = i, p
     return out
 
@@ -332,7 +340,8 @@ def xirr_scope(panel, scope):
 
 def ghosts(panel, scope, rf):
     s = panel.s[scope]
-    F, V, Dc = s["F"], s["V"], s["div"]
+    # argent réellement versé, et patrimoine = titres + dividendes pas encore réinvestis
+    F, V, Dc = s["F_ext"], s["V"], s["pending"]
     out = dict(dates=[d.strftime("%Y-%m-%d") for d in panel.cal], wealth=[round(float(v), 2) for v in (V + Dc)])
     bt = panel.bench_ticker
     if bt in panel.close:
@@ -624,7 +633,8 @@ def sim_defaults(panel, pos):
 def cash_reserve(panel, pos):
     """Réserve de liquidité du PEA : point de départ relevé dans TR, puis
     + reliquat de chaque exécution de plan (montant du plan - montant investi, parts entières)
-    + dividendes et ventes du PEA (crédités en liquidités chez TR)
+    + ventes du PEA (+ dividendes seulement si include_dividends : chez TR ils sont réinvestis au plan suivant)
+    + / - ajouts et retraits manuels (argent mis de côté ailleurs...)
     - achats payés avec la réserve (colonne funding = reserve)."""
     from .ledger import plan_executions
     cfg, today = panel.cfg, panel.today
@@ -645,13 +655,13 @@ def cash_reserve(panel, pos):
                        & ((pea["date"] - ex).abs() <= pd.Timedelta(days=2))]
             if rows.empty:
                 continue  # plan pas encore enregistré, ou échoué (aucun argent ne bouge)
-            left = float(pl["amount"]) - float(rows["amount"].sum())
+            left = float(pl["amount"]) + float(panel.reinv_row.loc[rows.index].sum()) - float(rows["amount"].sum())
             if left > 0.005:
                 n = float(rows["quantity"].sum())
                 moves.append(dict(date=ex.strftime("%Y-%m-%d"), kind="plan", amount=left,
                                   label=f"Reliquat du plan {name(t)} ({pl['amount']:g} € → {n:g} part{'s' if n > 1 else ''} pour {rows['amount'].sum():.2f} €)"))
     for r in pea.itertuples(index=False):
-        if r.type == "DIVIDEND" and cr.get("include_dividends", True):
+        if r.type == "DIVIDEND" and cr.get("include_dividends", False):
             moves.append(dict(date=r.date.strftime("%Y-%m-%d"), kind="dividende", amount=float(r.amount), label=f"Dividende {name(r.ticker)}"))
         elif r.type == "SELL" and cr.get("include_sales", True):
             moves.append(dict(date=r.date.strftime("%Y-%m-%d"), kind="vente", amount=float(r.amount), label=f"Vente {name(r.ticker)}"))
@@ -660,6 +670,13 @@ def cash_reserve(panel, pos):
         elif r.type == "BUY" and r.funding == "reserve":
             moves.append(dict(date=r.date.strftime("%Y-%m-%d"), kind="achat", amount=-float(r.amount),
                               label=f"Achat {name(r.ticker)} payé avec la réserve ({r.quantity:g} part{'s' if r.quantity > 1 else ''})"))
+    for adj in cr.get("adjustments", []):
+        d = pd.Timestamp(adj["date"])
+        if d < start or d > today or not adj.get("amount"):
+            continue
+        amt = float(adj["amount"])
+        moves.append(dict(date=d.strftime("%Y-%m-%d"), kind="manuel", amount=amt,
+                          label=(adj.get("note") or ("Ajout manuel" if amt > 0 else "Retrait manuel"))))
     moves.sort(key=lambda m: m["date"])
     bal, hist = float(cr["amount"]), [dict(date=start.strftime("%Y-%m-%d"), balance=float(cr["amount"]))]
     for m in moves:

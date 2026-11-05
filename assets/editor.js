@@ -400,6 +400,63 @@
     if (await commit(changes, `Dashboard : versement ponctuel de ${tot.toFixed(2)} € le ${dShort(date)}`)) render();
   }
 
+  // ---- Réserve de liquidité
+  function renderReserve() {
+    const cr = S.files.config.json.accounts.PEA.cash_reserve || { amount: 0, date: today(), adjustments: [] };
+    const adj = (cr.adjustments || []).map((a, i) => [a, i]).sort((x, y) => (x[0].date < y[0].date ? 1 : -1));
+    const R = D.reserve;
+    return `${connectBanner()}<div class="grid">
+      <div class="panel c4"><div class="panel-h"><h2>Solde de la réserve</h2><span class="sub">au dernier calcul</span></div><div class="panel-b">
+        <div style="font-size:28px;font-weight:650">${R ? eur(R.balance) : '–'}</div>
+        <div class="note">Départ ${eur(cr.amount)} le ${dShort(cr.date)}, puis reliquats des plans${cr.include_sales !== false ? ', ventes du PEA' : ''}${cr.include_dividends ? ', dividendes' : ''}, ajouts et retraits manuels, moins les achats payés avec la réserve.</div>
+        <div class="actions"><a class="btn sm" href="#donnees/versement">Investir la réserve</a></div></div></div>
+      <div class="panel c8"><div class="panel-h"><h2>Ajouter ou retirer de l'argent</h2><span class="sub">ex. argent mis de côté sur un autre compte</span></div><div class="panel-b">
+        <form id="f-adj" class="form">
+          ${field('Mouvement', sel('sens', [['+', 'Ajouter à la réserve'], ['-', 'Retirer de la réserve']], '+'))}
+          ${field('Montant (€)', '<input type="number" step="0.01" min="0" name="amount">')}
+          ${field('Date', `<input type="date" name="date" value="${today()}">`)}
+          ${field('Note', '<input name="note" placeholder="ex. Livret A, prime, retrait perso">')}
+        </form><div class="actions"><button class="btn primary" data-act="save-adj">Enregistrer</button></div></div></div>
+      </div>
+      <div class="panel"><div class="panel-h"><h2>Ajouts et retraits manuels</h2><span class="sub">config.json</span></div><div class="panel-b flush tbl-wrap">
+        <table class="t"><thead><tr><th>Date</th><th>Note</th><th class="n">Montant</th><th>Pris en compte</th><th></th></tr></thead><tbody>
+        ${adj.map(([a, i]) => `<tr><td>${dShort(a.date)}</td><td>${esc(a.note || '')}</td><td class="n"><span class="${a.amount >= 0 ? 'up' : 'down'}">${a.amount >= 0 ? '+' : '−'}${eur(Math.abs(a.amount))}</span></td>
+          <td>${a.date >= cr.date ? '<span class="pill on">oui</span>' : '<span class="pill off">inclus dans le recalage</span>'}</td>
+          <td><button class="btn sm danger" data-act="del-adj" data-i="${i}">Supprimer</button></td></tr>`).join('') || '<tr><td colspan="5" style="color:var(--muted)">Aucun pour l\'instant.</td></tr>'}
+        </tbody></table></div></div>
+      <div class="panel"><div class="panel-h"><h2>Recaler la réserve</h2><span class="sub">remplace le total à une date (les ajouts antérieurs y sont inclus)</span></div><div class="panel-b">
+        <form id="f-res" class="form">
+          ${field('Total de ta réserve à cette date (€)', `<input type="number" step="0.01" min="0" name="amount" value="${R ? (Math.round(R.balance * 100) / 100).toFixed(2) : cr.amount}">`, 'liquidités PEA affichées dans TR + argent mis de côté ailleurs')}
+          ${field('Date', `<input type="date" name="date" value="${today()}">`)}
+          <div class="field"><label>Ajouter automatiquement</label>
+            <label class="check-row"><input type="checkbox" name="sales" ${cr.include_sales !== false ? 'checked' : ''}> Ventes du PEA</label>
+            <label class="check-row"><input type="checkbox" name="divs" ${cr.include_dividends ? 'checked' : ''}> Dividendes (non : TR les réinvestit au plan suivant)</label></div>
+        </form><div class="actions"><button class="btn primary" data-act="save-res">Recaler</button></div></div></div>`;
+  }
+  async function saveAdj() {
+    const f = $('#f-adj');
+    const amt = numIn(f.amount.value);
+    if (!(amt > 0)) { msg('err', 'Indique un montant.'); return; }
+    const cfg = JSON.parse(JSON.stringify(S.files.config.json));
+    const cr = cfg.accounts.PEA.cash_reserve;
+    cr.adjustments = cr.adjustments || [];
+    const signed = Math.round((f.sens.value === '-' ? -amt : amt) * 100) / 100;
+    cr.adjustments.push({ date: f.date.value || today(), amount: signed, note: clean(f.note.value) || (signed > 0 ? 'Ajout manuel' : 'Retrait manuel') });
+    if (await commit([{ key: 'config', path: 'config.json', text: JSON.stringify(cfg, null, 2) + '\n' }], `Dashboard : réserve ${signed > 0 ? '+' : ''}${signed.toFixed(2)} € (${clean(f.note.value) || 'manuel'})`)) render();
+  }
+  async function saveRes() {
+    const f = $('#f-res');
+    const amt = numIn(f.amount.value);
+    if (amt == null || amt < 0) { msg('err', 'Indique le total de la réserve.'); return; }
+    const cfg = JSON.parse(JSON.stringify(S.files.config.json));
+    const cr = cfg.accounts.PEA.cash_reserve;
+    const date = f.date.value || today();
+    cr.amount = Math.round(amt * 100) / 100; cr.date = date;
+    cr.include_sales = f.sales.checked; cr.include_dividends = f.divs.checked;
+    cr.adjustments = (cr.adjustments || []).filter((a) => a.date > date);
+    if (await commit([{ key: 'config', path: 'config.json', text: JSON.stringify(cfg, null, 2) + '\n' }], `Dashboard : réserve recalée à ${cr.amount.toFixed(2)} € le ${dShort(date)}`)) render();
+  }
+
   // ---- Plans
   const freqOf = (p) => ((p.days || []).length > 1 ? 'twice' : String(p.every || 1));
   const freqText = (p) => { const f = freqOf(p); const d = (p.days || [p.day || 16]).join(' et '); return (FREQS.find((x) => x[0] === f) || [0, ''])[1] + ` (le ${d})`; };
@@ -530,12 +587,6 @@
       <div class="panel-b flush tbl-wrap"><table class="t" id="t-params"><thead><tr><th>Paramètre</th><th class="n">Valeur live</th><th>Mode</th><th class="n">Valeur manuelle / de secours</th><th class="n">Utilisée</th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="grid">
       <div class="panel c6"><div class="panel-h"><h2>Staking</h2><span class="sub">taux net versé par TR</span></div><div class="panel-b flush"><table class="t" id="t-stak"><thead><tr><th>Crypto</th><th class="n">Taux annuel</th><th>Depuis</th></tr></thead><tbody>${stak}</tbody></table></div></div>
-      <div class="panel c12"><div class="panel-h"><h2>Réserve de liquidité PEA</h2><span class="sub">recale-la sur les liquidités affichées dans TR quand tu veux</span></div><div class="panel-b"><form id="f-res" class="form">
-        ${field('Montant relevé dans TR (€)', `<input type="number" step="0.01" min="0" name="amount" value="${(c.accounts.PEA.cash_reserve || {}).amount ?? ''}">`, D.reserve ? `solde calculé aujourd'hui : ${eur(D.reserve.balance)}` : '')}
-        ${field('Date du relevé', `<input type="date" name="date" value="${esc((c.accounts.PEA.cash_reserve || {}).date || today())}">`, 'les mouvements après cette date s\'ajoutent')}
-        <div class="field"><label>Compter aussi</label><label class="check-row"><input type="checkbox" name="divs" ${(c.accounts.PEA.cash_reserve || {}).include_dividends !== false ? 'checked' : ''}> Dividendes du PEA</label>
-          <label class="check-row"><input type="checkbox" name="sales" ${(c.accounts.PEA.cash_reserve || {}).include_sales !== false ? 'checked' : ''}> Ventes du PEA</label></div>
-      </form></div></div>
       <div class="panel c6"><div class="panel-h"><h2>Alertes et référence</h2></div><div class="panel-b"><form id="f-misc" class="form">
         ${field('Indice de référence (ticker)', `<input name="bench_t" value="${esc(c.benchmark.ticker)}">`)}
         ${field('Nom de l\'indice', `<input name="bench_l" value="${esc(c.benchmark.label)}">`)}
@@ -561,12 +612,6 @@
       const a = cfg.assets[tr.dataset.t]; const r = numIn($('[data-f=rate]', tr).value); const since = $('[data-f=since]', tr).value;
       if (r) a.staking = { rate: Math.round(r * 1000) / 100000, since: since || today() }; else delete a.staking;
     });
-    const fr = $('#f-res');
-    if (fr && numIn(fr.amount.value) != null) {
-      cfg.accounts.PEA.cash_reserve = Object.assign({}, cfg.accounts.PEA.cash_reserve || {}, {
-        amount: Math.round(numIn(fr.amount.value) * 100) / 100, date: fr.date.value || today(),
-        include_dividends: fr.divs.checked, include_sales: fr.sales.checked });
-    }
     const f = $('#f-misc');
     cfg.benchmark = { ticker: f.bench_t.value.trim() || cfg.benchmark.ticker, label: f.bench_l.value.trim() || cfg.benchmark.label };
     cfg.alerts = { drawdown_pct: numIn(f.dd.value) ?? -10, plan_residual_pct: numIn(f.resid.value) ?? 10, max_line_weight_pct: numIn(f.wmax.value) ?? 90 };
@@ -644,8 +689,9 @@
   }
 
   // ------------------------------------------------------------ rendu & événements
-  const TABS = { ops: renderOps, versement: renderVersement, plans: renderPlans, lignes: renderLignes, params: renderParams, releve: renderReleve, connexion: renderConnexion };
+  const TABS = { ops: renderOps, versement: renderVersement, reserve: renderReserve, plans: renderPlans, lignes: renderLignes, params: renderParams, releve: renderReleve, connexion: renderConnexion };
   async function render() {
+    if (APP.state.sub && TABS[APP.state.sub]) { S.tab = APP.state.sub; APP.state.sub = null; S.edit = null; S.open = false; }
     $$('#ed-tabs button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.t === S.tab)));
     const body = $('#ed-body');
     if (S.tab !== 'connexion' && !S.files) {
@@ -745,6 +791,16 @@
       case 'save-ligne': saveLigne(); break;
       case 'save-params': saveParams(); break;
       case 'save-releve': saveReleve(); break;
+      case 'save-adj': saveAdj(); break;
+      case 'save-res': saveRes(); break;
+      case 'del-adj': {
+        const cfg = JSON.parse(JSON.stringify(files.config.json));
+        const a = cfg.accounts.PEA.cash_reserve.adjustments[i];
+        if (!confirm(`Supprimer ${a.amount > 0 ? "l'ajout" : 'le retrait'} de ${Math.abs(a.amount).toFixed(2)} € du ${dShort(a.date)} ?`)) return;
+        cfg.accounts.PEA.cash_reserve.adjustments.splice(i, 1);
+        await commit([{ key: 'config', path: 'config.json', text: JSON.stringify(cfg, null, 2) + '\n' }], `Dashboard : suppression d'un mouvement manuel de réserve`);
+        render(); break;
+      }
       case 'save-tok': {
         const v = $('#f-tok').tok.value.trim();
         if (!v) return;

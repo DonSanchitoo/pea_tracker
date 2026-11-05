@@ -153,7 +153,7 @@
       ${nextPlan ? `<div class="side-card"><div class="lbl">Prochaine exécution</div>
         <div class="row"><span class="big">${dLong(nextPlan.date)}</span><span class="lbl">J−${Math.max(0, Math.round(spanDays(D.meta.today, nextPlan.date)))}</span></div>
         <div class="lbl" style="margin-top:2px">${eur(nextPlan.amount, 0)} · ${esc(nextPlan.detail)}</div></div>` : ''}
-      ${D.reserve ? `<a class="side-card" href="#overview" style="text-decoration:none;display:block"><div class="lbl">Réserve de liquidité PEA</div>
+      ${D.reserve ? `<a class="side-card" href="#donnees/reserve" style="text-decoration:none;display:block"><div class="lbl">Réserve de liquidité PEA</div>
         <div class="row"><span class="big">${eur(D.reserve.balance)}</span><span class="lbl">≈ +${eur(D.reserve.monthly_estimate, 0)}/mois</span></div></a>` : ''}
       <div class="side-card"><div class="lbl">Échéance fiscale PEA</div>
         <div class="row"><span class="big">${dShort(f.maturity)}</span><span class="lbl">${nf(0).format(f.days_left)} j</span></div>
@@ -229,7 +229,8 @@
       <table class="t compact" style="margin-top:6px"><thead><tr><th>Derniers mouvements</th><th class="n">Montant</th></tr></thead><tbody>
       ${R.moves.slice(0, 4).map((m) => `<tr><td style="white-space:normal">${dShort(m.date)} · ${esc(m.label)}</td><td class="n">${dEur(m.amount)}</td></tr>`).join('') ||
         `<tr><td colspan="2" style="white-space:normal;color:var(--muted)">Départ : ${eur(R.start_amount)} relevés dans TR le ${dShort(R.start_date)}. Les reliquats des prochains plans s'ajouteront ici.</td></tr>`}</tbody></table>
-      <div class="note">Pour investir la réserve : « Mes données › Versement ponctuel », case « payé avec la réserve ». Montant à recaler sur TR dans « Paramètres ».</div>`;
+      <div class="actions" style="margin-top:8px"><a class="btn sm" href="#donnees/reserve">+ Ajouter / − retirer</a><a class="btn sm" href="#donnees/versement">Investir la réserve</a></div>
+      <div class="note">Reliquats des plans et ventes du PEA s'ajoutent seuls ; les dividendes non (TR les réinvestit au plan suivant).</div>`;
   }
 
   function allocBlock(pos, tot) {
@@ -918,6 +919,8 @@
   const RENDER = { overview: renderOverview, performance: renderPerformance, risque: renderRisk, positions: renderPositions, allocation: renderAllocation, crypto: renderCrypto, projection: renderProjection, transactions: renderTransactions, news: renderNews,
     donnees: () => { if (window.PEA_EDITOR) window.PEA_EDITOR.render(); else $('#ed-body').innerHTML = '<div class="empty"><span class="spin"></span> Chargement…</div>'; } };
   function show(view) {
+    const parts = String(view || '').split('/');
+    view = parts[0]; state.sub = parts[1] || null;
     if (!VIEWS.includes(view)) view = 'overview';
     state.view = view;
     $$('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-' + view));

@@ -172,6 +172,39 @@ def _after_close(now):
     return now.hour * 60 + now.minute >= 17 * 60 + 45
 
 
+# ---------------------------------------------------------------- dividendes réinvestis
+
+def _pea_plan_dates(cfg, first, last, trading_days):
+    tick = {p["ticker"] for p in cfg["plans"] if cfg["assets"].get(p["ticker"], {}).get("account") == "PEA"}
+    dates = set()
+    for p in cfg["plans"]:
+        if p["ticker"] in tick:
+            st = max(pd.Timestamp(p["start"]) if p.get("start") else first, first)
+            dates |= set(plan_executions(dict(p, active=True, end=None), st, last, trading_days))
+    return tick, dates
+
+
+def dividend_reinvestment(cfg, ledger, trading_days):
+    """Chez TR, les dividendes du PEA sont réinvestis au lancement suivant des plans d'épargne.
+    Retourne (part de chaque achat de plan financée par des dividendes [Series alignée sur le registre],
+    dividendes encaissés pas encore réinvestis)."""
+    out = pd.Series(0.0, index=ledger.index)
+    if ledger.empty or not cfg["accounts"].get("PEA", {}).get("dividends_reinvested", True):
+        return out, 0.0
+    tick, dates = _pea_plan_dates(cfg, ledger["date"].min(), ledger["date"].max(), trading_days)
+    pool = 0.0
+    for d, grp in ledger.groupby("date", sort=True):
+        buys = grp[(grp["type"] == "BUY") & grp["ticker"].isin(tick) & (grp["funding"] != "reserve") & (grp["quantity"] > 0)]
+        if pool > 0.004 and len(buys) and any(abs((d - e).days) <= 2 for e in dates):
+            tot = float(buys["amount"].sum())
+            used = min(pool, tot)
+            for i, r in buys.iterrows():
+                out[i] = used * float(r["amount"]) / tot
+            pool -= used
+        pool += float(grp[(grp["type"] == "DIVIDEND") & (grp["account"] == "PEA")]["amount"].sum())
+    return out, round(pool, 2)
+
+
 # ---------------------------------------------------------------- plans auto
 
 def auto_record_plans(cfg, ledger, ohlc_by_ticker, trading_days, now):
@@ -183,6 +216,7 @@ def auto_record_plans(cfg, ledger, ohlc_by_ticker, trading_days, now):
     """
     today = pd.Timestamp(now.date())
     added = []
+    pea_tick = {p["ticker"] for p in cfg["plans"] if cfg["assets"].get(p["ticker"], {}).get("account") == "PEA"}
     for plan in cfg["plans"]:
         t, amount = plan["ticker"], float(plan["amount"])
         if t not in cfg["assets"]:
@@ -199,10 +233,18 @@ def auto_record_plans(cfg, ledger, ohlc_by_ticker, trading_days, now):
             px = ohlc_by_ticker.get(t)
             if px is None or ex not in px.index:
                 continue
-            qty, amt, est = _fill(acc, amount, px.loc[ex])
+            budget, div_part = amount, 0.0
+            if acc == "PEA":
+                # dividendes encaissés depuis le dernier lancement : ajoutés au budget, au prorata des plans du jour
+                _, pool = dividend_reinvestment(cfg, ledger[ledger["date"] < ex], trading_days)
+                same_day = [p for p in cfg["plans"] if p["ticker"] in pea_tick and ex in plan_executions(p, ex, ex, trading_days)]
+                tot = sum(float(p["amount"]) for p in same_day) or amount
+                div_part = round(pool * amount / tot, 2)
+                budget = amount + div_part
+            qty, amt, est = _fill(acc, budget, px.loc[ex])
             if qty <= 0:
                 continue
-            note = (f"Plan d'épargne (estimé : {qty:g} parts à ~{est:.4f} €) : remplace par le montant TR" if acc == "PEA"
+            note = (f"Plan d'épargne{f' + {div_part:.2f} € de dividendes réinvestis' if div_part else ''} (estimé : {qty:g} parts à ~{est:.4f} €) : remplace par le montant TR" if acc == "PEA"
                     else f"Plan d'épargne (quantité estimée au cours moyen ~{est:.2f} €)")
             added.append(dict(date=ex.strftime("%Y-%m-%d"), account=acc, type="BUY", ticker=t,
                               quantity=qty, amount=amt, taxes=0, source="AUTO", note=note))
