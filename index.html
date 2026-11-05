@@ -181,30 +181,30 @@
 
       <!-- ============================ ALLOCATION -->
       <section class="view" id="view-allocation">
-        <div class="view-head"><div><h1>Allocation</h1><p>Où est ton argent, en direct et par transparence des ETF.</p></div></div>
+        <div class="view-head"><div><h1>Allocation</h1><p>Où est ton argent, par transparence des ETF. Recalculé chaque jour avec la valeur de chaque ligne : si une ligne monte, son poids monte partout. Le sélecteur « Périmètre » change tous les graphiques.</p></div></div>
         <div class="grid">
           <div class="panel c6">
-            <div class="panel-h"><h2>Par ligne <a class="help" href="aide.html#allocation">?</a></h2><span class="sub">consolidé</span></div>
+            <div class="panel-h"><h2>Par ligne <a class="help" href="aide.html#allocation">?</a></h2><span class="sub al-scope"></span></div>
             <div class="panel-b" id="al-lines"></div>
           </div>
           <div class="panel c6">
-            <div class="panel-h"><h2>Par classe d'actif</h2></div>
+            <div class="panel-h"><h2>Par classe d'actif</h2><span class="sub al-scope"></span></div>
             <div class="panel-b" id="al-class"></div>
           </div>
           <div class="panel c8">
-            <div class="panel-h"><h2>Carte de l'exposition géographique du PEA <a class="help" href="aide.html#geographie">?</a></h2><span class="sub">par transparence des ETF</span></div>
+            <div class="panel-h"><h2>Carte de l'exposition géographique <a class="help" href="aide.html#geographie">?</a></h2><span class="sub al-scope"></span></div>
             <div class="panel-b"><div class="chart h380" id="al-map"></div><div class="note" id="al-map-note"></div></div>
           </div>
           <div class="panel c4">
-            <div class="panel-h"><h2>Par zone</h2><span class="sub">consolidé</span></div>
+            <div class="panel-h"><h2>Par zone</h2><span class="sub al-scope"></span></div>
             <div class="panel-b" id="al-zones"></div>
           </div>
           <div class="panel c6">
-            <div class="panel-h"><h2>Secteurs couverts par le PEA <a class="help" href="aide.html#secteurs">?</a></h2><span class="sub">par transparence des ETF</span></div>
+            <div class="panel-h"><h2>Secteurs couverts <a class="help" href="aide.html#secteurs">?</a></h2><span class="sub al-scope"></span></div>
             <div class="panel-b" id="al-sectors"></div>
           </div>
           <div class="panel c6">
-            <div class="panel-h"><h2>Pays du PEA</h2><span class="sub">top 12</span></div>
+            <div class="panel-h"><h2>Pays (top 12)</h2><span class="sub al-scope"></span></div>
             <div class="panel-b" id="al-countries"></div>
           </div>
           <div class="panel c6">
@@ -236,41 +236,38 @@
 
       <!-- ============================ PROJECTION & FISCALITÉ -->
       <section class="view" id="view-projection">
-        <div class="view-head"><div><h1>Projection &amp; fiscalité</h1><p>Le simulateur part de ton portefeuille réel, ligne par ligne. Modifie n'importe quelle hypothèse : tout se recalcule instantanément.</p></div>
+        <div class="view-head"><div><h1>Projection de ton PEA</h1><p>Combien vaudra ton PEA si tu continues ? Bouge les curseurs : tout se recalcule.</p></div>
           <button class="btn" id="sim-reset">Revenir à mon portefeuille</button></div>
+        <div class="panel"><div class="panel-b" id="sim-hero"></div></div>
+        <div class="grid">
+          <div class="panel c4">
+            <div class="panel-h"><h2>Tes hypothèses <a class="help" href="aide.html#projection">?</a></h2></div>
+            <div class="panel-b" id="sim-sliders"></div>
+          </div>
+          <div class="panel c8">
+            <div class="panel-h"><h2>Évolution probable</h2>
+              <div class="seg" id="sim-unit"><button data-u="nom" aria-pressed="true">Euros courants</button><button data-u="real" aria-pressed="false">Euros d'aujourd'hui</button></div></div>
+            <div class="panel-b"><div class="legend" id="pj-legend"></div><div class="chart h380" id="pj-chart"></div><div class="note" id="sim-status"></div></div>
+          </div>
+        </div>
+        <details class="panel adv" id="sim-adv">
+          <summary>Réglages avancés : ligne par ligne, prix des parts, impôts, inflation, crypto</summary>
+          <div class="panel-b" id="sim-form"></div>
+          <div class="panel-b flush tbl-wrap" id="sim-lines"></div>
+          <div class="panel-b flush tbl-wrap" id="sim-breakdown"></div>
+        </details>
         <div class="grid">
           <div class="panel c4">
             <div class="panel-h"><h2>Compteur fiscal PEA <a class="help" href="aide.html#fiscalite">?</a></h2></div>
             <div class="panel-b" id="fx-counter"></div>
           </div>
-          <div class="panel c8">
-            <div class="panel-h"><h2>Si tu retirais aujourd'hui vs après 5 ans <a class="help" href="aide.html#fiscalite">?</a></h2></div>
-            <div class="panel-b flush tbl-wrap" id="fx-tax"></div>
+          <div class="panel c5">
+            <div class="panel-h"><h2>Retirer maintenant ou attendre 2030 ? <a class="help" href="aide.html#fiscalite">?</a></h2></div>
+            <div class="panel-b" id="fx-tax"></div>
           </div>
-          <div class="panel c12">
-            <div class="panel-h"><h2>Hypothèses de simulation <a class="help" href="aide.html#projection">?</a></h2><span class="sub" id="sim-sub"></span></div>
-            <div class="panel-b" id="sim-form"></div>
-            <div class="panel-b flush tbl-wrap" id="sim-lines"></div>
-          </div>
-          <div class="panel c8">
-            <div class="panel-h"><h2>Trajectoire simulée</h2><span class="sub" id="sim-chart-sub"></span></div>
-            <div class="panel-b"><div class="legend" id="pj-legend"></div><div class="chart h380" id="pj-chart"></div></div>
-          </div>
-          <div class="panel c4">
-            <div class="panel-h"><h2>À l'horizon</h2><span class="sub" id="sim-h-sub"></span></div>
-            <div class="panel-b flush kpi-grid" id="sim-kpis"></div>
-          </div>
-          <div class="panel c8">
-            <div class="panel-h"><h2>Étapes clés</h2><span class="sub">valeur nette = après impôts sur les gains</span></div>
-            <div class="panel-b flush tbl-wrap" id="pj-table"></div>
-          </div>
-          <div class="panel c4">
+          <div class="panel c3">
             <div class="panel-h"><h2>Dividendes <a class="help" href="aide.html#dividendes">?</a></h2></div>
             <div class="panel-b flush" id="fx-divs"></div>
-          </div>
-          <div class="panel c12">
-            <div class="panel-h"><h2>Répartition à l'horizon</h2></div>
-            <div class="panel-b flush tbl-wrap" id="sim-breakdown"></div>
           </div>
         </div>
       </section>

@@ -370,3 +370,31 @@ td input.in, td select.in { padding: 4px 6px; min-width: 70px; }
 .alloc-row { display: grid; grid-template-columns: minmax(0, 1fr) 140px 36px; gap: 8px; align-items: end; margin-bottom: 8px; }
 .field input[type="checkbox"], .check-row input[type="checkbox"], td input[type="checkbox"] { width: auto; min-width: 0; padding: 0; margin: 0; flex: none; }
 .check-row { justify-content: flex-start; }
+
+/* ---------------------------------------------------------------- projection simplifiée */
+.hsent { font-size: 15px; line-height: 1.5; max-width: 980px; }
+.hcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 14px 0 10px; }
+.hcard { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; background: var(--surface-2); }
+.hcard .hl { font-size: 12.5px; font-weight: 650; color: var(--text-2); }
+.hcard .hl span { font-weight: 500; color: var(--muted); }
+.hcard .hv { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 4px 0 6px; }
+.hcard .hs { font-size: 12.5px; color: var(--text-2); margin-top: 3px; }
+.hcard .hs.muted { color: var(--muted); }
+.hfoot { font-size: 12.5px; color: var(--text-2); line-height: 1.6; }
+.sl { margin-bottom: 16px; }
+.sl-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sl-h label { font-size: 12.5px; font-weight: 650; }
+.sl-h b { font-size: 14px; font-variant-numeric: tabular-nums; }
+.sl input[type="range"] { width: 100%; margin: 8px 0 4px; accent-color: var(--ink); height: 22px; }
+.sl small { display: block; color: var(--muted); font-size: 11.5px; }
+details.adv > summary { cursor: pointer; padding: 12px 14px; font-weight: 650; font-size: 13px; list-style: none; display: flex; align-items: center; gap: 8px; }
+details.adv > summary::-webkit-details-marker { display: none; }
+details.adv > summary::before { content: '▸'; color: var(--muted); transition: transform .15s; }
+details.adv[open] > summary::before { transform: rotate(90deg); }
+details.adv[open] > summary { border-bottom: 1px solid var(--border); }
+.tax2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tax2 > div { border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; background: var(--surface-2); }
+.tax2 .lbl { font-size: 12px; color: var(--muted); }
+.tax2 .big { font-size: 24px; font-weight: 700; margin: 2px 0; }
+.tax2 small { color: var(--text-2); font-size: 11.5px; }
+@media (max-width: 600px) { .tax2 { grid-template-columns: 1fr; } .hcard .hv { font-size: 26px; } }

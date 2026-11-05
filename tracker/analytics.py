@@ -468,6 +468,13 @@ def allocation(panel, pos, expo=None):
 
     zones_l = look(open_pos, "zones", total)
 
+    def group_scope(items):
+        tot = sum(p["value"] for p in items)
+        g = {}
+        for p in items:
+            g[p["asset_class"]] = g.get(p["asset_class"], 0) + p["value"]
+        return [dict(label=k, value=v, weight=v / tot if tot else 0) for k, v in sorted(g.items(), key=lambda x: -x[1])]
+
     def conc(items, tot):
         w = [p["value"] / tot for p in items] if tot else []
         hhi = sum(x * x for x in w)
@@ -492,6 +499,13 @@ def allocation(panel, pos, expo=None):
         pea_zones=look(pea, "zones", pea_total),
         pea_sectors=look(pea, "sectors", pea_total),
         total_sectors=look(open_pos, "sectors", total),
+        # par périmètre, recalculé chaque jour avec la valeur de chaque ligne
+        scoped={sc: dict(
+            total=sum(p["value"] for p in its),
+            lines=[dict(ticker=p["ticker"], short=p["short"], value=p["value"], account=p["account"]) for p in its],
+            classes=group_scope(its), zones=look(its, "zones", sum(p["value"] for p in its)),
+            sectors=look(its, "sectors", sum(p["value"] for p in its)), countries=look(its, "countries", sum(p["value"] for p in its)))
+            for sc, its in (("TOTAL", open_pos), ("PEA", pea), ("CRYPTO", [p for p in open_pos if p["account"] == "CRYPTO"])) if its},
         expo_sources=[dict(ticker=p["ticker"], short=p["short"], source=(expo.get(p["ticker"]) or {}).get("source", "indicatif"),
                            url=(expo.get(p["ticker"]) or {}).get("url")) for p in open_pos],
         concentration=dict(total=conc(open_pos, total), pea=conc(pea, pea_total)),

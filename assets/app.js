@@ -625,18 +625,23 @@
   }
   function renderAllocation() {
     const A = D.allocation;
-    const pos = D.positions.filter((p) => p.open);
-    const tot = A.total;
+    const sc = (A.scoped && A.scoped[state.scope]) ? state.scope : 'TOTAL';
+    const Z = (A.scoped && A.scoped[sc]) || { total: A.total, classes: A.by_class, zones: A.by_zone, sectors: A.total_sectors || [], countries: A.pea_countries || [] };
+    const pos = D.positions.filter((p) => p.open && (sc === 'TOTAL' || p.account === sc));
+    const tot = Z.total;
+    $$('.al-scope').forEach((x) => { x.textContent = { TOTAL: 'consolidé (PEA + crypto)', PEA: 'PEA', CRYPTO: 'crypto' }[sc]; });
     $('#al-lines').innerHTML = `<div class="segbar">${pos.map((p) => { const w = p.value / tot; return `<div style="flex:${w};background:${assetColor(p.ticker)};color:${D.assets[p.ticker].slot === 4 ? '#0b0b0b' : '#fff'}" title="${esc(p.short)} ${pct(w, 1)}">${w > 0.09 ? pct(w, 0) : ''}</div>`; }).join('')}</div>
       <table class="t compact"><thead><tr><th>Ligne</th><th class="n">Valeur</th><th class="n">Poids total</th><th class="n">Poids dans son compte</th></tr></thead><tbody>
       ${pos.map((p) => `<tr><td><div class="name"><span class="dot" style="background:${assetColor(p.ticker)}"></span>${esc(p.short)}</div></td><td class="n">${eur(p.value)}</td><td class="n">${pct(p.weight_total, 1)}</td><td class="n">${pct(p.weight_account, 1)} <small style="color:var(--muted)">${esc(p.account)}</small></td></tr>`).join('')}
       </tbody></table>
       <div class="note">Concentration : nombre effectif de lignes <b>${num(A.concentration.total.n_eff, 1)}</b> (consolidé), <b>${num(A.concentration.pea.n_eff, 1)}</b> (PEA). <a href="aide.html#concentration">C'est quoi ?</a></div>`;
-    $('#al-class').innerHTML = hbars(A.by_class, slot(1), tot);
-    $('#al-zones').innerHTML = hbars(A.by_zone, slot(1)) + '<div class="note">Air Liquide et TotalEnergies sont comptées en France (siège), même si leur activité est mondiale.</div>';
-    $('#al-sectors').innerHTML = hbars(A.pea_sectors || [], slot(1)) + `<div class="note">${sourcesNote(A)}</div>`;
-    $('#al-countries').innerHTML = hbars((A.pea_countries || []).slice(0, 12), slot(1));
-    renderMap(A);
+    $('#al-class').innerHTML = hbars(Z.classes, slot(1), tot);
+    const stocks = pos.filter((p) => p.kind === 'Action').map((p) => p.short);
+    const sNote = stocks.length ? `${stocks.length > 1 ? stocks.slice(0, -1).join(', ') + ' et ' + stocks[stocks.length - 1] + ' sont comptées dans le pays de leur siège' : stocks[0] + ' est comptée dans le pays de son siège'}, même si l'activité est mondiale.` : '';
+    $('#al-zones').innerHTML = hbars(Z.zones, slot(1)) + (sNote ? `<div class="note">${esc(sNote)}</div>` : '');
+    $('#al-sectors').innerHTML = hbars(Z.sectors, slot(1)) + `<div class="note">${sourcesNote(A, sc)}</div>`;
+    $('#al-countries').innerHTML = Z.countries.length ? hbars(Z.countries.slice(0, 12), slot(1)) : '<div class="empty">La crypto n\'a pas de pays.</div>';
+    renderMap(Z, tot);
     $('#al-plan').innerHTML = `<div class="legend"><span><i class="sq" style="background:${slot(1)}"></i>Réel (valeur)</span><span><i class="sq" style="background:${cv('--muted')}"></i>Part des versements du plan</span></div>` +
       A.vs_plan.map((r) => `<div style="padding:6px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;font-size:12px"><span>${esc(r.short)}</span><span class="num">${pct(r.actual, 1)} <span style="color:var(--muted)">/ ${pct(r.plan, 1)}</span></span></div>
         <div class="segbar thin" style="margin:4px 0 2px"><div style="flex:${r.actual};background:${slot(1)}"></div><div style="flex:${Math.max(1 - r.actual, 0)};background:var(--surface-3)"></div></div>
@@ -651,8 +656,8 @@
       </tbody></table>`;
   }
 
-  function sourcesNote(A) {
-    return 'Sources : ' + (A.expo_sources || []).filter((x) => x.ticker && D.assets[x.ticker] && D.assets[x.ticker].account === 'PEA')
+  function sourcesNote(A, sc) {
+    return 'Sources : ' + (A.expo_sources || []).filter((x) => x.ticker && D.assets[x.ticker] && (sc === 'TOTAL' || D.assets[x.ticker].account === sc))
       .map((x) => `${esc(x.short)} : ${x.url && /justETF/.test(x.source) ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.source)}</a>` : esc(x.source)}`).join(' · ') +
       '. justETF publie les 4 premiers pays et secteurs ; le reste suit la répartition indicative de l\'indice.';
   }
@@ -669,11 +674,14 @@
     if (!worldLoading) worldLoading = fetch('https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/json/world.json').then((r) => r.json()).then((j) => { echarts.registerMap('world', j); return true; }).catch(() => false);
     return worldLoading;
   }
-  function renderMap(A) {
-    const list = A.pea_countries || [];
+  function renderMap(Z, tot) {
+    const list = Z.countries || [];
     const note = $('#al-map-note');
     const off = list.filter((x) => !MAP_NAMES[x.label]);
-    note.innerHTML = off.length ? `Hors carte (trop petits ou non localisables) : ${off.map((x) => `${esc(x.label)} ${pct(x.weight, 1)}`).join(', ')}.` : '';
+    const mapped = list.reduce((a, x) => a + x.value, 0);
+    const outside = tot - mapped;
+    note.innerHTML = [off.length ? `Hors carte (petits territoires) : ${off.map((x) => `${esc(x.label)} ${pct(x.weight, 1)}`).join(', ')}.` : '',
+      outside > 0.5 ? `Sans pays (crypto) : ${pct(outside / tot, 1)} (${eur(outside, 0)}).` : ''].filter(Boolean).join(' ');
     loadWorld().then((ok) => {
       const c = mk('al-map');
       if (!c) return;
@@ -684,7 +692,7 @@
       c.setOption({
         animation: false,
         tooltip: { trigger: 'item', backgroundColor: cv('--surface'), borderColor: cv('--border-strong'), textStyle: { color: cv('--text'), fontSize: 12 },
-          formatter: (p) => (p.data ? `<b>${esc(p.data.fr)}</b><br>${nf(1).format(p.data.value)} % du PEA · ${eur(p.data.eur, 0)}` : `${esc(p.name)} : 0 %`) },
+          formatter: (p) => (p.data ? `<b>${esc(p.data.fr)}</b><br>${nf(1).format(p.data.value)} % · ${eur(p.data.eur, 0)}` : `${esc(p.name)} : 0 %`) },
         visualMap: { type: 'continuous', min: 0, max: Math.ceil(max), left: 8, bottom: 8, itemHeight: 110, calculable: false, text: [`${Math.ceil(max)} %`, '0 %'],
           textStyle: { color: cv('--muted'), fontSize: 11 }, inRange: { color: dark ? ['#184f95', '#3987e5', '#9ec5f4'] : ['#cde2fb', '#5598e7', '#104281'] } },
         series: [{ type: 'map', map: 'world', roam: true, scaleLimit: { min: 1, max: 8 }, zoom: 1.15, center: [15, 25],
@@ -734,13 +742,14 @@
   }
 
   // ------------------------------------------------------------ PROJECTION & FISCALITÉ
-  const SIM_KEY = 'pea-sim-v1';
+  const SIM_KEY = 'pea-sim-v2';
+  const MC_N = 10000;
   const MONTHS_LONG = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   function simDefaults() {
     const S = D.sim;
     return {
       scope: 'PEA', years: S.years, infl: S.inflation, ps: S.ps_rate, ir: S.ir_rate,
-      exc: 0, excMonth: 12, idx: 0, reinvest: true, mc: true,
+      exc: 0, excMonth: 12, idx: 0, reinvest: true, unit: 'nom',
       lines: S.lines.map((l) => ({ ticker: l.ticker, short: l.short, account: l.account, value: Math.round(l.value * 100) / 100,
         monthly: Math.round(l.monthly * 100) / 100, ret: l.ret, vol: l.vol, yld: Math.round((l.yld || 0) * 10000) / 10000, hist: l.hist_vol, on: true,
         price: l.account === 'PEA' && l.price ? Math.round(l.price * 1000) / 1000 : 0 })),
@@ -752,148 +761,306 @@
     let saved = null;
     try { saved = JSON.parse(store.get(SIM_KEY, 'null')); } catch (e) { saved = null; }
     if (!saved || !Array.isArray(saved.lines)) return def;
-    // garde tes hypothèses, mais repart des valeurs du jour pour tes vraies lignes
     const lines = def.lines.map((l) => { const o = saved.lines.find((x) => x.ticker === l.ticker); return o ? Object.assign({}, o, { value: l.value, hist: l.hist, short: l.short, price: l.price }) : l; });
     saved.lines.filter((x) => x.custom).forEach((x) => lines.push(x));
     return Object.assign({}, def, saved, { lines });
   }
   function saveSim() { store.set(SIM_KEY, JSON.stringify(sim)); }
-
-  function rng(seed) { // mulberry32 : tirages reproductibles d'un rendu à l'autre
+  function rng(seed) { // mulberry32 : mêmes tirages d'un calcul à l'autre, la fourchette ne « tremble » pas
     let a = seed >>> 0;
     return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   }
-  function gauss(r) { let u = 0, v = 0; while (u === 0) u = r(); while (v === 0) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function makeGauss(r) {
+    let spare = null;
+    return () => {
+      if (spare !== null) { const s = spare; spare = null; return s; }
+      let u = 0; while (u === 0) u = r();
+      const v = r(), m = Math.sqrt(-2 * Math.log(u));
+      spare = m * Math.sin(2 * Math.PI * v);
+      return m * Math.cos(2 * Math.PI * v);
+    };
+  }
+  const inScope = (P) => P.lines.filter((l) => l.on && (P.scope === 'ALL' || l.account === 'PEA'));
+  const monthlyTotal = (P) => inScope(P).reduce((a, l) => a + (+l.monthly || 0), 0);
+  function avgRet(P) {
+    const ls = inScope(P);
+    const w = ls.map((l) => (+l.value || 0) + (+l.monthly || 0) * 60);
+    const tw = w.reduce((a, b) => a + b, 0);
+    return tw ? ls.reduce((a, l, i) => a + (+l.ret || 0) * w[i], 0) / tw : 0.06;
+  }
 
-  function simulate(P) {
+  function model(P) {
     const M = Math.max(1, Math.round(P.years * 12));
-    const lines = P.lines.filter((l) => l.on && (P.scope === 'ALL' || l.account === 'PEA'));
+    const lines = inScope(P);
     const start = parseISO(D.sim.today);
-    const dates = [];
-    for (let m = 0; m <= M; m++) { const d = new Date(start); d.setMonth(d.getMonth() + m); dates.push(iso(d)); }
-    const mat = D.sim.maturity;
-    const totMonthly = lines.reduce((a, l) => a + (+l.monthly || 0), 0);
-    const share = lines.map((l) => (totMonthly ? (+l.monthly || 0) / totMonthly : 1 / Math.max(lines.length, 1)));
+    const dates = [], months = [];
+    for (let m = 0; m <= M; m++) { const d = new Date(start); d.setMonth(d.getMonth() + m); dates.push(iso(d)); months.push(d.getMonth() + 1); }
+    const tot = monthlyTotal(P);
+    const share = lines.map((l) => (tot ? (+l.monthly || 0) / tot : 1 / Math.max(lines.length, 1)));
     const inv0 = { PEA: D.sim.invested.PEA || 0, CRYPTO: P.scope === 'ALL' ? (D.sim.invested.CRYPTO || 0) : 0 };
-    const cash0 = { PEA: (D.sim.dividends && D.sim.dividends.PEA) || 0, CRYPTO: 0 };
-    // rendement de départ = ce que tu as déjà (valeurs saisies) ; le capital investi de départ suit les valeurs saisies si tu les changes
-    const realVal = { PEA: 0, CRYPTO: 0 }, simVal = { PEA: 0, CRYPTO: 0 };
-    D.sim.lines.forEach((l) => { realVal[l.account] += l.value; });
-    lines.forEach((l) => { simVal[l.account] += +l.value || 0; });
-    ['PEA', 'CRYPTO'].forEach((a) => { if (Math.abs(simVal[a] - realVal[a]) > 0.5) inv0[a] = Math.max(0, inv0[a] + (simVal[a] - realVal[a])); });
-    if (P.scope !== 'ALL') { simVal.CRYPTO = 0; inv0.CRYPTO = 0; }
+    const real = { PEA: 0, CRYPTO: 0 }, typed = { PEA: 0, CRYPTO: 0 };
+    D.sim.lines.forEach((l) => { real[l.account] += l.value; });
+    lines.forEach((l) => { typed[l.account] += +l.value || 0; });
+    ['PEA', 'CRYPTO'].forEach((a) => { if (Math.abs(typed[a] - real[a]) > 0.5) inv0[a] = Math.max(0, inv0[a] + typed[a] - real[a]); });
+    if (P.scope !== 'ALL') inv0.CRYPTO = 0;
+    const coef = lines.map((l) => ({ mu: Math.log(1 + (+l.ret || 0)) / 12, s: (+l.vol || 0) / Math.sqrt(12), rho: l.account === 'CRYPTO' ? 0.35 : 0.85,
+      y: (+l.yld || 0) / 12, pea: l.account === 'PEA', price: l.account === 'PEA' ? (+l.price || 0) : 0, monthly: +l.monthly || 0, v0: +l.value || 0 }));
+    return { P, M, lines, dates, months, share, inv0, coef, matIdx: dates.findIndex((d) => d >= D.sim.maturity), start: typed.PEA + (P.scope === 'ALL' ? typed.CRYPTO : 0) };
+  }
 
-    function run(r) {
-      const v = lines.map((l) => +l.value || 0);
-      const px = lines.map((l) => (l.account === 'PEA' ? +l.price || 0 : 0)); // 0 = quantité fractionnée
-      const cash = Object.assign({}, cash0), inv = Object.assign({}, inv0);
-      const out = r ? null : { total: [], invested: [], net: [], real: [], netReal: [], pea: [], crypto: [], contrib: lines.map(() => 0), left: lines.map(() => 0) };
-      const totals = r ? new Float64Array(M + 1) : null;
-      const snap = (m) => {
-        let vp = 0, vc = 0;
-        lines.forEach((l, i) => { if (l.account === 'PEA') vp += v[i]; else vc += v[i]; });
-        const total = vp + vc + cash.PEA + cash.CRYPTO;
-        if (r) { totals[m] = total; return; }
-        const rate = dates[m] >= mat ? P.ps : P.ps + P.ir;
-        const tax = Math.max(vp + cash.PEA - inv.PEA, 0) * rate + Math.max(vc + cash.CRYPTO - inv.CRYPTO, 0) * (P.ps + P.ir);
-        const defl = Math.pow(1 + P.infl, m / 12);
-        out.total.push(total); out.invested.push(inv.PEA + inv.CRYPTO); out.net.push(total - tax);
-        out.real.push(total / defl); out.netReal.push((total - tax) / defl); out.pea.push(vp + cash.PEA); out.crypto.push(vc + cash.CRYPTO);
-        if (m === M) { out.tax = tax; out.lineValues = v.slice(); }
-      };
-      snap(0);
-      const z0 = lines.map((l) => ({ mu: Math.log(1 + (+l.ret || 0)) / 12, s: (+l.vol || 0) / Math.sqrt(12), rho: l.account === 'CRYPTO' ? 0.35 : 0.85 }));
-      for (let m = 1; m <= M; m++) {
-        const zc = r ? gauss(r) : 0;
-        const month = parseISO(dates[m]).getMonth() + 1;
-        const grow = Math.pow(1 + (+P.idx || 0), Math.floor((m - 1) / 12));
-        lines.forEach((l, i) => {
-          const z = z0[i];
-          const g = r ? Math.exp(z.mu - z.s * z.s / 2 + z.s * (z.rho * zc + Math.sqrt(1 - z.rho * z.rho) * gauss(r))) : Math.exp(z.mu);
-          const div = v[i] * (+l.yld || 0) / 12;
-          v[i] *= g;
-          if (px[i]) px[i] *= g;
-          if (P.reinvest) v[i] += div; else cash[l.account] += div;
-          // PEA : parts entières, plan et versement exceptionnel exécutés séparément (comme chez TR)
-          const buy = (amt) => (px[i] ? Math.floor(amt / px[i] + 1e-9) * px[i] : amt);
-          const want = (+l.monthly || 0) * grow + (+P.exc && month === +P.excMonth ? (+P.exc) * share[i] : 0);
-          const c = buy((+l.monthly || 0) * grow) + (+P.exc && month === +P.excMonth ? buy((+P.exc) * share[i]) : 0);
-          v[i] += c; inv[l.account] += c;
-          if (!r) { out.contrib[i] += c; out.left[i] += want - c; }
-        });
-        snap(m);
+  // Un chemin. g = null : trajectoire « attendue » (rendements moyens) avec tout le détail.
+  // Sinon : chemin aléatoire, seuls les totaux aux mois `rec` sont gardés dans out[offset…].
+  function runPath(md, g, rec, outArr, offset) {
+    const { P, M, coef, share, months } = md;
+    const n = coef.length, det = !g;
+    const v = new Float64Array(n), px = new Float64Array(n);
+    for (let i = 0; i < n; i++) { v[i] = coef[i].v0; px[i] = coef[i].price; }
+    let cashP = 0, cashC = 0, invP = md.inv0.PEA, invC = md.inv0.CRYPTO;
+    const o = det ? { total: [], invested: [], tax: [], contrib: new Array(n).fill(0), left: new Array(n).fill(0) } : null;
+    const exc = +P.exc || 0, excM = +P.excMonth, idx = +P.idx || 0;
+    let ri = 0;
+    const snap = (m) => {
+      let vp = cashP, vc = cashC;
+      for (let i = 0; i < n; i++) { if (coef[i].pea) vp += v[i]; else vc += v[i]; }
+      if (!det) { while (ri < rec.length && rec[ri] === m) { outArr[offset + ri] = vp + vc; ri++; } return; }
+      const rate = md.dates[m] >= D.sim.maturity ? P.ps : P.ps + P.ir;
+      o.total.push(vp + vc); o.invested.push(invP + invC);
+      o.tax.push(Math.max(vp - invP, 0) * rate + Math.max(vc - invC, 0) * (P.ps + P.ir));
+    };
+    snap(0);
+    for (let m = 1; m <= M; m++) {
+      const zc = det ? 0 : g();
+      const grow = idx ? Math.pow(1 + idx, Math.floor((m - 1) / 12)) : 1;
+      const excOn = exc && months[m] === excM;
+      for (let i = 0; i < n; i++) {
+        const c = coef[i];
+        const gr = det ? Math.exp(c.mu) : Math.exp(c.mu - c.s * c.s / 2 + c.s * (c.rho * zc + Math.sqrt(1 - c.rho * c.rho) * g()));
+        const div = v[i] * c.y;
+        v[i] *= gr;
+        if (px[i]) px[i] *= gr;
+        if (P.reinvest) v[i] += div; else if (c.pea) cashP += div; else cashC += div;
+        const w1 = c.monthly * grow, w2 = excOn ? exc * share[i] : 0;
+        let got = w1 + w2;
+        if (px[i]) got = Math.floor(w1 / px[i] + 1e-9) * px[i] + (w2 ? Math.floor(w2 / px[i] + 1e-9) * px[i] : 0);
+        v[i] += got;
+        if (c.pea) invP += got; else invC += got;
+        if (det) { o.contrib[i] += got; o.left[i] += w1 + w2 - got; }
       }
-      return r ? totals : out;
+      snap(m);
     }
-    const det = run(null);
-    let band = null, pLoss = null;
-    if (P.mc && lines.length) {
-      const N = 500, r = rng(20261105);
-      const all = [];
-      for (let k = 0; k < N; k++) all.push(run(r));
-      band = { p10: [], p50: [], p90: [] };
-      for (let m = 0; m <= M; m++) {
-        const col = all.map((a) => a[m]).sort((x, y) => x - y);
-        band.p10.push(col[Math.floor(N * 0.1)]); band.p50.push(col[Math.floor(N * 0.5)]); band.p90.push(col[Math.floor(N * 0.9)]);
+    if (det) o.lineValues = Array.from(v);
+    return o;
+  }
+
+  let mcJob = 0, lastMd = null, lastDet = null, lastQ = null, mcTimer = null;
+  function runMC(md, det) {
+    const job = ++mcJob;
+    const rec = [];
+    for (let m = 12; m <= md.M; m += 12) rec.push(m);
+    if (md.matIdx > 0) rec.push(md.matIdx);
+    rec.push(md.M);
+    const R = Array.from(new Set(rec)).sort((a, b) => a - b);
+    const res = new Float64Array(MC_N * R.length);
+    const g = makeGauss(rng(20261105));
+    let k = 0;
+    const step = () => {
+      if (job !== mcJob) return;
+      const end = Math.min(k + 400, MC_N);
+      for (; k < end; k++) runPath(md, g, R, res, k * R.length);
+      $('#sim-status').innerHTML = `<span class="spin"></span> Fourchette : ${nf(0).format(k)} / ${nf(0).format(MC_N)} scénarios calculés…`;
+      if (k < MC_N) { setTimeout(step, 0); return; }
+      const q = { rec: R, p10: [], p50: [], p90: [] };
+      const col = new Float64Array(MC_N);
+      for (let j = 0; j < R.length; j++) {
+        for (let i = 0; i < MC_N; i++) col[i] = res[i * R.length + j];
+        col.sort();
+        q.p10.push(col[Math.floor(MC_N * 0.1)]); q.p50.push(col[Math.floor(MC_N * 0.5)]); q.p90.push(col[Math.floor(MC_N * 0.9)]);
       }
-      pLoss = all.filter((a) => a[M] < det.invested[M]).length / N;
+      let loss = 0;
+      const lj = R.length - 1;
+      for (let i = 0; i < MC_N; i++) if (res[i * R.length + lj] < det.invested[md.M]) loss++;
+      q.pLoss = loss / MC_N;
+      lastQ = q;
+      renderHero(md, det, q); renderSimChart(md, det, q);
+      $('#sim-status').textContent = `Fourchette calculée sur ${nf(0).format(MC_N)} scénarios aléatoires (volatilité de chaque ligne). La zone grise contient 8 scénarios sur 10.`;
+    };
+    setTimeout(step, 20);
+  }
+  function recompute(withMC) {
+    const md = model(sim), det = runPath(md, null);
+    lastMd = md; lastDet = det; lastQ = null; mcJob++;
+    $('#sim-status').innerHTML = `<span class="spin"></span> Fourchette : calcul des ${nf(0).format(MC_N)} scénarios…`;
+    renderHero(md, det, null); renderSimChart(md, det, null); renderBreakdown(md, det);
+    clearTimeout(mcTimer);
+    if (withMC !== false) mcTimer = setTimeout(() => runMC(md, det), 350);
+  }
+
+  function horizons(md) {
+    const y0 = parseISO(D.sim.today).getFullYear();
+    const out = [];
+    if (md.matIdx > 0 && md.matIdx <= md.M) out.push([md.matIdx, `Le ${dShort(D.sim.maturity)}`, 'fin des 5 ans du PEA']);
+    if (md.M >= 120 && Math.abs(120 - md.matIdx) > 6) out.push([120, `En ${y0 + 10}`, 'dans 10 ans']);
+    if (md.M > 252) out.push([240, `En ${y0 + 20}`, 'dans 20 ans']);
+    if (!out.length || out[out.length - 1][0] !== md.M) out.push([md.M, `En ${y0 + Math.round(md.M / 12)}`, `dans ${Math.round(md.M / 12)} an${md.M >= 24 ? 's' : ''}`]);
+    return out.slice(-4);
+  }
+  function qAt(q, m, key) { if (!q) return null; const j = q.rec.indexOf(m); return j >= 0 ? q[key][j] : null; }
+
+  function renderHero(md, det, q) {
+    const P = sim, real = P.unit === 'real';
+    const defl = (m) => (real ? Math.pow(1 + P.infl, m / 12) : 1);
+    const cards = horizons(md).map(([m, lab, sub]) => {
+      const med = qAt(q, m, 'p50'), lo = qAt(q, m, 'p10'), hi = qAt(q, m, 'p90');
+      const val = med != null ? med : det.total[m];
+      const inv = det.invested[m];
+      const eff = det.total[m] - inv > 0 ? det.tax[m] / (det.total[m] - inv) : 0;
+      const net = val - Math.max(val - inv, 0) * eff;
+      return `<div class="hcard"><div class="hl">${lab} <span>· ${sub}</span></div>
+        <div class="hv">${eur(val / defl(m), 0)}</div>
+        <div class="hs">dont <b>${eur(inv / defl(m), 0)}</b> versés · plus-value <b class="${cls(val - inv)}">${eurS((val - inv) / defl(m), 0)}</b></div>
+        <div class="hs">${lo != null ? `8 chances sur 10 entre <b>${eur(lo / defl(m), 0)}</b> et <b>${eur(hi / defl(m), 0)}</b>` : '<span class="spin"></span> fourchette en calcul…'}</div>
+        <div class="hs muted">net d'impôts ≈ ${eur(net / defl(m), 0)}${real ? '' : ` · ≈ ${eur(val / Math.pow(1 + P.infl, m / 12), 0)} d'aujourd'hui`}</div></div>`;
+    }).join('');
+    const exc = +P.exc ? ` + <b>${eur(+P.exc, 0)}</b> chaque ${MONTHS_LONG[(+P.excMonth || 12) - 1]}` : '';
+    const left = det.left.reduce((a, b) => a + b, 0), contrib = det.contrib.reduce((a, b) => a + b, 0);
+    const lastNet = det.total[md.M] - det.tax[md.M];
+    $('#sim-hero').innerHTML = `<div class="hsent">En versant <b>${eur(monthlyTotal(P), 0)} par mois</b>${exc}, avec un rendement moyen de <b>${pct(avgRet(P), 1)} par an</b>,
+        ton ${P.scope === 'ALL' ? 'PEA + crypto' : 'PEA'} (aujourd'hui <b>${eur(md.start, 0)}</b>) vaudrait probablement${real ? ", en euros d'aujourd'hui" : ''} :</div>
+      <div class="hcards">${cards}</div>
+      <div class="hfoot">${q ? `Risque de finir sous ce que tu as versé : <b>${pct(q.pLoss, 1)}</b> des ${nf(0).format(MC_N)} scénarios. ` : ''}
+        Revenu possible ensuite (règle des 4 %, en euros d'aujourd'hui) : <b>${eur(lastNet / Math.pow(1 + P.infl, md.M / 12) * 0.04 / 12, 0)} par mois</b>.
+        ${left > contrib * 0.02 ? (() => { const i = det.left.indexOf(Math.max(...det.left)); const l = md.lines[i];
+          return `<span class="down">Parts entières : ≈ ${eur(left, 0)} de tes versements ne seraient pas investis, surtout sur ${esc(l.short)} : son plan de ${eur(l.monthly, 0)} n'achète plus de part quand le prix d'une part le dépasse. Augmente ce plan (ou passe à 2 parts) pour éviter ça.</span>`; })() : ''}</div>`;
+  }
+
+  function renderSimChart(md, det, q) {
+    const P = sim, real = P.unit === 'real';
+    const f = (m) => (real ? Math.pow(1 + P.infl, m / 12) : 1);
+    const ink = cv('--ink'), mut = cv('--muted');
+    const ser = [], leg = [];
+    if (q) {
+      const xs = [md.dates[0]].concat(q.rec.map((m) => md.dates[m]));
+      const ms = [0].concat(q.rec);
+      const lo = [det.total[0]].concat(q.p10), hi = [det.total[0]].concat(q.p90), med = [det.total[0]].concat(q.p50);
+      ser.push({ name: 'bas', type: 'line', stack: 'band', data: xs.map((x, i) => [x, lo[i] / f(ms[i])]), lineStyle: { opacity: 0 }, showSymbol: false, silent: true, emphasis: { disabled: true }, smooth: 0.3 });
+      ser.push({ name: 'Fourchette', type: 'line', stack: 'band', data: xs.map((x, i) => [x, (hi[i] - lo[i]) / f(ms[i])]), lineStyle: { opacity: 0 }, areaStyle: { color: hexA(ink, 0.09) }, showSymbol: false, silent: true, emphasis: { disabled: true }, smooth: 0.3 });
+      ser.push(line('Valeur probable (médiane)', xs.map((x, i) => [x, med[i] / f(ms[i])]), ink, { smooth: 0.3 }));
+      leg.push({ label: 'Valeur probable', color: ink }, { label: '8 scénarios sur 10', color: hexA(ink, 0.25), sq: true });
+    } else {
+      ser.push(line('Trajectoire moyenne', md.dates.map((x, m) => [x, det.total[m] / f(m)]), ink));
+      leg.push({ label: 'Trajectoire moyenne', color: ink });
     }
-    return { dates, det, band, pLoss, lines, M };
+    ser.push(line('Capital versé', md.dates.map((x, m) => [x, det.invested[m] / f(m)]), mut, { lineStyle: { width: 1.5, color: mut } }));
+    leg.push({ label: 'Capital versé', color: mut });
+    legend('pj-legend', leg);
+    const c = mk('pj-chart');
+    if (!c) return;
+    c.setOption(base({ xAxis: xTime(spanDays(md.dates[0], md.dates[md.M])), yAxis: yVal(axEur), series: ser,
+      tooltip: Object.assign(base().tooltip, { formatter: (ps) => {
+        const d = new Date(ps[0].axisValue);
+        const m = Math.max(0, Math.min(md.M, Math.round((d - parseISO(md.dates[0])) / (864e5 * 30.44))));
+        let h = `<div style="font-weight:650;margin-bottom:4px">${dLong(md.dates[m])}</div>`;
+        const row = (k, v) => `<div style="display:flex;justify-content:space-between;gap:14px"><span>${k}</span><b>${eur(v, 0)}</b></div>`;
+        const med = qAt(q, m, 'p50');
+        h += row(med != null ? 'Valeur probable' : 'Trajectoire moyenne', (med != null ? med : det.total[m]) / f(m)) + row('Capital versé', det.invested[m] / f(m));
+        if (q && qAt(q, m, 'p10') != null) h += `<div style="color:var(--muted);margin-top:3px">8 chances sur 10 entre ${eur(qAt(q, m, 'p10') / f(m), 0)} et ${eur(qAt(q, m, 'p90') / f(m), 0)}</div>`;
+        return h;
+      } }) }), true);
+  }
+
+  function slider(k, label, val, min, max, step, fmt, hint) {
+    return `<div class="sl"><div class="sl-h"><label for="sl-${k}">${label}</label><b id="slv-${k}">${fmt(val)}</b></div>
+      <input type="range" id="sl-${k}" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${val}"><small>${hint}</small></div>`;
+  }
+  const SLFMT = { monthly: (v) => eur(+v, 0) + ' / mois', ret: (v) => nf(2).format(+v) + ' % / an', years: (v) => `${v} an${+v > 1 ? 's' : ''}`, exc: (v) => (+v ? eur(+v, 0) + ' / an' : 'aucun') };
+  function renderSliders() {
+    const P = sim, cur = monthlyTotal(P), plans = D.plans.filter((p) => p.active && (P.scope === 'ALL' || p.account === 'PEA')).reduce((a, p) => a + p.monthly, 0);
+    $('#sim-sliders').innerHTML =
+      slider('monthly', 'Versement mensuel', Math.round(cur), 0, Math.max(2000, Math.ceil(cur * 2 / 100) * 100), 5, SLFMT.monthly, `tes plans actuels : ${eur(plans, 0)} / mois`) +
+      slider('ret', 'Rendement moyen attendu', +(avgRet(P) * 100).toFixed(2), 0, 15, 0.25, SLFMT.ret, 'repère : actions monde ≈ 7 % / an sur longue période (hors inflation)') +
+      slider('years', 'Horizon', P.years, 1, 40, 1, SLFMT.years, `jusqu'en ${parseISO(D.sim.today).getFullYear() + (+P.years)}`) +
+      `<div class="chips" style="margin:-4px 0 12px">${[['mat', '2030'], ['10', '10 ans'], ['20', '20 ans'], ['30', '30 ans'], ['40', '40 ans']]
+        .map(([y, l]) => `<button class="chip" data-y="${y}" aria-pressed="${String(y === 'mat' ? +P.years === matYears() : +P.years === +y)}">${l}</button>`).join('')}</div>` +
+      slider('exc', 'Versement exceptionnel chaque année', +P.exc || 0, 0, 5000, 50, SLFMT.exc, `ex. 600 € à Noël (mois réglable dans les réglages avancés)`) +
+      `<label class="check-row" style="margin-top:6px"><input type="checkbox" id="sl-all" ${P.scope === 'ALL' ? 'checked' : ''}> Inclure la crypto</label>`;
+  }
+  const matYears = () => Math.max(1, Math.ceil((parseISO(D.sim.maturity) - parseISO(D.sim.today)) / (365.25 * 864e5)));
+  function onSlider(e) {
+    const k = e.target.dataset.k, v = parseFloat(e.target.value);
+    if (!k) return;
+    $(`#slv-${k}`).textContent = SLFMT[k](v);
+    const ls = inScope(sim);
+    if (k === 'monthly') {
+      const cur = monthlyTotal(sim);
+      if (cur > 0) ls.forEach((l) => { l.monthly = Math.round((+l.monthly || 0) * v / cur * 100) / 100; });
+      else if (ls.length) ls[0].monthly = v;
+    } else if (k === 'ret') {
+      const d = v / 100 - avgRet(sim);
+      ls.forEach((l) => { l.ret = Math.max(-0.5, Math.round(((+l.ret || 0) + d) * 10000) / 10000); });
+    } else if (k === 'years') {
+      sim.years = v;
+      e.target.parentElement.querySelector('small').textContent = `jusqu'en ${parseISO(D.sim.today).getFullYear() + v}`;
+    } else if (k === 'exc') sim.exc = v;
+    saveSim();
+    recompute();
+    if ($('#sim-adv').open) renderSimForm();
   }
 
   function simField(label, html, hint) { return `<div class="field"><label>${label}</label>${html}${hint ? `<small>${hint}</small>` : ''}</div>`; }
   const pctIn = (k, v, step = 0.1) => `<input type="number" step="${step}" data-k="${k}" value="${(v * 100).toFixed(2).replace(/\.?0+$/, '')}">`;
-
   function renderSimForm() {
     const P = sim, prm = D.params || {};
     const live = (k) => (prm[k] && prm[k].live != null ? `live : ${pct(prm[k].live, 1)}` : '');
     $('#sim-form').innerHTML = `<div class="form wide">
-      ${simField('Périmètre', `<select data-k="scope"><option value="PEA" ${P.scope === 'PEA' ? 'selected' : ''}>PEA seul</option><option value="ALL" ${P.scope === 'ALL' ? 'selected' : ''}>PEA + crypto</option></select>`)}
-      ${simField('Horizon (années)', `<input type="number" min="1" max="50" step="1" data-k="years" value="${P.years}">`, `jusqu'en ${parseISO(D.sim.today).getFullYear() + (+P.years || 0)}`)}
       ${simField('Inflation (%/an)', pctIn('infl', P.infl), live('inflation'))}
       ${simField('Prélèvements sociaux (%)', pctIn('ps', P.ps), live('ps_rate'))}
       ${simField('Impôt sur le revenu PFU (%)', pctIn('ir', P.ir), 'appliqué avant les 5 ans du PEA et sur la crypto')}
-      ${simField('Versement exceptionnel chaque année (€)', `<input type="number" min="0" step="50" data-k="exc" value="${P.exc}">`, 'ex. 600 € à Noël, réparti comme tes plans')}
       ${simField('Mois du versement exceptionnel', `<select data-k="excMonth">${MONTHS_LONG.map((m, i) => `<option value="${i + 1}" ${+P.excMonth === i + 1 ? 'selected' : ''}>${m}</option>`).join('')}</select>`)}
       ${simField('Hausse annuelle des versements (%)', pctIn('idx', P.idx), 'ex. 2 % pour suivre ton salaire')}
-      <div class="field"><label>Options</label>
-        <label class="check-row"><input type="checkbox" data-k="reinvest" ${P.reinvest ? 'checked' : ''}> Dividendes réinvestis</label>
-        <label class="check-row"><input type="checkbox" data-k="mc" ${P.mc ? 'checked' : ''}> Fourchette probable (500 scénarios)</label></div>
+      <div class="field"><label>Dividendes</label><label class="check-row"><input type="checkbox" data-k="reinvest" ${P.reinvest ? 'checked' : ''}> réinvestis</label></div>
     </div>`;
     $('#sim-lines').innerHTML = `<table class="t"><thead><tr><th>Ligne</th><th>Compte</th><th class="n">Valeur de départ (€)</th><th class="n">Versement / mois (€)</th><th class="n">Prix d'une part (€)</th><th class="n">Rendement attendu (%/an)</th><th class="n">Dividende (%/an)</th><th class="n">Volatilité (%)</th><th></th></tr></thead><tbody>
-      ${P.lines.map((l, i) => `<tr data-i="${i}" class="${l.on ? '' : 'closed'}">
+      ${P.lines.map((l, i) => `<tr data-i="${i}" class="${l.on && (P.scope === 'ALL' || l.account === 'PEA') ? '' : 'closed'}">
         <td><label class="check-row"><input type="checkbox" data-l="on" ${l.on ? 'checked' : ''}>${l.custom ? `<input class="in" data-l="short" value="${esc(l.short)}" style="width:140px">` : `<span class="dot" style="background:${assetColor(l.ticker)}"></span>${esc(l.short)}`}</label></td>
         <td>${l.custom ? `<select class="in" data-l="account"><option ${l.account === 'PEA' ? 'selected' : ''}>PEA</option><option value="CRYPTO" ${l.account === 'CRYPTO' ? 'selected' : ''}>CRYPTO</option></select>` : esc(l.account)}</td>
         <td class="n"><input class="in" type="number" step="10" data-l="value" value="${l.value}"></td>
         <td class="n"><input class="in" type="number" step="5" data-l="monthly" value="${l.monthly}"></td>
-        <td class="n">${l.account === 'PEA' ? `<input class="in" type="number" step="0.01" min="0" data-l="price" value="${l.price || ''}" placeholder="fractionné">${l.price && l.monthly ? `<br><small style="color:var(--muted)">${Math.floor(l.monthly / l.price)} part(s) / mois</small>` : ''}` : '<small style="color:var(--muted)">fractionné</small>'}</td>
+        <td class="n">${l.account === 'PEA' ? `<input class="in" type="number" step="0.01" min="0" data-l="price" value="${l.price || ''}" placeholder="fractionné">` : '<small style="color:var(--muted)">fractionné</small>'}</td>
         <td class="n"><input class="in" type="number" step="0.5" data-l="ret" value="${+(l.ret * 100).toFixed(2)}"></td>
         <td class="n"><input class="in" type="number" step="0.1" data-l="yld" value="${+(l.yld * 100).toFixed(2)}"></td>
         <td class="n"><input class="in" type="number" step="1" data-l="vol" value="${+(l.vol * 100).toFixed(1)}">${l.hist ? `<br><small style="color:var(--muted)">historique ${nf(0).format(l.hist * 100)} %</small>` : ''}</td>
         <td>${l.custom ? '<button class="btn sm danger" data-del="1">×</button>' : ''}</td></tr>`).join('')}
       </tbody></table>
       <div class="actions" style="padding:0 12px 12px"><button class="btn" id="sim-add">+ Ajouter une ligne fictive</button>
-      <span class="note" style="margin:0">PEA : seules des parts entières sont achetées (plancher du montant ÷ prix, le prix évolue avec le rendement) ; le reliquat n'est pas investi. Rendement attendu = hausse moyenne du cours par an (hors dividendes pour les actions). Volatilité = ampleur des variations, utilisée pour la fourchette.</span></div>`;
-    $('#sim-sub').textContent = `départ : ${D.sim.lines.filter((l) => l.value > 0).length} lignes réelles au ${dShort(D.sim.today)}`;
+      <span class="note" style="margin:0">PEA : parts entières (plancher du montant ÷ prix, le prix monte avec le rendement). Rendement = hausse moyenne du cours par an. Volatilité = ampleur des variations, utilisée pour la fourchette.</span></div>`;
   }
-
-  function bindSimForm() {
-    const upd = () => { saveSim(); renderSimOutput(); };
+  function renderBreakdown(md, det) {
+    const tot = det.lineValues.reduce((a, b) => a + b, 0) || 1;
+    $('#sim-breakdown').innerHTML = `<table class="t"><thead><tr><th>Répartition à l'horizon (trajectoire moyenne)</th><th class="n">Valeur</th><th class="n">Part</th><th class="n">Investi sur la période</th><th class="n">Non investi (parts entières)</th></tr></thead><tbody>
+      ${md.lines.map((l, i) => `<tr><td><div class="name"><span class="dot" style="background:${l.custom ? cv('--muted') : assetColor(l.ticker)}"></span>${esc(l.short)}</div></td><td class="n">${eur(det.lineValues[i], 0)}</td><td class="n">${pct(det.lineValues[i] / tot, 1)}</td><td class="n">${eur(det.contrib[i], 0)}</td><td class="n">${det.left[i] > 0.5 ? eur(det.left[i], 0) : '–'}</td></tr>`).join('')}
+      </tbody></table>`;
+  }
+  function bindSim() {
+    $('#sim-sliders').oninput = onSlider;
+    $('#sim-sliders').onclick = (e) => {
+      const b = e.target.closest('[data-y]'); if (!b) return;
+      sim.years = b.dataset.y === 'mat' ? matYears() : +b.dataset.y;
+      saveSim(); renderSliders(); recompute();
+    };
+    $('#sim-sliders').onchange = (e) => { if (e.target.id === 'sl-all') { sim.scope = e.target.checked ? 'ALL' : 'PEA'; saveSim(); renderSliders(); renderSimForm(); recompute(); } };
     let t;
-    const later = () => { clearTimeout(t); t = setTimeout(upd, 250); };
+    const later = () => { clearTimeout(t); t = setTimeout(() => { saveSim(); renderSliders(); recompute(); }, 300); };
     $('#sim-form').oninput = $('#sim-form').onchange = (e) => {
       const k = e.target.dataset.k; if (!k) return;
       if (e.target.type === 'checkbox') sim[k] = e.target.checked;
       else if (['infl', 'ps', 'ir', 'idx'].includes(k)) sim[k] = (parseFloat(e.target.value) || 0) / 100;
-      else if (k === 'scope') sim[k] = e.target.value;
       else sim[k] = parseFloat(e.target.value) || 0;
-      if (k === 'years') { const sm = e.target.parentElement.querySelector('small'); if (sm) sm.textContent = `jusqu'en ${parseISO(D.sim.today).getFullYear() + (+sim.years || 0)}`; }
       later();
     };
     $('#sim-lines').oninput = $('#sim-lines').onchange = (e) => {
       const tr = e.target.closest('tr[data-i]'); const k = e.target.dataset.l; if (!tr || !k) return;
       const l = sim.lines[+tr.dataset.i];
-      if (k === 'on') { l.on = e.target.checked; tr.classList.toggle('closed', !l.on); }
+      if (k === 'on') l.on = e.target.checked;
       else if (k === 'short' || k === 'account') l[k] = e.target.value;
       else if (['ret', 'yld', 'vol'].includes(k)) l[k] = (parseFloat(e.target.value) || 0) / 100;
       else l[k] = parseFloat(e.target.value) || 0;
@@ -902,65 +1069,12 @@
     $('#sim-lines').onclick = (e) => {
       if (e.target.id === 'sim-add') {
         sim.lines.push({ ticker: 'X-' + Date.now(), short: 'Nouvelle ligne', account: 'PEA', value: 0, monthly: 50, price: 0, ret: 0.07, vol: 0.18, yld: 0, on: true, custom: true });
-        saveSim(); renderSimForm(); renderSimOutput();
+        saveSim(); renderSimForm(); renderSliders(); recompute();
       } else if (e.target.dataset.del) {
-        sim.lines.splice(+e.target.closest('tr').dataset.i, 1); saveSim(); renderSimForm(); renderSimOutput();
+        sim.lines.splice(+e.target.closest('tr').dataset.i, 1); saveSim(); renderSimForm(); renderSliders(); recompute();
       }
     };
-  }
-
-  function renderSimOutput() {
-    const R = simulate(sim), P = sim, d = R.det, M = R.M;
-    const ink = cv('--ink'), mut = cv('--muted');
-    const ser = [];
-    if (R.band) {
-      ser.push({ name: 'p10', type: 'line', stack: 'band', data: R.dates.map((x, i) => [x, R.band.p10[i]]), lineStyle: { opacity: 0 }, showSymbol: false, silent: true, emphasis: { disabled: true } });
-      ser.push({ name: 'Fourchette 10-90 %', type: 'line', stack: 'band', data: R.dates.map((x, i) => [x, R.band.p90[i] - R.band.p10[i]]), lineStyle: { opacity: 0 }, areaStyle: { color: hexA(ink, 0.08) }, showSymbol: false, silent: true, emphasis: { disabled: true } });
-    }
-    ser.push(line('Valeur (rendements attendus)', R.dates.map((x, i) => [x, d.total[i]]), ink));
-    ser.push(line("En euros d'aujourd'hui", R.dates.map((x, i) => [x, d.real[i]]), slot(1)));
-    ser.push(line('Capital investi', R.dates.map((x, i) => [x, d.invested[i]]), mut, { lineStyle: { width: 1.5, color: mut } }));
-    const leg = [{ label: 'Valeur (rendements attendus)', color: ink }, { label: "En euros d'aujourd'hui (inflation déduite)", color: slot(1) }, { label: 'Capital investi', color: mut }];
-    if (R.band) leg.push({ label: '8 scénarios sur 10 dans cette zone', color: hexA(ink, 0.25), sq: true });
-    legend('pj-legend', leg);
-    const c = mk('pj-chart');
-    if (c) c.setOption(base({ xAxis: xTime(spanDays(R.dates[0], R.dates[M])), yAxis: yVal(axEur), series: ser,
-      tooltip: Object.assign(base().tooltip, { formatter: (ps) => {
-        const i = ps[0].dataIndex;
-        let h = `<div style="font-weight:650;margin-bottom:4px">${dLong(R.dates[i])}</div>`;
-        const row = (k, v) => `<div style="display:flex;justify-content:space-between;gap:14px"><span>${k}</span><b>${eur(v, 0)}</b></div>`;
-        h += row('Valeur', d.total[i]) + row("En euros d'aujourd'hui", d.real[i]) + row('Capital investi', d.invested[i]) + row('Net après impôts', d.net[i]);
-        if (R.band) h += `<div style="color:var(--muted);margin-top:4px">8 chances sur 10 entre ${eur(R.band.p10[i], 0)} et ${eur(R.band.p90[i], 0)}</div>`;
-        return h;
-      } }) }), true);
-    $('#sim-chart-sub').textContent = `${R.lines.length} ligne(s) · ${eur(R.lines.reduce((a, l) => a + (+l.monthly || 0), 0), 0)} / mois`;
-    const end = R.dates[M];
-    $('#sim-h-sub').textContent = dLong(end);
-    const gain = d.total[M] - d.invested[M];
-    $('#sim-kpis').innerHTML = kgrid([
-      { label: 'Valeur', value: eur(d.total[M], 0), delta: R.band ? `8 chances sur 10 : ${eur(R.band.p10[M], 0)} à ${eur(R.band.p90[M], 0)}` : '' },
-      { label: "En euros d'aujourd'hui", help: 'projection', value: eur(d.real[M], 0), delta: `inflation ${pct(P.infl, 1)} / an` },
-      { label: 'Capital investi', value: eur(d.invested[M], 0) },
-      { label: 'Plus-value', value: `<span class="${cls(gain)}">${eurS(gain, 0)}</span>` },
-      { label: 'Impôts si retrait', value: `<span class="down">−${eur(d.tax, 0)}</span>`, delta: end >= D.sim.maturity ? 'PEA de plus de 5 ans' : 'PEA de moins de 5 ans' },
-      { label: 'Net en poche', value: eur(d.net[M], 0), delta: `${eur(d.netReal[M], 0)} en euros d'aujourd'hui` },
-      { label: 'Revenu mensuel possible', help: 'projection', value: eur(d.netReal[M] * 0.04 / 12, 0), delta: "règle des 4 %, euros d'aujourd'hui" },
-      ...(R.pLoss != null ? [{ label: 'Risque de finir sous le capital investi', value: pct(R.pLoss, 0), delta: 'sur 500 scénarios' }] : []),
-      ...(d.left.reduce((a, b) => a + b, 0) > 1 ? [{ label: 'Non investi (parts entières)', help: 'plans', value: eur(d.left.reduce((a, b) => a + b, 0), 0), delta: 'reliquats des plans sur la période' }] : []),
-    ]);
-    const marks = [];
-    const mi = R.dates.findIndex((x) => x >= D.sim.maturity);
-    if (mi > 0) marks.push(['Échéance fiscale PEA', mi]);
-    for (let y = 5; y * 12 < M; y += 5) marks.push([`${y} ans`, y * 12]);
-    marks.push([`Horizon (${P.years} ans)`, M]);
-    marks.sort((a, b) => a[1] - b[1]);
-    $('#pj-table').innerHTML = `<table class="t"><thead><tr><th>Étape</th><th>Date</th><th class="n">Investi</th><th class="n">Valeur</th>${R.band ? '<th class="n">Fourchette 10-90 %</th>' : ''}<th class="n">En € d'aujourd'hui</th><th class="n">Net après impôts</th></tr></thead><tbody>
-      ${marks.map(([lab, i]) => `<tr><td>${lab}</td><td>${dShort(R.dates[i])}</td><td class="n">${eur(d.invested[i], 0)}</td><td class="n">${eur(d.total[i], 0)}</td>
-        ${R.band ? `<td class="n">${eur(R.band.p10[i], 0)} – ${eur(R.band.p90[i], 0)}</td>` : ''}<td class="n">${eur(d.real[i], 0)}</td><td class="n">${eur(d.net[i], 0)}</td></tr>`).join('')}</tbody></table>`;
-    const tot = d.lineValues.reduce((a, b) => a + b, 0) || 1;
-    $('#sim-breakdown').innerHTML = `<table class="t"><thead><tr><th>Ligne</th><th class="n">Valeur à l'horizon</th><th class="n">Part</th><th class="n">Investi sur la période</th><th class="n">Non investi (parts entières)</th><th class="n">Rendement attendu</th></tr></thead><tbody>
-      ${R.lines.map((l, i) => `<tr><td><div class="name"><span class="dot" style="background:${l.custom ? cv('--muted') : assetColor(l.ticker)}"></span>${esc(l.short)}</div></td><td class="n">${eur(d.lineValues[i], 0)}</td><td class="n">${pct(d.lineValues[i] / tot, 1)}</td><td class="n">${eur(d.contrib[i], 0)}</td><td class="n">${d.left[i] > 0.5 ? eur(d.left[i], 0) : '–'}</td><td class="n">${pct(l.ret, 1)}</td></tr>`).join('')}
-      </tbody></table><div class="note" style="padding:0 12px 10px">Ordres de grandeur, pas une prévision : la vraie trajectoire alternera hausses et baisses. La fourchette vient de 500 scénarios aléatoires fondés sur les volatilités saisies.</div>`;
+    $$('#sim-unit button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.u === sim.unit)));
   }
 
   function renderProjection() {
@@ -969,25 +1083,20 @@
     $('#fx-counter').innerHTML = `<div style="font-size:30px;font-weight:650">${nf(0).format(F.days_left)} <span style="font-size:14px;color:var(--muted);font-weight:500">jours</span></div>
       <div class="meter"><div style="width:${(F.progress * 100).toFixed(1)}%"></div></div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>Ouvert le ${dShort(F.opened)}</span><span>5 ans le ${dShort(F.maturity)}</span></div>
-      <div style="margin-top:14px;font-size:12px">Plafond de versements : <b>${eur(F.deposits, 0)}</b> / ${eur(F.ceiling, 0)}</div>
-      <div class="meter"><div style="width:${Math.max(F.ceiling_used * 100, 0.5).toFixed(2)}%"></div></div>
-      <div class="note">${pct(F.ceiling_used, 2)} utilisé. À ${eur(monthly, 0)}/mois, plafond atteint dans ≈ ${nf(0).format((F.ceiling - F.deposits) / monthly / 12)} ans.</div>`;
-    $('#fx-tax').innerHTML = `<table class="t"><thead><tr><th>Scénario de retrait</th><th class="n">Valeur PEA</th><th class="n">Gain imposable</th><th class="n">Taux</th><th class="n">Impôts</th><th class="n">Net en poche</th></tr></thead><tbody>
-      <tr><td>Aujourd'hui (avant 5 ans : retrait = clôture du PEA)</td><td class="n">${eur(F.value)}</td><td class="n">${eurS(F.gain)}</td><td class="n">${pct(F.pfu_rate, 1)}</td><td class="n down">−${eur(F.tax_now)}</td><td class="n">${eur(F.net_now)}</td></tr>
-      <tr><td>Après le ${dShort(F.maturity)} (à valeur égale)</td><td class="n">${eur(F.value)}</td><td class="n">${eurS(F.gain)}</td><td class="n">${pct(F.ps_rate, 1)}</td><td class="n down">−${eur(F.tax_after)}</td><td class="n">${eur(F.net_after)}</td></tr>
-      </tbody></table><div class="note" style="padding:0 12px 10px">Écart aujourd'hui : <b>${eur(F.saving)}</b>. PFU = ${pct(F.pfu_rate - F.ps_rate, 1)} d'impôt + ${pct(F.ps_rate, 1)} de prélèvements sociaux (valeurs de « Paramètres »). Gain = valeur + dividendes − capital net investi.</div>`;
+      <div class="note">Après le ${dShort(F.maturity)}, plus d'impôt sur le revenu sur les gains : seuls les prélèvements sociaux (${pct(F.ps_rate, 1)}) restent dus. Plafond de versements : ${eur(F.deposits, 0)} / ${eur(F.ceiling, 0)} (${pct(F.ceiling_used, 1)}), atteint dans ≈ ${nf(0).format((F.ceiling - F.deposits) / monthly / 12)} ans à ce rythme.</div>`;
+    $('#fx-tax').innerHTML = `<div class="tax2">
+        <div><div class="lbl">Si tu retires aujourd'hui</div><div class="big">${eur(F.net_now, 0)}</div><small>impôts ${eur(F.tax_now, 0)} (${pct(F.pfu_rate, 1)} des gains) · le PEA est clôturé</small></div>
+        <div><div class="lbl">Après le ${dShort(F.maturity)}</div><div class="big up">${eur(F.net_after, 0)}</div><small>impôts ${eur(F.tax_after, 0)} (${pct(F.ps_rate, 1)} des gains) · le PEA reste ouvert</small></div></div>
+      <div class="note">À valeur égale, attendre 2030 t'économise <b>${eur(F.saving, 0)}</b> d'impôts aujourd'hui, et l'écart grandit avec tes gains. Calcul sur ta plus-value actuelle (${eurS(F.gain, 0)}).</div>`;
     const D2 = D.dividends;
     $('#fx-divs').innerHTML = `<table class="t compact"><tbody>
-      <tr><td style="color:var(--muted)">Encaissés depuis l'ouverture</td><td class="n">${eur(D2.total)}</td></tr>
+      <tr><td style="color:var(--muted)">Reçus depuis l'ouverture</td><td class="n">${eur(D2.total)}</td></tr>
       <tr><td style="color:var(--muted)">12 derniers mois</td><td class="n">${eur(D2.ttm)}</td></tr>
-      <tr><td style="color:var(--muted)">Rendement sur coût (actions)</td><td class="n">${pct(D2.yield_on_cost)}</td></tr>
-      <tr><td style="color:var(--muted)">Estimation 12 mois à venir</td><td class="n">${eur(D2.forward)}</td></tr></tbody></table>
-      <table class="t compact"><thead><tr><th>Prochains (estimés)</th><th class="n">Montant</th></tr></thead><tbody>
+      <tr><td style="color:var(--muted)">Attendus sur 12 mois</td><td class="n">${eur(D2.forward)}</td></tr>
       ${D2.next.map((x) => `<tr><td>${esc(x.short)} · ${dShort(x.ex_date)}</td><td class="n">${eur(x.amount)}</td></tr>`).join('')}</tbody></table>
-      <table class="t compact"><thead><tr><th>Reçus (ajoutés automatiquement)</th><th class="n">Montant</th></tr></thead><tbody>
-      ${D2.received.slice().reverse().map((x) => `<tr><td>${dShort(x.date)} · ${esc(x.short)}</td><td class="n">${eur(x.amount)}</td></tr>`).join('')}</tbody></table>`;
+      <div class="note" style="padding:0 12px 10px">Réinvestis par TR au plan suivant.</div>`;
     if (!sim) sim = loadSim();
-    renderSimForm(); bindSimForm(); renderSimOutput();
+    renderSliders(); renderSimForm(); bindSim(); recompute();
   }
 
   // ------------------------------------------------------------ ACTUALITÉS
@@ -1022,6 +1131,12 @@
   $('#news-sort').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; newsState.sort = b.dataset.s; $$('#news-sort button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); renderNews(); });
   $('#news-lines').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; newsState.line = b.dataset.line; renderNews(); });
   $('#sim-reset').addEventListener('click', () => { sim = simDefaults(); saveSim(); renderProjection(); });
+  $$('#sim-unit button').forEach((b) => b.addEventListener('click', () => {
+    if (!sim) return;
+    sim.unit = b.dataset.u; saveSim();
+    $$('#sim-unit button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    if (lastMd) { renderHero(lastMd, lastDet, lastQ); renderSimChart(lastMd, lastDet, lastQ); }
+  }));
 
   // ------------------------------------------------------------ TRANSACTIONS
   const TYPE_LABEL = { BUY: ['Achat', 'b-buy'], SELL: ['Vente', 'b-sell'], DIVIDEND: ['Dividende', 'b-div'], TRANSFER_IN: ['Transfert entrant', 'b-other'], TRANSFER_OUT: ['Transfert sortant', 'b-other'], STAKING: ['Staking', 'b-div'], BONUS: ['Attribution', 'b-other'], FEE: ['Frais', 'b-sell'] };
@@ -1050,7 +1165,7 @@
     state.view = view;
     $$('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-' + view));
     $$('#nav a[data-view]').forEach((a) => a.classList.toggle('active', a.dataset.view === view));
-    const scoped = ['overview', 'performance', 'risque'].includes(view);
+    const scoped = ['overview', 'performance', 'risque', 'allocation'].includes(view);
     $('#scope-seg').parentElement.style.opacity = scoped ? '1' : '.45';
     $('#scope-seg').parentElement.title = scoped ? '' : 'Sans effet sur cette vue';
     renderChrome();

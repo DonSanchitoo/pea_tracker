@@ -32,6 +32,22 @@ REGION = {
     "Chili": "Autres émergents", "Pérou": "Autres émergents", "Colombie": "Autres émergents", "Grèce": "Autres émergents", "Vietnam": "Autres émergents",
 }
 OTHER = {"autre", "autres"}
+# répartition par défaut d'une grande zone en pays (quand une ligne n'a que des zones)
+ZONE_COUNTRIES = {
+    "Amérique du Nord": {"États-Unis": 96, "Canada": 4},
+    "Europe": {"Grande-Bretagne": 23, "Suisse": 15, "Allemagne": 14, "Pays-Bas": 9, "Danemark": 6, "Suède": 6, "Italie": 6,
+               "Espagne": 6, "Finlande": 3, "Belgique": 3, "Norvège": 2, "Irlande": 2, "Autriche": 1, "Portugal": 1, "Pologne": 3},
+    "France": {"France": 100}, "Japon": {"Japon": 100},
+    "Pacifique développé": {"Australie": 70, "Hong Kong": 18, "Singapour": 10, "Nouvelle-Zélande": 2},
+    "Chine": {"Chine": 100}, "Taïwan": {"Taïwan": 100}, "Inde": {"Inde": 100}, "Corée du Sud": {"Corée du Sud": 100},
+    "Autres émergents": {"Brésil": 22, "Arabie saoudite": 18, "Afrique du Sud": 14, "Mexique": 10, "Indonésie": 10, "Malaisie": 8,
+                         "Thaïlande": 8, "Émirats arabes unis": 5, "Philippines": 3, "Chili": 2},
+}
+# secteur Yahoo (anglais) -> libellé justETF
+YAHOO_SECTOR = {"Technology": "Technologie", "Financial Services": "Finance", "Industrials": "Industrie", "Healthcare": "Soins de santé",
+                "Consumer Cyclical": "Biens de consommation non cycliques", "Consumer Defensive": "Biens de consommation cycliques",
+                "Communication Services": "Télécommunication", "Energy": "Énergie", "Basic Materials": "Matériaux de base",
+                "Utilities": "Services aux collectivités", "Real Estate": "Immobilier"}
 
 
 def _parse(text):
@@ -58,6 +74,17 @@ def update(cfg, fetch=True, max_age_days=7):
     warnings, changed = [], False
     now = datetime.now(timezone.utc)
     for t, a in cfg["assets"].items():
+        if a.get("kind") == "Action" and not a.get("sectors") and not data.get(t, {}).get("sectors"):
+            try:
+                import yfinance as yf
+                info = yf.Ticker(t).info or {}
+                sec = YAHOO_SECTOR.get(info.get("sector"))
+                if sec:
+                    data[t] = {"sectors": {sec: 100}, "source": "Yahoo", "fetched_at": now.strftime("%Y-%m-%d %H:%M UTC")}
+                    changed = True
+            except Exception:
+                pass
+            continue
         if a.get("kind") != "ETF" or not a.get("isin"):
             continue
         old = data.get(t, {})
@@ -109,7 +136,13 @@ def effective(cfg, live):
         if a.get("account") == "CRYPTO" or a.get("kind") == "Crypto":
             countries, sectors = {}, {"Crypto-actifs": 100}
         else:
-            countries = _merge(lv.get("countries"), a.get("countries"))
+            indicative = a.get("countries")
+            if not indicative and a.get("zones"):
+                indicative = {}
+                for z, w in a["zones"].items():
+                    for c, cw in ZONE_COUNTRIES.get(z, {"Autres": 100}).items():
+                        indicative[c] = indicative.get(c, 0) + w * cw / 100
+            countries = _merge(lv.get("countries"), indicative)
             sectors = _merge(lv.get("sectors"), a.get("sectors")) or {"Non renseigné": 100}
         if countries:
             zones = {}

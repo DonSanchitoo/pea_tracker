@@ -17,6 +17,11 @@
   const FREQS = [['1', 'Chaque mois'], ['twice', '2 fois par mois'], ['2', 'Tous les 2 mois'], ['3', 'Chaque trimestre']];
   const WORLD = { 'Amérique du Nord': 74, 'Europe': 16, 'Japon': 5.5, 'Pacifique développé': 2.5, 'Autres': 2 };
   const EM = { 'Chine': 27, 'Taïwan': 22, 'Inde': 20, 'Corée du Sud': 11, 'Autres émergents': 20 };
+  const WORLD_S = { 'Technologie': 26, 'Finance': 17, 'Industrie': 11, 'Soins de santé': 10, 'Biens de consommation non cycliques': 10, 'Télécommunication': 8,
+    'Biens de consommation cycliques': 6, 'Énergie': 3.5, 'Matériaux de base': 3.5, 'Services aux collectivités': 2.7, 'Immobilier': 2.3 };
+  const NDX_S = { 'Technologie': 52, 'Télécommunication': 15, 'Biens de consommation non cycliques': 14, 'Soins de santé': 6, 'Biens de consommation cycliques': 6, 'Industrie': 5, 'Autres': 2 };
+  const EM_S = { 'Technologie': 30, 'Finance': 22, 'Biens de consommation non cycliques': 13, 'Télécommunication': 10, 'Industrie': 7, 'Matériaux de base': 6, 'Énergie': 4, 'Autres': 8 };
+  const EU_S = { 'Finance': 22, 'Industrie': 18, 'Soins de santé': 14, 'Biens de consommation cycliques': 9, 'Technologie': 8, 'Biens de consommation non cycliques': 8, 'Matériaux de base': 6, 'Énergie': 5, 'Services aux collectivités': 4, 'Télécommunication': 4, 'Immobilier': 2 };
   const S = { tab: 'ops', files: null, loading: false, catalog: null, newAssets: {}, prices: {}, edit: null, open: false, user: null };
 
   const token = () => APP.store.get(TOKEN_KEY, '');
@@ -172,8 +177,14 @@
     else if (/JAPAN|JAPON|TOPIX|NIKKEI/.test(n)) { zones = { Japon: 100 }; fr = 'Nikkei OR "Bourse de Tokyo"'; en = 'Nikkei OR "Japanese stocks"'; }
     else if (/WORLD|MONDE|ACWI/.test(n)) { fr = '"MSCI World"'; en = '"MSCI World"'; }
     const nm = title(it.n);
-    return { name: nm, short: nm.length > 22 ? nm.slice(0, 22).trim() : nm, tr_name: nm, isin, account: kind === 'Crypto' ? 'CRYPTO' : 'PEA', kind, asset_class: cls,
+    let sectors = null;
+    if (kind === 'Crypto') sectors = { 'Crypto-actifs': 100 };
+    else if (kind === 'ETF') sectors = /NASDAQ|NSDQ|TECH/.test(n) ? NDX_S : cls === 'Actions Asie émergente (ETF)' ? EM_S : cls === 'Actions Europe (ETF)' || cls === 'Actions françaises' ? EU_S : WORLD_S;
+    const out = { name: nm, short: nm.length > 22 ? nm.slice(0, 22).trim() : nm, tr_name: nm, isin, account: kind === 'Crypto' ? 'CRYPTO' : 'PEA', kind, asset_class: cls,
       ter: kind === 'ETF' ? 0.2 : 0, slot: nextSlot(), zones, ttf: kind === 'Action' && isin.startsWith('FR'), news: { fr, en } };
+    if (sectors) out.sectors = Object.assign({}, sectors);
+    if (kind === 'Action') out.countries = isin.startsWith('FR') ? { France: 100 } : {};
+    return out;
   }
   async function searchInstruments(q) {
     const nq = norm(q).trim();
