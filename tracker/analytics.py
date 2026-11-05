@@ -545,6 +545,18 @@ def _last_price(panel, t):
     return float(s.iloc[-1]) if len(s) else float("nan")
 
 
+def safety_margin(panel, t):
+    """Marge de sécurité d'un plan en parts entières : 2 fois la variation mensuelle habituelle du cours
+    (écart-type sur un an), bornée entre 5 % et 15 %. 8 % par défaut sans historique."""
+    raw = panel.raw.get(t)
+    if raw is None or len(raw) < 60:
+        return 0.08
+    crypto = panel.cfg["assets"].get(t, {}).get("account") == "CRYPTO"
+    r = raw["close"][raw.index <= panel.today].pct_change().dropna().iloc[-(365 if crypto else 252):]
+    sm = float(r.std() * math.sqrt(30 if crypto else 21))
+    return min(0.15, max(0.05, 2 * sm)) if sm == sm else 0.08
+
+
 def plans_info(panel, pos):
     from .ledger import monthly_equivalent, next_execution, plan_days
     cfg, today = panel.cfg, panel.today
@@ -566,9 +578,11 @@ def plans_info(panel, pos):
         if a["account"] == "PEA" and price == price and price > 0:
             n = math.floor(pl["amount"] / (price * 1.002))
             inv = n * price
+            m = safety_margin(panel, t)
             row.update(shares=n, invested=inv, residual=pl["amount"] - inv,
-                       residual_pct=(pl["amount"] - inv) / pl["amount"],
-                       suggest=[dict(shares=k, amount=math.ceil(k * price * 1.02)) for k in (max(n, 1), max(n, 1) + 1)])
+                       residual_pct=(pl["amount"] - inv) / pl["amount"], margin=m,
+                       room=(pl["amount"] / (n * price) - 1) if n else None,
+                       suggest=[dict(shares=k, amount=math.ceil(k * price * (1 + m))) for k in (max(n, 1), max(n, 1) + 1)])
         else:
             row.update(shares=None, invested=float(pl["amount"]), residual=0.0, residual_pct=0.0)
         rows.append(row)

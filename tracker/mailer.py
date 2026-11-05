@@ -194,13 +194,11 @@ def build_html(cfg, data, kind, added, cid, dca_date=None):
         note = ""
         if any(t["source"] == "AUTO" for t in execd):
             note = (f'<div style="font-size:12px;color:{C["text2"]};margin-top:8px">Montants <b>estimés</b> au cours du jour '
-                    f'(nombre de parts exact dans 14 cas sur 14 jusqu\'ici). Pour être au centime, corrige-les avec les montants TR '
+                    f'(nombre de parts fiable). Pour être au centime, corrige-les avec les montants TR '
                     f'dans <a href="{url}#donnees" style="color:{C["blue"]}">Mes données</a>.</div>')
-        resid = [p for p in data["plans"] if p.get("residual_pct") and p["residual_pct"] >= 0.1]
-        if resid:
-            p = resid[0]
-            note += (f'<div style="font-size:12px;color:{C["text2"]};margin-top:6px">⚠ Plan {p["short"]} : ≈ {eur(p["residual"])} '
-                     f'non investis par mois (parts entières). Montant conseillé : {" ou ".join(str(s["amount"]) + " €" for s in p["suggest"])}.</div>')
+        for i in [i for i in data["insights"] if i["id"].startswith("plan-")][:2]:
+            note += (f'<div style="font-size:12px;color:{C["text2"]};margin-top:6px">⚠ {i["title"]} : détail et montant conseillé '
+                     f'dans « À surveiller », plus bas.</div>')
         last = max((t["date"] for t in execd), default=today)
         body += _section(f"Plans exécutés le {dshort(last)}",
                          _table(["Ligne", "Date", "Quantité", "Prix", "Montant", "Source"], rows, ["left", "left", "right", "right", "right", "left"]) + note)

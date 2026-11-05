@@ -38,13 +38,31 @@ def _insights(cfg, panel, pos, plans, alloc, risk, recon, ghosts_pea, reserve=No
     eur = lambda v: f"{v:,.2f} €".replace(",", " ").replace(".", ",")
     pct = lambda v: f"{v * 100:.1f} %".replace(".", ",")
 
+    parts = lambda k: f"{k} part{'s' if k > 1 else ''}"
     for p in plans:
-        if p.get("residual_pct") and p["residual_pct"] * 100 >= al.get("plan_residual_pct", 10):
-            sug = " ou ".join(f"{s['amount']} € ({s['shares']} part{'s' if s['shares'] > 1 else ''})" for s in p["suggest"])
+        if not p.get("active") or p.get("shares") is None:
+            continue
+        n, s1, s2 = p["shares"], p["suggest"][0], p["suggest"][1]
+        marge = f"marge de {p['margin'] * 100:.0f} % = 2 fois la variation mensuelle habituelle de son cours, recalculée chaque jour"
+        quand = f" le {pd.Timestamp(p['next']).strftime('%d/%m')}" if p.get("next") else ""
+        if n == 0:
+            out.append(dict(level="alert", id="plan-zero", title=f"Plan {p['short']} : aucune part achetée",
+                            text=f"À {eur(p['price'])} la part, tes {p['amount']:g} € ne suffisent plus pour une part : rien ne sera acheté{quand}, "
+                                 f"tout ira dans ta réserve. Montant conseillé : {s1['amount']} € ({parts(s1['shares'])}), {marge}."))
+        elif n <= 2 and p["room"] < p["margin"]:
+            out.append(dict(level="warn", id="plan-marge", title=f"Plan {p['short']} : marge trop juste",
+                            text=f"À {eur(p['price'])} la part, tes {p['amount']:g} € achètent {parts(n)}. Si le cours monte de plus de "
+                                 f"{pct(p['room'])} d'ici l'exécution{quand}, le plan " + (f"n'en achète que {n - 1}. " if n > 1 else "n'achète plus rien. ") +
+                                 f"Montant conseillé : {s1['amount']} € ({parts(s1['shares'])}) ou {s2['amount']} € ({parts(s2['shares'])}), {marge}."))
+        elif p.get("residual_pct") and p["residual_pct"] * 100 >= al.get("plan_residual_pct", 10):
+            if p["amount"] >= s1["amount"]:
+                conseil = (f"Ton montant garde une bonne marge : la part peut monter de {pct(p['room'])} avant que le plan achète une part de moins. "
+                           f"Pour réduire le reliquat : {s1['amount']} € ({parts(n)}) ; pour {parts(n + 1)} : {s2['amount']} € ({marge}).")
+            else:
+                conseil = f"Montant conseillé : {s1['amount']} € ({parts(s1['shares'])}) ou {s2['amount']} € ({parts(s2['shares'])}), {marge}."
             out.append(dict(level="warn", id="plan-residuel", title=f"Plan {p['short']} : {eur(p['residual'])} non investis par mois",
-                            text=f"Le PEA n'achète que des parts entières. À {eur(p['price'])} la part, tes {p['amount']:g} € "
-                                 f"achètent {p['shares']} part{'s' if p['shares'] > 1 else ''} et laissent {pct(p['residual_pct'])} du montant de côté. "
-                                 f"Montant conseillé : {sug} (marge de 2 % incluse)."))
+                            text=f"Le PEA n'achète que des parts entières. À {eur(p['price'])} la part, tes {p['amount']:g} € achètent {parts(n)} ; "
+                                 f"le reste ({pct(p['residual_pct'])}) n'est pas perdu, il va dans ta réserve de liquidité. {conseil}"))
     auto = panel.ledger[(panel.ledger["source"] == "AUTO") & (panel.ledger["type"] == "BUY")]
     if len(auto):
         out.append(dict(level="info", id="auto", title=f"{len(auto)} achat(s) estimé(s) par le robot à vérifier",
@@ -52,31 +70,66 @@ def _insights(cfg, panel, pos, plans, alloc, risk, recon, ghosts_pea, reserve=No
                              "corrige le montant avec celui affiché dans TR et passe la source à TR."))
     est = panel.ledger[panel.ledger["source"] == "ESTIME"]
     if len(est):
-        out.append(dict(level="info", id="estime", title="Historique crypto partiellement estimé",
-                        text="Les 2 transferts ETH entrants (date et quantité exactes inconnues) et le staking sont estimés. "
-                             "La valeur et le coût actuels sont calés sur TR ; seule la courbe avant le 20/08/2026 est approximative."))
+        TYP = {"TRANSFER_IN": "transfert entrant", "TRANSFER_OUT": "transfert sortant", "BUY": "achat", "SELL": "vente",
+               "DIVIDEND": "dividende", "BONUS": "bonus", "FEE": "frais", "STAKING": "staking"}
+        ops = est[est["type"] != "STAKING"]
+        stk = est[est["type"] == "STAKING"]
+        accts = sorted(set(est["account"]))
+        bits = [f"{TYP.get(r.type, r.type.lower())} {cfg['assets'].get(r.ticker, {}).get('short', r.ticker)} du {pd.Timestamp(r.date).strftime('%d/%m/%Y')}"
+                for r in ops.itertuples(index=False)]
+        txt = ""
+        if bits:
+            txt += ("Opération estimée (date ou quantité à confirmer) : " if len(bits) == 1 else "Opérations estimées (date ou quantité à confirmer) : ") + ", ".join(bits) + ". "
+        if len(stk):
+            txt += f"{len(stk)} versement{'s' if len(stk) > 1 else ''} de staking calculé{'s' if len(stk) > 1 else ''} au taux paramétré (le dernier le {pd.Timestamp(stk['date'].max()).strftime('%d/%m/%Y')}). "
+        if len(ops):
+            txt += f"La courbe avant le {pd.Timestamp(ops['date'].max()).strftime('%d/%m/%Y')} est approximative. "
+        txt += "Pour être exact, corrige ces lignes avec les montants TR dans « Mes données » et passe leur source à TR."
+        out.append(dict(level="info", id="estime",
+                        title=f"{len(est)} ligne{'s' if len(est) > 1 else ''} estimée{'s' if len(est) > 1 else ''} dans le registre ({', '.join(a.lower() if a == 'CRYPTO' else a for a in accts)})",
+                        text=txt))
     rp = risk.get("PEA", {})
     if rp.get("dd_current") is not None and rp["dd_current"] * 100 <= al.get("drawdown_pct", -10):
         out.append(dict(level="alert", id="drawdown", title=f"PEA à {pct(rp['dd_current'])} de son plus haut",
                         text="Repli significatif. Aucun impact tant que tu ne vends pas : les plans achètent moins cher."))
     conc = alloc["concentration"]["pea"]
     if conc.get("top") and conc["top"] * 100 >= al.get("max_line_weight_pct", 90):
-        out.append(dict(level="info", id="concentration", title="Une ligne dépasse 90 % du PEA",
-                        text="Si c'est un ETF Monde, c'est une concentration de produit, pas de risque : il contient ~1 400 sociétés."))
+        big = max((p for p in pos if p["open"] and p["account"] == "PEA"), key=lambda p: p["value"])
+        world = "Monde" in (big.get("asset_class") or "")
+        out.append(dict(level="info" if world else "warn", id="concentration",
+                        title=f"{big['short']} pèse {pct(conc['top'])} du PEA",
+                        text="C'est un ETF Monde : concentration de produit, pas de risque, il contient plus de 1 000 sociétés."
+                        if world else "Une seule ligne porte presque tout le PEA : une forte baisse de cette ligne se verrait directement sur le total."))
     if ghosts_pea and ghosts_pea.get("bench_final"):
         diff = ghosts_pea["wealth_final"] - ghosts_pea["bench_final"]
+        held = panel.ledger[(panel.ledger["account"] == "PEA") & (panel.ledger["type"].isin(["BUY", "SELL", "TRANSFER_IN"]))]["ticker"]
+        others = ", ".join(dict.fromkeys(cfg["assets"][t]["short"] for t in held if t != cfg["benchmark"]["ticker"] and t in cfg["assets"])) or "aucune"
         out.append(dict(level="good" if diff >= 0 else "info", id="fantome",
-                        title=f"Tes choix vs 100 % MSCI World : {'+' if diff >= 0 else ''}{eur(diff)}",
+                        title=f"Tes choix vs 100 % {cfg['benchmark'].get('short', cfg['benchmark']['label'])} : {'+' if diff >= 0 else ''}{eur(diff)}",
                         text="Différence entre ton PEA réel (dividendes inclus) et le même argent, aux mêmes dates, placé uniquement "
-                             "sur le MSCI World. Positif = tes lignes hors MSCI World (Asie, actions, trade iShares) ont rapporté plus."))
+                             f"sur {cfg['benchmark']['label']}. Positif = tes autres lignes ({others}) ont rapporté plus."))
     fee = alloc["fee_year"]
     if fee > 0:
         out.append(dict(level="info", id="frais", title=f"Frais de gestion ETF : ≈ {eur(fee)} par an",
                         text=f"Frais courants moyens pondérés {alloc['ter_weighted']:.2f} %. Ils sont déjà déduits du cours, rien à payer en plus.".replace(".", ",", 1)))
     if recon is not None:
-        out.append(dict(level="good" if recon["ok"] else "alert", id="recon",
-                        title="Registre conforme à Trade Republic" if recon["ok"] else "Écart avec Trade Republic",
-                        text=f"Contrôle du {pd.Timestamp(recon['date']).strftime('%d/%m/%Y')} : quantités, PRU et performances comparés aux écrans TR."))
+        rdate = pd.Timestamp(recon["date"])
+        age = int((panel.today - rdate).days)
+        since = panel.ledger[(panel.ledger["date"] > rdate) & (panel.ledger["type"].isin(["BUY", "SELL", "TRANSFER_IN", "TRANSFER_OUT"]))]
+        stale = age > al.get("recon_max_days", 40)
+        quand = "aujourd'hui" if age == 0 else f"il y a {age} jour{'s' if age > 1 else ''}"
+        if not recon["ok"]:
+            out.append(dict(level="alert", id="recon", title="Écart avec Trade Republic",
+                            text=f"Contrôle du {rdate.strftime('%d/%m/%Y')} : au moins une quantité, un PRU ou une performance diffère des écrans TR. "
+                                 "Détail dans Transactions, contrôle TR."))
+        elif stale:
+            out.append(dict(level="warn", id="recon", title=f"Contrôle TR à refaire (dernier {quand})",
+                            text=f"Le registre était conforme à TR le {rdate.strftime('%d/%m/%Y')}, mais {len(since)} opération{'s ont' if len(since) > 1 else ' a'} eu lieu depuis, "
+                                 f"non vérifiée{'s' if len(since) > 1 else ''}. Saisis un relevé TR dans « Mes données », onglet Relevé TR (2 minutes)."))
+        else:
+            out.append(dict(level="good", id="recon", title="Registre conforme à Trade Republic",
+                            text=f"Contrôle du {rdate.strftime('%d/%m/%Y')} ({quand}) : quantités, PRU et performances comparés aux écrans TR."
+                                 + (f" {len(since)} opération{'s' if len(since) > 1 else ''} depuis, à vérifier au prochain relevé." if len(since) else "")))
     if reserve:
         best = [b for b in reserve["buyable"] if b["shares"] > 0]
         txt = (" · ".join(f"{b['shares']} part{'s' if b['shares'] > 1 else ''} {de(b['short'])}" for b in best[:3])
@@ -139,7 +192,7 @@ def _events(cfg, panel, plans, divs, fiscal, planned):
                        detail=o.get("note") or "Achat au montant, quantité calculée le jour venu", amount=o["amount"]))
     for dv in divs["next"]:
         ev.append(dict(date=dv["ex_date"], kind="dividende", label=f"Détachement {dv['short']} (estimé)",
-                       detail=f"≈ {dv['per_share']:.2f} € x {dv.get('qty', 0):g} action(s), versé 2 jours ouvrés après".replace(".", ",", 1),
+                       detail=f"≈ {dv['per_share']:.2f} € × {dv.get('qty', 0):g} action{'s' if dv.get('qty', 0) > 1 else ''}, versé 2 jours ouvrés après".replace(".", ",", 1),
                        amount=dv["amount"]))
     ev.append(dict(date=fiscal["maturity"], kind="fiscal", label="PEA : 5 ans, exonération d'impôt sur le revenu",
                    detail="Seuls les prélèvements sociaux restent dus sur les gains", amount=None))
@@ -257,6 +310,7 @@ def build(cfg, ledger, panel, recon_df, warnings, now, params=None, news=None, p
         allocation=alloc, plans=plans, dividends=divs, fiscal=fiscal, sim=sim, staking=staking,
         reconciliation=recon, transactions=tx, planned=planned, reserve=reserve,
         params=params or {}, config=editable, presets=PRESETS,
+        safety={t: round(an.safety_margin(panel, t), 4) for t in cfg["assets"]},
         news=dict(updated_at=news.get("updated_at"), items=news.get("items", [])[:120],
                   top=top_news(news.get("items", []), pos, plans)),
         insights=_insights(cfg, panel, pos, plans, alloc, risk, recon, ghosts_d.get("PEA"), reserve),

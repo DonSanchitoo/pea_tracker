@@ -211,7 +211,7 @@ Ratio d'information = (ta perf annualisée − MSCI World annualisé) / tracking
 
   <h3 id="plans">Efficacité des plans d'épargne</h3>
   <p>Dans un PEA, la loi interdit les fractions de titres : TR achète le nombre de parts entières que permet le montant, et le reste n'est pas investi. Le tableau estime, au cours actuel, combien de parts ton plan achètera et combien d'euros resteront de côté.</p>
-  <p><b>Ton cas</b> : le plan Asie émergente de 45 € n'achète qu'une part à ~36 € : environ 9 € par mois (≈ 19 %) ne travaillent pas. Deux options : baisser à 38 € (1 part, marge de 2 % pour les variations de cours) ou monter à ~75 € (2 parts). Le PEA Monde à ~6,35 € la part perd moins de 1 € par mois : rien à changer.</p>
+  <p><b>Montant conseillé</b> : le tableau « Efficacité des plans » et la rubrique « À surveiller » recalculent chaque jour, au dernier cours, le montant qui achète 1 ou 2 parts avec une <b>marge de sécurité</b> : 2 fois la variation mensuelle habituelle du cours de la ligne (écart-type sur un an, entre 5 % et 15 %). Avec une marge trop juste, une hausse du cours avant le 16 fait acheter une part de moins, voire aucune. Le reliquat n'est jamais perdu : il va dans ta réserve de liquidité. Alertes : <b>aucune part achetée</b> (le plan ne couvre plus le prix d'une part), <b>marge trop juste</b> (plan de 1 ou 2 parts qu'une hausse normale ferait tomber), <b>reliquat</b> au-delà du seuil réglé dans <code>alerts.plan_residual_pct</code> (10 % par défaut).</p>
 
   <!-- ===================================================== FISCALITÉ -->
   <h2 id="fiscalite">6. Fiscalité et projection</h2>
@@ -221,7 +221,7 @@ Ratio d'information = (ta perf annualisée − MSCI World annualisé) / tracking
     <tr><td>Avant 5 ans</td><td>Clôture du PEA (sauf cas légaux : licenciement, invalidité, création d'entreprise…)</td><td>PFU 31,4 % = 12,8 % d'impôt + 18,6 % de prélèvements sociaux</td></tr>
     <tr><td>Après 5 ans</td><td>Le PEA reste ouvert, versements toujours possibles</td><td>18,6 % de prélèvements sociaux</td></tr>
   </tbody></table>
-  <p>Taux 2026 : la loi de financement de la Sécurité sociale a relevé la CSG sur les revenus du capital, les prélèvements sociaux passent de 17,2 % à 18,6 %. Ils sont modifiables dans <code>config.json</code> si la loi change. Le gain imposable est estimé par valeur + dividendes − capital net investi (approximation de la règle fiscale « valeur liquidative − versements »).</p>
+  <p>Taux 2026 : la loi de financement de la Sécurité sociale a relevé la CSG sur les revenus du capital, les prélèvements sociaux passent de 17,2 % à 18,6 %. Le taux est relevé automatiquement sur service-public.fr (bascule manuelle possible dans « Mes données › Paramètres »). Le gain imposable est estimé par valeur + dividendes − capital net investi (approximation de la règle fiscale « valeur liquidative − versements »).</p>
   <span class="you">Économie d'impôt si tu attends 2030, à valeur égale : <b data-v="fiscal.saving" data-f="eur"></b></span>
   <p><b>Plafond</b> : 150 000 € de versements (pas de valeur). Les gains n'en consomment pas. <b>Crypto</b> : hors PEA, les plus-values sont imposées au PFU lors d'une vente contre des euros (exonération si le total des cessions de l'année ne dépasse pas 305 €).</p>
 
@@ -239,16 +239,17 @@ Revenu mensuel possible = net en euros d'aujourd'hui × 4 % / 12</div>
 
   <!-- ===================================================== CONTRÔLE -->
   <h2 id="reconciliation">7. Contrôle Trade Republic</h2>
-  <p>Le fichier <code>data/reconciliation.csv</code> garde les chiffres relevés sur l'appli TR (capture du 05/11/2026). À chaque mise à jour, le dashboard vérifie que le registre redonne exactement les mêmes quantités, PRU, performances et coût de revient. ✓ = identique (tolérance : 0,6 centime sur un PRU, 0,02 point sur une performance affichée). Un « ! » rouge signale un écart : il manque une opération ou un montant est faux.</p>
-  <p>Ajoute un relevé de temps en temps (une ligne par position, voir plus bas) : c'est ce qui garantit que le dashboard reste juste à l'euro près.</p>
+  <p>Le fichier <code>data/reconciliation.csv</code> garde les chiffres relevés sur l'appli TR (le dernier relevé fait foi). À chaque mise à jour, le dashboard vérifie que le registre redonne exactement les mêmes quantités, PRU, performances et coût de revient. ✓ = identique (tolérance : 0,6 centime sur un PRU, 0,02 point sur une performance affichée). Un « ! » rouge signale un écart : il manque une opération ou un montant est faux.</p>
+  <p>Le contrôle porte sur la date du relevé : les opérations passées depuis ne sont pas vérifiées. Au-delà de 40 jours (réglable : <code>alerts.recon_max_days</code>), l'alerte « Contrôle TR à refaire » apparaît dans le dashboard et le mail. Un relevé se saisit dans « Mes données › Relevé TR » en 2 minutes, idéalement juste après l'exécution des plans.</p>
 
   <h2 id="alertes">8. Alertes « À surveiller »</h2>
   <ul>
-    <li><b>Plan avec argent non investi</b> : plus de 10 % du montant d'un plan reste de côté à cause des parts entières.</li>
+    <li><b>Plans</b> : aucune part achetée, marge trop juste, ou plus de 10 % du montant laissé en réserve à cause des parts entières (voir « Montant conseillé »).</li>
     <li><b>Opérations AUTO</b> : plans enregistrés par le robot avec un montant estimé, à remplacer par le montant TR.</li>
-    <li><b>Historique estimé</b> : lignes saisies avec une hypothèse (transferts ETH).</li>
+    <li><b>Lignes estimées</b> : opérations du registre en source ESTIME (date ou quantité à confirmer, staking calculé), listées une par une.</li>
     <li><b>Drawdown</b> : PEA à plus de 10 % sous son plus haut.</li>
-    <li><b>Tes choix vs MSCI World</b>, <b>frais</b>, <b>contrôle TR</b> : rappels d'information.</li>
+    <li><b>Contrôle TR</b> : conforme, à refaire (relevé de plus de 40 jours) ou écart.</li>
+    <li><b>Tes choix vs l'indice de référence</b>, <b>frais</b>, <b>réserve</b> : rappels d'information.</li>
   </ul>
   <p>Seuils réglables dans <code>config.json</code>, rubrique <code>alerts</code>.</p>
 

@@ -273,9 +273,12 @@
     if (!p) return 'Prix inconnu pour l\'instant : la quantité sera calculée au cours du jour.';
     if (a.account !== 'PEA') return `≈ ${qty(Math.round(amount / p * 1e6) / 1e6)} ${esc(t.split('-')[0])} au cours actuel (${eur(p)}), quantité fractionnée.`;
     const n = Math.floor(amount / p + 1e-9), left = amount - n * p;
-    if (!n) return `<span class="down">0 part : ${eur(amount)} ne suffisent pas pour une part (${eur(p)} au dernier cours). Rien ne sera acheté.</span> Montant minimum conseillé : ${Math.ceil(p * 1.02)} €.`;
+    const m = (D.safety && D.safety[t]) || 0.08, mtxt = `marge de ${Math.round(m * 100)} % pour absorber une hausse du cours`;
+    if (!n) return `<span class="down">0 part : ${eur(amount)} ne suffisent pas pour une part (${eur(p)} au dernier cours). Rien ne sera acheté.</span> Montant conseillé : ${Math.ceil(p * (1 + m))} € (${mtxt}).`;
+    const room = amount / (n * p) - 1;
     return `<b>${n} part${n > 1 ? 's' : ''}</b> × ${eur(p)} = ${eur(n * p)} investis${left > 0.005 ? ` · <span class="${left / amount >= 0.1 ? 'down' : ''}">${eur(left)} non investis</span>` : ''}` +
-      (plan && left / amount >= 0.05 ? ` · pour ${n + 1} parts : ${Math.ceil((n + 1) * p * 1.02)} €` : '') + ' <span style="color:var(--muted)">(au dernier cours, PEA = parts entières)</span>';
+      (plan && n <= 2 && room < m ? ` · <span class="down">marge trop juste : si le cours monte de plus de ${(room * 100).toFixed(1).replace(".", ",")} %, le plan achète ${n - 1} part${n - 1 > 1 ? 's' : ''}</span> · conseillé : ${Math.ceil(n * p * (1 + m))} €` : '') +
+      (plan && left / amount >= 0.05 ? ` · pour ${n + 1} parts : ${Math.ceil((n + 1) * p * (1 + m))} € (${mtxt})` : '') + ' <span style="color:var(--muted)">(au dernier cours, PEA = parts entières)</span>';
   }
   function updateHints() {
     const fp = $('#f-plan'), hp = $('#plan-hint');
