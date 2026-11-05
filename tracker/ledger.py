@@ -285,11 +285,12 @@ def auto_staking(cfg, ledger, today):
 # ---------------------------------------------------------------- ordres au montant
 
 def resolve_budget_orders(cfg, ledger, ohlc_by_ticker, now):
-    """Remplace les achats sans quantité par leur exécution estimée. Retourne (registre, ordres prévus)."""
+    """Remplace les achats sans quantité par leur exécution estimée (PEA : plancher(montant / prix) parts entières).
+    Retourne (registre, ordres prévus, avertissements)."""
     today = pd.Timestamp(now.date())
     if not ledger["budget"].any():
-        return ledger, []
-    planned, rows = [], []
+        return ledger, [], []
+    planned, rows, skipped = [], [], []
     for r in ledger.to_dict("records"):
         if not r["budget"]:
             rows.append(r)
@@ -305,8 +306,8 @@ def resolve_budget_orders(cfg, ledger, ohlc_by_ticker, now):
             continue
         qty, amt, est = _fill(acc, float(r["amount"]), px.loc[ex])
         if qty <= 0:
-            planned.append(dict(date=r["date"].strftime("%Y-%m-%d"), ticker=r["ticker"], account=acc,
-                                amount=float(r["amount"]), note="Montant inférieur au prix d'une part"))
+            skipped.append(f"Versement du {r['date'].strftime('%d/%m/%Y')} sur {cfg['assets'][r['ticker']]['short']} : "
+                           f"{float(r['amount']):.2f} € ne suffisent pas pour une part (~{est:.2f} €), rien n'est acheté.")
             continue
         r = dict(r)
         r.update(date=ex, quantity=qty, amount=amt, source="AUTO",
@@ -314,7 +315,7 @@ def resolve_budget_orders(cfg, ledger, ohlc_by_ticker, now):
         rows.append(r)
     out = pd.DataFrame(rows, columns=ledger.columns)
     out["date"] = pd.to_datetime(out["date"])
-    return out.sort_values(["date", "line"], kind="mergesort").reset_index(drop=True), planned
+    return out.sort_values(["date", "line"], kind="mergesort").reset_index(drop=True), planned, skipped
 
 
 # ---------------------------------------------------------------- écriture

@@ -612,6 +612,7 @@ def sim_defaults(panel, pos):
         lines.append(dict(ticker=t, short=a["short"], account=a["account"], asset_class=a.get("asset_class"),
                           slot=a.get("slot", 8), value=p["value"] if (p and p["open"]) else 0.0,
                           monthly=sum(monthly_equivalent(pl) for pl in plans if pl["ticker"] == t),
+                          price=price if price == price else None,
                           ret=d["return"], vol=d["vol"], yld=d.get("yield", 0), hist_vol=hist_vol))
     inv = {acc: float(panel.s[acc]["invested"].iloc[-1]) for acc in ("PEA", "CRYPTO") if acc in panel.s}
     divs = {acc: float(panel.s[acc]["div"].iloc[-1]) for acc in ("PEA", "CRYPTO") if acc in panel.s}

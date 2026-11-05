@@ -597,7 +597,8 @@
       scope: 'PEA', years: S.years, infl: S.inflation, ps: S.ps_rate, ir: S.ir_rate,
       exc: 0, excMonth: 12, idx: 0, reinvest: true, mc: true,
       lines: S.lines.map((l) => ({ ticker: l.ticker, short: l.short, account: l.account, value: Math.round(l.value * 100) / 100,
-        monthly: Math.round(l.monthly * 100) / 100, ret: l.ret, vol: l.vol, yld: Math.round((l.yld || 0) * 10000) / 10000, hist: l.hist_vol, on: true })),
+        monthly: Math.round(l.monthly * 100) / 100, ret: l.ret, vol: l.vol, yld: Math.round((l.yld || 0) * 10000) / 10000, hist: l.hist_vol, on: true,
+        price: l.account === 'PEA' && l.price ? Math.round(l.price * 1000) / 1000 : 0 })),
     };
   }
   let sim = null;
@@ -607,7 +608,7 @@
     try { saved = JSON.parse(store.get(SIM_KEY, 'null')); } catch (e) { saved = null; }
     if (!saved || !Array.isArray(saved.lines)) return def;
     // garde tes hypothèses, mais repart des valeurs du jour pour tes vraies lignes
-    const lines = def.lines.map((l) => { const o = saved.lines.find((x) => x.ticker === l.ticker); return o ? Object.assign({}, o, { value: l.value, hist: l.hist, short: l.short }) : l; });
+    const lines = def.lines.map((l) => { const o = saved.lines.find((x) => x.ticker === l.ticker); return o ? Object.assign({}, o, { value: l.value, hist: l.hist, short: l.short, price: l.price }) : l; });
     saved.lines.filter((x) => x.custom).forEach((x) => lines.push(x));
     return Object.assign({}, def, saved, { lines });
   }
@@ -639,8 +640,9 @@
 
     function run(r) {
       const v = lines.map((l) => +l.value || 0);
+      const px = lines.map((l) => (l.account === 'PEA' ? +l.price || 0 : 0)); // 0 = quantité fractionnée
       const cash = Object.assign({}, cash0), inv = Object.assign({}, inv0);
-      const out = r ? null : { total: [], invested: [], net: [], real: [], netReal: [], pea: [], crypto: [], contrib: lines.map(() => 0) };
+      const out = r ? null : { total: [], invested: [], net: [], real: [], netReal: [], pea: [], crypto: [], contrib: lines.map(() => 0), left: lines.map(() => 0) };
       const totals = r ? new Float64Array(M + 1) : null;
       const snap = (m) => {
         let vp = 0, vc = 0;
@@ -665,11 +667,14 @@
           const g = r ? Math.exp(z.mu - z.s * z.s / 2 + z.s * (z.rho * zc + Math.sqrt(1 - z.rho * z.rho) * gauss(r))) : Math.exp(z.mu);
           const div = v[i] * (+l.yld || 0) / 12;
           v[i] *= g;
+          if (px[i]) px[i] *= g;
           if (P.reinvest) v[i] += div; else cash[l.account] += div;
-          let c = (+l.monthly || 0) * grow;
-          if (+P.exc && month === +P.excMonth) c += (+P.exc) * share[i];
+          // PEA : parts entières, plan et versement exceptionnel exécutés séparément (comme chez TR)
+          const buy = (amt) => (px[i] ? Math.floor(amt / px[i] + 1e-9) * px[i] : amt);
+          const want = (+l.monthly || 0) * grow + (+P.exc && month === +P.excMonth ? (+P.exc) * share[i] : 0);
+          const c = buy((+l.monthly || 0) * grow) + (+P.exc && month === +P.excMonth ? buy((+P.exc) * share[i]) : 0);
           v[i] += c; inv[l.account] += c;
-          if (!r) out.contrib[i] += c;
+          if (!r) { out.contrib[i] += c; out.left[i] += want - c; }
         });
         snap(m);
       }
@@ -710,19 +715,20 @@
         <label class="check-row"><input type="checkbox" data-k="reinvest" ${P.reinvest ? 'checked' : ''}> Dividendes réinvestis</label>
         <label class="check-row"><input type="checkbox" data-k="mc" ${P.mc ? 'checked' : ''}> Fourchette probable (500 scénarios)</label></div>
     </div>`;
-    $('#sim-lines').innerHTML = `<table class="t"><thead><tr><th>Ligne</th><th>Compte</th><th class="n">Valeur de départ (€)</th><th class="n">Versement / mois (€)</th><th class="n">Rendement attendu (%/an)</th><th class="n">Dividende (%/an)</th><th class="n">Volatilité (%)</th><th></th></tr></thead><tbody>
+    $('#sim-lines').innerHTML = `<table class="t"><thead><tr><th>Ligne</th><th>Compte</th><th class="n">Valeur de départ (€)</th><th class="n">Versement / mois (€)</th><th class="n">Prix d'une part (€)</th><th class="n">Rendement attendu (%/an)</th><th class="n">Dividende (%/an)</th><th class="n">Volatilité (%)</th><th></th></tr></thead><tbody>
       ${P.lines.map((l, i) => `<tr data-i="${i}" class="${l.on ? '' : 'closed'}">
         <td><label class="check-row"><input type="checkbox" data-l="on" ${l.on ? 'checked' : ''}>${l.custom ? `<input class="in" data-l="short" value="${esc(l.short)}" style="width:140px">` : `<span class="dot" style="background:${assetColor(l.ticker)}"></span>${esc(l.short)}`}</label></td>
         <td>${l.custom ? `<select class="in" data-l="account"><option ${l.account === 'PEA' ? 'selected' : ''}>PEA</option><option value="CRYPTO" ${l.account === 'CRYPTO' ? 'selected' : ''}>CRYPTO</option></select>` : esc(l.account)}</td>
         <td class="n"><input class="in" type="number" step="10" data-l="value" value="${l.value}"></td>
         <td class="n"><input class="in" type="number" step="5" data-l="monthly" value="${l.monthly}"></td>
+        <td class="n">${l.account === 'PEA' ? `<input class="in" type="number" step="0.01" min="0" data-l="price" value="${l.price || ''}" placeholder="fractionné">${l.price && l.monthly ? `<br><small style="color:var(--muted)">${Math.floor(l.monthly / l.price)} part(s) / mois</small>` : ''}` : '<small style="color:var(--muted)">fractionné</small>'}</td>
         <td class="n"><input class="in" type="number" step="0.5" data-l="ret" value="${+(l.ret * 100).toFixed(2)}"></td>
         <td class="n"><input class="in" type="number" step="0.1" data-l="yld" value="${+(l.yld * 100).toFixed(2)}"></td>
         <td class="n"><input class="in" type="number" step="1" data-l="vol" value="${+(l.vol * 100).toFixed(1)}">${l.hist ? `<br><small style="color:var(--muted)">historique ${nf(0).format(l.hist * 100)} %</small>` : ''}</td>
         <td>${l.custom ? '<button class="btn sm danger" data-del="1">×</button>' : ''}</td></tr>`).join('')}
       </tbody></table>
       <div class="actions" style="padding:0 12px 12px"><button class="btn" id="sim-add">+ Ajouter une ligne fictive</button>
-      <span class="note" style="margin:0">Rendement attendu = hausse moyenne du cours par an (hors dividendes pour les actions). Volatilité = ampleur des variations, utilisée pour la fourchette.</span></div>`;
+      <span class="note" style="margin:0">PEA : seules des parts entières sont achetées (plancher du montant ÷ prix, le prix évolue avec le rendement) ; le reliquat n'est pas investi. Rendement attendu = hausse moyenne du cours par an (hors dividendes pour les actions). Volatilité = ampleur des variations, utilisée pour la fourchette.</span></div>`;
     $('#sim-sub').textContent = `départ : ${D.sim.lines.filter((l) => l.value > 0).length} lignes réelles au ${dShort(D.sim.today)}`;
   }
 
@@ -750,7 +756,7 @@
     };
     $('#sim-lines').onclick = (e) => {
       if (e.target.id === 'sim-add') {
-        sim.lines.push({ ticker: 'X-' + Date.now(), short: 'Nouvelle ligne', account: 'PEA', value: 0, monthly: 50, ret: 0.07, vol: 0.18, yld: 0, on: true, custom: true });
+        sim.lines.push({ ticker: 'X-' + Date.now(), short: 'Nouvelle ligne', account: 'PEA', value: 0, monthly: 50, price: 0, ret: 0.07, vol: 0.18, yld: 0, on: true, custom: true });
         saveSim(); renderSimForm(); renderSimOutput();
       } else if (e.target.dataset.del) {
         sim.lines.splice(+e.target.closest('tr').dataset.i, 1); saveSim(); renderSimForm(); renderSimOutput();
@@ -795,6 +801,7 @@
       { label: 'Net en poche', value: eur(d.net[M], 0), delta: `${eur(d.netReal[M], 0)} en euros d'aujourd'hui` },
       { label: 'Revenu mensuel possible', help: 'projection', value: eur(d.netReal[M] * 0.04 / 12, 0), delta: "règle des 4 %, euros d'aujourd'hui" },
       ...(R.pLoss != null ? [{ label: 'Risque de finir sous le capital investi', value: pct(R.pLoss, 0), delta: 'sur 500 scénarios' }] : []),
+      ...(d.left.reduce((a, b) => a + b, 0) > 1 ? [{ label: 'Non investi (parts entières)', help: 'plans', value: eur(d.left.reduce((a, b) => a + b, 0), 0), delta: 'reliquats des plans sur la période' }] : []),
     ]);
     const marks = [];
     const mi = R.dates.findIndex((x) => x >= D.sim.maturity);
@@ -806,8 +813,8 @@
       ${marks.map(([lab, i]) => `<tr><td>${lab}</td><td>${dShort(R.dates[i])}</td><td class="n">${eur(d.invested[i], 0)}</td><td class="n">${eur(d.total[i], 0)}</td>
         ${R.band ? `<td class="n">${eur(R.band.p10[i], 0)} – ${eur(R.band.p90[i], 0)}</td>` : ''}<td class="n">${eur(d.real[i], 0)}</td><td class="n">${eur(d.net[i], 0)}</td></tr>`).join('')}</tbody></table>`;
     const tot = d.lineValues.reduce((a, b) => a + b, 0) || 1;
-    $('#sim-breakdown').innerHTML = `<table class="t"><thead><tr><th>Ligne</th><th class="n">Valeur à l'horizon</th><th class="n">Part</th><th class="n">Versé sur la période</th><th class="n">Rendement attendu</th></tr></thead><tbody>
-      ${R.lines.map((l, i) => `<tr><td><div class="name"><span class="dot" style="background:${l.custom ? cv('--muted') : assetColor(l.ticker)}"></span>${esc(l.short)}</div></td><td class="n">${eur(d.lineValues[i], 0)}</td><td class="n">${pct(d.lineValues[i] / tot, 1)}</td><td class="n">${eur(d.contrib[i], 0)}</td><td class="n">${pct(l.ret, 1)}</td></tr>`).join('')}
+    $('#sim-breakdown').innerHTML = `<table class="t"><thead><tr><th>Ligne</th><th class="n">Valeur à l'horizon</th><th class="n">Part</th><th class="n">Investi sur la période</th><th class="n">Non investi (parts entières)</th><th class="n">Rendement attendu</th></tr></thead><tbody>
+      ${R.lines.map((l, i) => `<tr><td><div class="name"><span class="dot" style="background:${l.custom ? cv('--muted') : assetColor(l.ticker)}"></span>${esc(l.short)}</div></td><td class="n">${eur(d.lineValues[i], 0)}</td><td class="n">${pct(d.lineValues[i] / tot, 1)}</td><td class="n">${eur(d.contrib[i], 0)}</td><td class="n">${d.left[i] > 0.5 ? eur(d.left[i], 0) : '–'}</td><td class="n">${pct(l.ret, 1)}</td></tr>`).join('')}
       </tbody></table><div class="note" style="padding:0 12px 10px">Ordres de grandeur, pas une prévision : la vraie trajectoire alternera hausses et baisses. La fourchette vient de 500 scénarios aléatoires fondés sur les volatilités saisies.</div>`;
   }
 

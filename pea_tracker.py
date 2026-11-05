@@ -56,7 +56,8 @@ def run(args):
         for r in added:
             print(f"Ajout automatique : {r['date']} {r['type']} {r['ticker']} {r['quantity']} / {r['amount']} €")
         ledger = lg.load_ledger(cfg)
-    ledger, planned = lg.resolve_budget_orders(cfg, ledger, by_ticker, now)
+    ledger, planned, skipped = lg.resolve_budget_orders(cfg, ledger, by_ticker, now)
+    warnings += skipped
     for w in warnings:
         print("ATTENTION :", w)
 

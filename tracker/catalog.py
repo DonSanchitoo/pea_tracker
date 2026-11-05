@@ -48,7 +48,15 @@ def _euronext(url, kind):
             continue
         toks = [t.strip(".,()") for t in name.upper().split()]
         extra = " ".join(ABBR[t] for t in toks if t in ABBR)
-        out.append({"s": f"{sym}.PA", "n": name, "i": isin, "t": kind, "m": market, "k": extra})
+        price = None
+        for col in (13, 8):
+            try:
+                price = float(row[col].replace(",", "")) if len(row) > col and row[col] not in ("", "-") else None
+            except ValueError:
+                price = None
+            if price:
+                break
+        out.append({"s": f"{sym}.PA", "n": name, "i": isin, "t": kind, "m": market, "k": extra, "p": price})
     return out
 
 
@@ -57,7 +65,7 @@ def _coingecko():
     r = requests.get(COINGECKO, headers=UA, timeout=40)
     r.raise_for_status()
     stable = {"usdt", "usdc", "dai", "fdusd", "usde", "tusd", "eurc", "pyusd", "usds", "busd"}
-    return [{"s": f"{c['symbol'].upper()}-EUR", "n": c["name"], "i": "", "t": "Crypto", "m": "Crypto"}
+    return [{"s": f"{c['symbol'].upper()}-EUR", "n": c["name"], "i": "", "t": "Crypto", "m": "Crypto", "p": c.get("current_price")}
             for c in r.json() if c.get("symbol") and c["symbol"].lower() not in stable]
 
 

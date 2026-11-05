@@ -17,7 +17,7 @@
   const FREQS = [['1', 'Chaque mois'], ['twice', '2 fois par mois'], ['2', 'Tous les 2 mois'], ['3', 'Chaque trimestre']];
   const WORLD = { 'Amérique du Nord': 74, 'Europe': 16, 'Japon': 5.5, 'Pacifique développé': 2.5, 'Autres': 2 };
   const EM = { 'Chine': 27, 'Taïwan': 22, 'Inde': 20, 'Corée du Sud': 11, 'Autres émergents': 20 };
-  const S = { tab: 'ops', files: null, loading: false, catalog: null, newAssets: {}, edit: null, open: false, user: null };
+  const S = { tab: 'ops', files: null, loading: false, catalog: null, newAssets: {}, prices: {}, edit: null, open: false, user: null };
 
   const token = () => APP.store.get(TOKEN_KEY, '');
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
@@ -236,6 +236,7 @@
         const el = e.target.closest('.pk-item[data-s]'); if (!el) return;
         e.preventDefault();
         const it = (list._items || []).find((x) => x.s === el.dataset.s); if (!it) return;
+        if (it.p) S.prices[it.s] = it.p;
         if (!cfgAssets()[it.s] && !S.newAssets[it.s]) S.newAssets[it.s] = guessAsset(it);
         const a = cfgAssets()[it.s] || S.newAssets[it.s];
         v.value = it.s;
@@ -246,6 +247,33 @@
       });
     });
   }
+  function priceOf(t) {
+    const p = D.positions.find((x) => x.ticker === t && x.price) || D.plans.find((x) => x.ticker === t && x.price) || ((D.sim && D.sim.lines) || []).find((x) => x.ticker === t && x.price);
+    if (p) return p.price;
+    if (S.prices[t]) return S.prices[t];
+    const c = (S.catalog || []).find((x) => x.s === t);
+    return c && c.p ? c.p : null;
+  }
+  // PEA : parts entières uniquement, nombre = plancher(montant / prix) ; crypto : quantité fractionnée
+  function shareHint(t, amount, plan) {
+    const a = cfgAssets()[t] || S.newAssets[t];
+    if (!a || !(amount > 0)) return '';
+    const p = priceOf(t);
+    if (!p) return 'Prix inconnu pour l\'instant : la quantité sera calculée au cours du jour.';
+    if (a.account !== 'PEA') return `≈ ${qty(Math.round(amount / p * 1e6) / 1e6)} ${esc(t.split('-')[0])} au cours actuel (${eur(p)}), quantité fractionnée.`;
+    const n = Math.floor(amount / p + 1e-9), left = amount - n * p;
+    if (!n) return `<span class="down">0 part : ${eur(amount)} ne suffisent pas pour une part (${eur(p)} au dernier cours). Rien ne sera acheté.</span> Montant minimum conseillé : ${Math.ceil(p * 1.02)} €.`;
+    return `<b>${n} part${n > 1 ? 's' : ''}</b> × ${eur(p)} = ${eur(n * p)} investis${left > 0.005 ? ` · <span class="${left / amount >= 0.1 ? 'down' : ''}">${eur(left)} non investis</span>` : ''}` +
+      (plan && left / amount >= 0.05 ? ` · pour ${n + 1} parts : ${Math.ceil((n + 1) * p * 1.02)} €` : '') + ' <span style="color:var(--muted)">(au dernier cours, PEA = parts entières)</span>';
+  }
+  function updateHints() {
+    const fp = $('#f-plan'), hp = $('#plan-hint');
+    if (fp && hp) hp.innerHTML = shareHint(fp.ticker.value, numIn(fp.amount.value), true);
+    $$('#alloc-rows .alloc-row').forEach((r) => { const h = $('.alloc-hint', r); if (h) h.innerHTML = shareHint($('.pk-v', r).value, numIn($('.alloc-amt', r).value)); });
+    const fo = $('#f-op'), ho = $('#op-hint');
+    if (fo && ho) ho.innerHTML = fo.type.value === 'BUY' && !numIn(fo.quantity.value) ? shareHint(fo.ticker.value, numIn(fo.amount.value)) : '';
+  }
+
   // nouvelles lignes choisies dans un formulaire : ajoutées à config.json avant les opérations
   function withNewAssets(cfgObj, tickers) {
     let added = 0;
@@ -275,6 +303,7 @@
       ${field('TTF incluse (€)', `<input type="number" step="0.01" min="0" name="taxes" value="${esc(r.taxes)}">`, 'calculée seule pour les actions françaises')}
       ${field('Source', sel('source', [['TR', 'TR (montant exact)'], ['AUTO', 'Estimé'], ['ESTIME', 'Hypothèse']], r.source))}
       ${field('Note', `<input name="note" value="${esc(r.note)}">`)}
+      <div class="field" style="grid-column:1/-1"><div class="pk-sel" id="op-hint"></div></div>
       </form><div class="actions"><button class="btn primary" data-act="save-op">Enregistrer</button><button class="btn" data-act="cancel">Annuler</button>${e ? `<button class="btn danger" data-act="del-op" data-i="${e.index}">Supprimer cette opération</button>` : ''}</div></div></div>` : '';
     const rows = tx.rows.map((x, i) => [x, i]).reverse();
     return `${connectBanner()}${form}
@@ -330,7 +359,7 @@
       <div class="actions"><button class="btn primary" data-act="save-vers">Enregistrer le versement</button></div></div></div>`;
   }
   function allocRow(t, amt) {
-    return `<div class="alloc-row">${field('Ligne', pickerHTML('t', t))}${field('Montant (€)', `<input type="number" step="1" min="0" class="alloc-amt" value="${amt != null ? amt : ''}">`)}<button type="button" class="btn sm danger" data-act="alloc-del" style="margin-bottom:4px">×</button></div>`;
+    return `<div class="alloc-row">${field('Ligne', pickerHTML('t', t))}${field('Montant (€)', `<input type="number" step="1" min="0" class="alloc-amt" value="${amt != null ? amt : ''}">`)}<button type="button" class="btn sm danger" data-act="alloc-del" style="margin-bottom:4px">×</button><div class="pk-sel alloc-hint" style="grid-column:1/-1;margin:-4px 0 4px"></div></div>`;
   }
   function addAlloc(t, amt) {
     const box = $('#alloc-rows');
@@ -338,8 +367,9 @@
     div.innerHTML = allocRow(t, amt);
     const el = div.firstElementChild;
     box.appendChild(el);
-    wirePickers(el);
+    wirePickers(el, () => updateHints());
     updateLeft();
+    updateHints();
   }
   function updateLeft() {
     const tot = numIn(($('#f-vers [name=total]') || {}).value) || 0;
@@ -382,6 +412,7 @@
       ${field('Première exécution', `<input type="date" name="start" value="${esc(p.start || today())}">`)}
       ${field('Fin (optionnel)', `<input type="date" name="end" value="${esc(p.end || '')}">`, 'vide = sans fin')}
       <div class="field"><label>État</label><label class="check-row"><input type="checkbox" name="active" ${p.active !== false ? 'checked' : ''}> Actif</label></div>
+      <div class="field" style="grid-column:1/-1"><div class="pk-sel" id="plan-hint"></div></div>
       </form><div class="actions"><button class="btn primary" data-act="save-plan">Enregistrer</button><button class="btn" data-act="cancel">Annuler</button></div></div></div>` : '';
     return `${connectBanner()}${form}<div class="panel"><div class="panel-h"><h2>Plans d'épargne <span class="sub">config.json</span></h2><button class="btn primary" data-act="new-plan">+ Nouveau plan</button></div>
       <div class="panel-b flush tbl-wrap"><table class="t"><thead><tr><th>Ligne</th><th class="n">Montant</th><th>Fréquence</th><th>Début</th><th>Fin</th><th>État</th><th></th></tr></thead><tbody>
@@ -611,7 +642,9 @@
     wirePickers(body, (t, a, pk) => {
       if (pk.dataset.picker === 'pick') fillLigne(t, a);
       if (pk.dataset.picker === 'ticker' && $('#f-op')) ttfAuto($('#f-op'));
+      updateHints();
     });
+    loadCatalog().then(updateHints);
     if (S.tab === 'versement') { addAlloc('', null); }
     const fo = $('#f-op');
     if (fo) { fo.amount.addEventListener('input', () => ttfAuto(fo)); fo.type.addEventListener('change', () => ttfAuto(fo)); fo.taxes.addEventListener('input', () => { fo.taxes.dataset.touched = '1'; }); }
@@ -624,6 +657,7 @@
     S.tab = b.dataset.t; S.edit = null; S.open = false; msg('', ''); render();
   });
   $('#ed-recalc').addEventListener('click', () => recalc());
+  $('#ed-body').addEventListener('input', () => updateHints());
   $('#ed-body').addEventListener('click', async (e) => {
     const g = e.target.closest('[data-goto]');
     if (g) { e.preventDefault(); S.tab = g.dataset.goto; S.edit = null; S.open = false; render(); return; }
