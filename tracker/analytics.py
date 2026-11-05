@@ -88,7 +88,8 @@ class Panel:
         self.cal = pd.date_range(start - pd.Timedelta(days=1), self.today, freq="D")
 
         # cours réels par ticker (index = jours de cotation)
-        self.raw = {t: unadjusted(ohlc, actions, t) for t in set(self.tickers) | {self.bench_ticker}}
+        plan_t = {p["ticker"] for p in cfg.get("plans", []) if p["ticker"] in cfg["assets"]}
+        self.raw = {t: unadjusted(ohlc, actions, t) for t in set(self.tickers) | {self.bench_ticker} | plan_t}
         self.actions = actions
         close = {}
         for t, df in self.raw.items():
@@ -443,14 +444,16 @@ def allocation(panel, pos):
         hhi = sum(x * x for x in w)
         return dict(hhi=hhi, n_eff=(1 / hhi) if hhi else None, top=max(w) if w else None)
 
-    pea_plans = [pl for pl in cfg["plans"] if cfg["assets"][pl["ticker"]]["account"] == "PEA"]
+    from .ledger import monthly_equivalent
+    pea_plans = [dict(pl, amount=monthly_equivalent(pl)) for pl in cfg["plans"]
+                 if pl["ticker"] in cfg["assets"] and cfg["assets"][pl["ticker"]]["account"] == "PEA" and _plan_live(pl, panel.today)]
     plan_tot = sum(pl["amount"] for pl in pea_plans)
     vs_plan = []
     for p in pea:
-        pl = next((x for x in pea_plans if x["ticker"] == p["ticker"]), None)
+        amt = sum(x["amount"] for x in pea_plans if x["ticker"] == p["ticker"])
         vs_plan.append(dict(ticker=p["ticker"], short=p["short"], slot=p["slot"],
                             actual=p["value"] / pea_total if pea_total else 0,
-                            plan=(pl["amount"] / plan_tot) if (pl and plan_tot) else 0.0))
+                            plan=(amt / plan_tot) if plan_tot else 0.0))
     return dict(
         total=total,
         by_account=group(open_pos, "account"),
@@ -465,29 +468,60 @@ def allocation(panel, pos):
 
 # ----------------------------------------------------------------- plans & événements
 
+def _plan_live(pl, today):
+    return pl.get("active", True) is not False and (not pl.get("end") or pd.Timestamp(pl["end"]) >= today)
+
+
+def freq_label(pl):
+    from .ledger import plan_days
+    days = plan_days(pl)
+    every = int(pl.get("every", 1) or 1)
+    d = " et ".join(str(x) for x in days)
+    if len(days) > 1:
+        base = f"{len(days)} fois par mois (le {d})"
+    else:
+        base = f"le {d}"
+    if every == 1:
+        return base if len(days) > 1 else f"Chaque mois, {base}"
+    if every == 3:
+        return f"Chaque trimestre, {base}"
+    return f"Tous les {every} mois, {base}"
+
+
+def _last_price(panel, t):
+    raw = panel.raw.get(t)
+    if raw is None or raw.empty:
+        return float("nan")
+    s = raw["close"][raw.index <= panel.today]
+    return float(s.iloc[-1]) if len(s) else float("nan")
+
+
 def plans_info(panel, pos):
+    from .ledger import monthly_equivalent, next_execution, plan_days
     cfg, today = panel.cfg, panel.today
-    from .ledger import execution_date
     rows = []
-    for pl in cfg["plans"]:
+    for i, pl in enumerate(cfg["plans"]):
         t = pl["ticker"]
-        p = next((x for x in pos if x["ticker"] == t), None)
-        price = p["price"] if p else float("nan")
-        ex = execution_date(today.year, today.month, pl.get("day", 16), panel.trading_days)
-        if ex < today or (ex == today and t in set(panel.ledger[(panel.ledger["date"] == today)]["ticker"])):
-            nm = today + pd.DateOffset(months=1)
-            ex = execution_date(nm.year, nm.month, pl.get("day", 16), panel.trading_days)
-        acc = cfg["assets"][t]["account"]
-        row = dict(ticker=t, short=cfg["assets"][t]["short"], account=acc, amount=pl["amount"],
-                   day=pl.get("day", 16), next=ex.strftime("%Y-%m-%d"), days_to=int((ex - today).days), price=price)
-        if acc == "PEA" and price == price and price > 0:
+        if t not in cfg["assets"]:
+            continue
+        a = cfg["assets"][t]
+        price = _last_price(panel, t)
+        done_today = ((panel.ledger["date"] == today) & (panel.ledger["ticker"] == t) & (panel.ledger["type"] == "BUY")).any()
+        live = _plan_live(pl, today)
+        ex = next_execution(pl, today, panel.trading_days, include_today=not done_today) if live else None
+        row = dict(index=i, id=pl.get("id"), ticker=t, short=a["short"], account=a["account"], amount=float(pl["amount"]),
+                   days=plan_days(pl), every=int(pl.get("every", 1) or 1), start=pl.get("start"), end=pl.get("end"),
+                   active=live, freq=freq_label(pl), monthly=monthly_equivalent(pl) if live else 0.0,
+                   next=ex.strftime("%Y-%m-%d") if ex is not None else None,
+                   days_to=int((ex - today).days) if ex is not None else None, price=price)
+        if a["account"] == "PEA" and price == price and price > 0:
             n = math.floor(pl["amount"] / (price * 1.002))
             inv = n * price
             row.update(shares=n, invested=inv, residual=pl["amount"] - inv,
                        residual_pct=(pl["amount"] - inv) / pl["amount"],
                        suggest=[dict(shares=k, amount=math.ceil(k * price * 1.02)) for k in (max(n, 1), max(n, 1) + 1)])
         else:
-            row.update(shares=None, invested=pl["amount"], residual=0.0, residual_pct=0.0)
+            row.update(shares=None, invested=float(pl["amount"]), residual=0.0, residual_pct=0.0)
         rows.append(row)
     return rows
 
@@ -546,34 +580,44 @@ def fiscal_info(panel):
     )
 
 
-def projection(panel):
+def sim_defaults(panel, pos):
+    """Point de départ du simulateur (côté navigateur) : ton portefeuille réel ligne par ligne."""
+    from .ledger import monthly_equivalent
     cfg, today = panel.cfg, panel.today
-    pc = cfg["projection"]
-    months = int(pc["years"]) * 12
-    s = panel.s["PEA"]
-    v0 = float(s["V"].iloc[-1])
-    inv0 = float(s["invested"].iloc[-1])
-    c = sum(pl["amount"] for pl in cfg["plans"] if cfg["assets"][pl["ticker"]]["account"] == "PEA")
-    dates = [(today + pd.DateOffset(months=m)).strftime("%Y-%m-%d") for m in range(months + 1)]
-    invested = [round(inv0 + c * m, 2) for m in range(months + 1)]
-    scen = []
-    mat = pd.Timestamp(cfg["accounts"]["PEA"]["fiscal_maturity"])
-    m_mat = max((mat.year - today.year) * 12 + mat.month - today.month, 0)
-    horizons = [("Échéance fiscale", m_mat), ("10 ans", 120), (f"{pc['years']} ans", months)]
-    ps = cfg["tax"]["ps_rate"]
-    for sc in pc["scenarios"]:
-        g = (1 + sc["rate"]) ** (1 / 12)
-        v, vals = v0, [round(v0, 2)]
-        for _ in range(months):
-            v = v * g + c
-            vals.append(round(v, 2))
-        hz = []
-        for label, m in horizons:
-            val, inv = vals[m], invested[m]
-            hz.append(dict(label=label, date=dates[m], value=val, invested=inv, gain=val - inv,
-                           net=val - max(val - inv, 0) * ps))
-        scen.append(dict(key=sc["key"], label=sc["label"], rate=sc["rate"], values=vals, horizons=hz))
-    return dict(dates=dates, invested=invested, monthly=c, start_value=v0, scenarios=scen)
+    pc = cfg.get("projection", {})
+    cd = pc.get("class_defaults", {})
+    plans = [pl for pl in cfg["plans"] if pl["ticker"] in cfg["assets"] and _plan_live(pl, today)]
+    tickers = [p["ticker"] for p in pos if p["open"]] + [pl["ticker"] for pl in plans]
+    lines, seen = [], set()
+    for t in tickers:
+        if t in seen:
+            continue
+        seen.add(t)
+        a = cfg["assets"][t]
+        p = next((x for x in pos if x["ticker"] == t), None)
+        d = dict(cd.get("default", {"return": 0.06, "vol": 0.18, "yield": 0}))
+        d.update(cd.get(a.get("asset_class"), {}))
+        d.update(a.get("projection", {}))
+        raw = panel.raw.get(t)
+        hist_vol = None
+        if raw is not None and len(raw) > 60:
+            r = raw["close"].pct_change().dropna().iloc[-252:]
+            hist_vol = float(r.std() * math.sqrt(365 if a["account"] == "CRYPTO" else 252))
+        price = _last_price(panel, t)
+        if a.get("kind") == "Action":
+            dv = unadjusted_dividends(panel.actions, t)
+            dv = dv[dv.index > today - pd.Timedelta(days=366)]
+            if len(dv) and price == price and price > 0:
+                d["yield"] = float(dv.sum() / price)
+        lines.append(dict(ticker=t, short=a["short"], account=a["account"], asset_class=a.get("asset_class"),
+                          slot=a.get("slot", 8), value=p["value"] if (p and p["open"]) else 0.0,
+                          monthly=sum(monthly_equivalent(pl) for pl in plans if pl["ticker"] == t),
+                          ret=d["return"], vol=d["vol"], yld=d.get("yield", 0), hist_vol=hist_vol))
+    inv = {acc: float(panel.s[acc]["invested"].iloc[-1]) for acc in ("PEA", "CRYPTO") if acc in panel.s}
+    divs = {acc: float(panel.s[acc]["div"].iloc[-1]) for acc in ("PEA", "CRYPTO") if acc in panel.s}
+    return dict(today=today.strftime("%Y-%m-%d"), lines=lines, invested=inv, dividends=divs,
+                inflation=cfg.get("inflation", 0.02), ps_rate=cfg["tax"]["ps_rate"], ir_rate=cfg["tax"]["ir_rate_pfu"],
+                maturity=cfg["accounts"]["PEA"]["fiscal_maturity"], years=int(pc.get("years", 20)), class_defaults=cd)
 
 
 # ----------------------------------------------------------------- réconciliation TR

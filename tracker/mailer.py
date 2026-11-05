@@ -129,7 +129,7 @@ def _table(headers, rows, aligns):
     return f'<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid {C["border"]};border-collapse:collapse;border-radius:6px">{th and "<tr>" + th + "</tr>"}{trs}</table>'
 
 
-def build_html(cfg, data, kind, added, cid):
+def build_html(cfg, data, kind, added, cid, dca_date=None):
     k = data["kpi"]
     per = {sc: {p["key"]: p for p in data["periods"][sc]} for sc in data["periods"]}
     url = cfg.get("dashboard_url", "#")
@@ -167,11 +167,10 @@ def build_html(cfg, data, kind, added, cid):
     # plans exécutés
     if "dca" in kind or kind == "test":
         plan_t = {p["ticker"] for p in cfg["plans"]}
-        month = pd.Timestamp(today).strftime("%Y-%m")
-        if kind == "test":  # test : derniers plans exécutés, quel que soit le mois
-            month = max(t["date"] for t in data["transactions"] if t["type"] == "BUY" and t["ticker"] in plan_t)[:7]
+        ref = pd.Timestamp(dca_date) if dca_date is not None else pd.Timestamp(today)
         rows, tot = [], 0.0
-        execd = [t for t in data["transactions"] if t["type"] == "BUY" and t["date"][:7] == month and t["ticker"] in plan_t]
+        execd = [t for t in data["transactions"] if t["type"] == "BUY" and t["ticker"] in plan_t
+                 and abs((pd.Timestamp(t["date"]) - ref).days) <= 2]
         for t in sorted(execd, key=lambda t: t["ticker"]):
             src = "estimé" if t["source"] == "AUTO" else "TR"
             rows.append([t["short"], dshort(t["date"]), (f"{t['quantity']:g}" if t["account"] == "PEA" else f"{t['quantity']:.6f}").replace(".", ","),
@@ -181,8 +180,8 @@ def build_html(cfg, data, kind, added, cid):
         note = ""
         if any(t["source"] == "AUTO" for t in execd):
             note = (f'<div style="font-size:12px;color:{C["text2"]};margin-top:8px">Montants <b>estimés</b> au cours du jour '
-                    f'(nombre de parts exact dans 14 cas sur 14 jusqu\'ici). Pour être au centime, remplace-les par les montants TR '
-                    f'dans <code>data/transactions.csv</code> et passe la source à TR. <a href="{url}aide.html#maj" style="color:{C["blue"]}">Comment faire</a></div>')
+                    f'(nombre de parts exact dans 14 cas sur 14 jusqu\'ici). Pour être au centime, corrige-les avec les montants TR '
+                    f'dans <a href="{url}#donnees" style="color:{C["blue"]}">Mes données</a>.</div>')
         resid = [p for p in data["plans"] if p.get("residual_pct") and p["residual_pct"] >= 0.1]
         if resid:
             p = resid[0]
@@ -218,6 +217,23 @@ def build_html(cfg, data, kind, added, cid):
     body += _section("Positions", _table(["Ligne", "Valeur", "Poids", "+/- latente", "7 jours"], rows, ["left", "right", "right", "right", "right"]),
                      "PRU et performance comme TR")
 
+    # mouvements des 7 derniers jours (tout ce qui a été ajouté : plans, dividendes, staking, tes saisies)
+    TYPES = {"BUY": "Achat", "SELL": "Vente", "DIVIDEND": "Dividende", "TRANSFER_IN": "Transfert entrant", "TRANSFER_OUT": "Transfert sortant",
+             "STAKING": "Staking", "BONUS": "Action gratuite", "FEE": "Frais"}
+    since = (pd.Timestamp(today) - pd.Timedelta(days=7)).strftime("%Y-%m-%d")
+    moves = [t for t in data["transactions"] if t["date"] > since]
+    mrows = [[dshort(t["date"]), TYPES.get(t["type"], t["type"]), t["short"],
+              (_qty(t["quantity"]) if t["quantity"] else "–"), eur(t["amount"]) if t["amount"] else "–",
+              {"AUTO": "auto", "ESTIME": "estimé"}.get(t["source"], "TR")] for t in moves]
+    for o in data.get("planned", []):
+        mrows.append([dshort(o["date"]), "Versement prévu", data["assets"].get(o["ticker"], {}).get("short", o["ticker"]), "–", eur(o["amount"]), "à venir"])
+    plans_txt = " · ".join(f'{p["short"]} {eur(p["amount"], 0)} ({p["freq"].lower()})' for p in data["plans"] if p.get("active"))
+    body += _section("Mouvements de la semaine",
+                     (_table(["Date", "Opération", "Ligne", "Quantité", "Montant", "Source"], mrows, ["left", "left", "left", "right", "right", "left"])
+                      if mrows else f'<div style="font-size:12px;color:{C["muted"]}">Aucune opération ces 7 derniers jours.</div>') +
+                     f'<div style="font-size:12px;color:{C["text2"]};margin-top:8px"><b>Plans actifs</b> : {plans_txt or "aucun"}.</div>',
+                     "plans, dividendes, staking et tes saisies")
+
     # risque
     r = data["risk"]["PEA"]
     risk = f"""<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>
@@ -240,6 +256,21 @@ def build_html(cfg, data, kind, added, cid):
                  f'<span style="font-size:11px;color:{C["muted"]}">{e["detail"]}</span></td><td style="{TD}text-align:right">{eur(e["amount"]) if e.get("amount") is not None else ""}</td></tr>'
                  for e in data["events"][:3])
     body += _section("Agenda", f'<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid {C["border"]};border-collapse:collapse">{ev}</table>')
+
+    # top 5 des actus de la semaine (en bas du mail)
+    top = data.get("news", {}).get("top", [])[:5]
+    if top:
+        names = {t: a["short"] for t, a in data["assets"].items()}
+        names["MARCHE"] = "Marchés"
+        rows_n = "".join(
+            f'<tr><td valign="top" style="padding:10px 10px 10px 0;font-size:20px;font-weight:800;color:{C["muted"]};width:24px">{i}</td>'
+            f'<td style="padding:10px 0;border-bottom:1px solid {C["border"]}">'
+            f'<div style="font-size:11px;color:{C["muted"]}">{n["source"]} · {names.get(n.get("main"), n.get("main", ""))} · {n["lang"].upper()} · {dshort(n["date"][:10])}</div>'
+            f'<a href="{n["url"]}" style="font-size:14px;color:{C["text"]};text-decoration:none;font-weight:650;line-height:1.35">{n["title"]}</a></td></tr>'
+            for i, n in enumerate(top, 1))
+        body += _section("Top 5 de la semaine sur tes positions",
+                         f'<table width="100%" cellpadding="0" cellspacing="0">{rows_n}</table>',
+                         f'<a href="{url}#news" style="color:{C["blue"]}">toutes les actus</a>')
 
     f = data["fiscal"]
     cta = f"""
@@ -280,9 +311,9 @@ def build_text(cfg, data, kind):
     return "\n".join(lines)
 
 
-def build_message(cfg, data, panel, kind, added):
+def build_message(cfg, data, panel, kind, added, dca_date=None):
     cid = make_msgid(domain="pea-tracker")[1:-1]
-    html = build_html(cfg, data, kind, added, cid)
+    html = build_html(cfg, data, kind, added, cid, dca_date)
     png = chart_png(data)
     k = data["kpi"]["TOTAL"]
     w = {p["key"]: p for p in data["periods"]["TOTAL"]}["1S"]

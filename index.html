@@ -22,7 +22,9 @@
       <a href="#crypto" data-view="crypto"><svg viewBox="0 0 24 24"><path d="M12 2l7 10-7 4-7-4z"/><path d="M5 13.5L12 22l7-8.5-7 4z"/></svg><span>Crypto</span></a>
       <a href="#projection" data-view="projection"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Projection &amp; fiscalité</span></a>
       <a href="#transactions" data-view="transactions"><svg viewBox="0 0 24 24"><path d="M4 2v20l3-2 3 2 2-2 2 2 3-2 3 2V2l-3 2-3-2-2 2-2-2-3 2z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Transactions</span></a>
+      <a href="#news" data-view="news"><svg viewBox="0 0 24 24"><path d="M4 4h13v16H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v10a2 2 0 0 1-2 2"/><path d="M8 8h5M8 12h5M8 16h3"/></svg><span>Actualités</span></a>
       <div class="sep"></div>
+      <a href="#donnees" data-view="donnees"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span>Mes données</span></a>
       <a href="aide.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg><span>Guide des indicateurs</span></a>
     </nav>
     <div class="side-foot" id="side-foot"></div>
@@ -93,6 +95,10 @@
           <div class="panel c4">
             <div class="panel-h"><h2>Contrôle Trade Republic <a class="help" href="aide.html#reconciliation">?</a></h2><span class="sub" id="ov-recon-sub"></span></div>
             <div class="panel-b flush tbl-wrap" id="ov-recon"></div>
+          </div>
+          <div class="panel c12">
+            <div class="panel-h"><h2>À la une sur tes positions <a class="help" href="aide.html#actus">?</a></h2><a class="sub" href="#news">toutes les actus →</a></div>
+            <div class="panel-b flush news-grid" id="ov-news"></div>
           </div>
         </div>
       </section>
@@ -210,7 +216,8 @@
 
       <!-- ============================ PROJECTION & FISCALITÉ -->
       <section class="view" id="view-projection">
-        <div class="view-head"><div><h1>Projection &amp; fiscalité</h1><p>PEA uniquement. Hypothèses : plans actuels maintenus, rendement annuel constant.</p></div></div>
+        <div class="view-head"><div><h1>Projection &amp; fiscalité</h1><p>Le simulateur part de ton portefeuille réel, ligne par ligne. Modifie n'importe quelle hypothèse : tout se recalcule instantanément.</p></div>
+          <button class="btn" id="sim-reset">Revenir à mon portefeuille</button></div>
         <div class="grid">
           <div class="panel c4">
             <div class="panel-h"><h2>Compteur fiscal PEA <a class="help" href="aide.html#fiscalite">?</a></h2></div>
@@ -220,25 +227,62 @@
             <div class="panel-h"><h2>Si tu retirais aujourd'hui vs après 5 ans <a class="help" href="aide.html#fiscalite">?</a></h2></div>
             <div class="panel-b flush tbl-wrap" id="fx-tax"></div>
           </div>
+          <div class="panel c12">
+            <div class="panel-h"><h2>Hypothèses de simulation <a class="help" href="aide.html#projection">?</a></h2><span class="sub" id="sim-sub"></span></div>
+            <div class="panel-b" id="sim-form"></div>
+            <div class="panel-b flush tbl-wrap" id="sim-lines"></div>
+          </div>
           <div class="panel c8">
-            <div class="panel-h"><h2>Projection du PEA <a class="help" href="aide.html#projection">?</a></h2>
-              <div class="seg" id="pj-h">
-                <button data-h="mat" aria-pressed="true">Échéance 2030</button>
-                <button data-h="120" aria-pressed="false">10 ans</button>
-                <button data-h="240" aria-pressed="false">20 ans</button>
-              </div>
-            </div>
-            <div class="panel-b"><div class="legend" id="pj-legend"></div><div class="chart h340" id="pj-chart"></div></div>
+            <div class="panel-h"><h2>Trajectoire simulée</h2><span class="sub" id="sim-chart-sub"></span></div>
+            <div class="panel-b"><div class="legend" id="pj-legend"></div><div class="chart h380" id="pj-chart"></div></div>
+          </div>
+          <div class="panel c4">
+            <div class="panel-h"><h2>À l'horizon</h2><span class="sub" id="sim-h-sub"></span></div>
+            <div class="panel-b flush kpi-grid" id="sim-kpis"></div>
+          </div>
+          <div class="panel c8">
+            <div class="panel-h"><h2>Étapes clés</h2><span class="sub">valeur nette = après impôts sur les gains</span></div>
+            <div class="panel-b flush tbl-wrap" id="pj-table"></div>
           </div>
           <div class="panel c4">
             <div class="panel-h"><h2>Dividendes <a class="help" href="aide.html#dividendes">?</a></h2></div>
             <div class="panel-b flush" id="fx-divs"></div>
           </div>
           <div class="panel c12">
-            <div class="panel-h"><h2>Projection : chiffres clés</h2><span class="sub">valeur nette = après prélèvements sociaux sur les gains</span></div>
-            <div class="panel-b flush tbl-wrap" id="pj-table"></div>
+            <div class="panel-h"><h2>Répartition à l'horizon</h2></div>
+            <div class="panel-b flush tbl-wrap" id="sim-breakdown"></div>
           </div>
         </div>
+      </section>
+
+      <!-- ============================ ACTUALITÉS -->
+      <section class="view" id="view-news">
+        <div class="view-head"><div><h1>Actualités</h1><p id="news-sub"></p></div>
+          <div class="filters">
+            <div class="seg" id="news-lang"><button data-l="" aria-pressed="true">FR + EN</button><button data-l="fr" aria-pressed="false">Français</button><button data-l="en" aria-pressed="false">English</button></div>
+            <div class="seg" id="news-sort"><button data-s="score" aria-pressed="true">Pertinence</button><button data-s="date" aria-pressed="false">Récent</button></div>
+          </div>
+        </div>
+        <div class="chips" id="news-lines"></div>
+        <div class="panel"><div class="panel-b flush" id="news-list"></div></div>
+      </section>
+
+      <!-- ============================ MES DONNÉES -->
+      <section class="view" id="view-donnees">
+        <div class="view-head"><div><h1>Mes données</h1><p>Tout ce que tu modifies ici est enregistré dans ton dépôt GitHub (historique complet), puis le dashboard se recalcule automatiquement.</p></div>
+          <div class="filters"><span id="ed-status" class="asof"></span><button class="btn" id="ed-recalc">Recalculer maintenant</button></div>
+        </div>
+        <div class="seg tabs" id="ed-tabs">
+          <button data-t="ops" aria-pressed="true">Opérations</button>
+          <button data-t="versement" aria-pressed="false">Versement ponctuel</button>
+          <button data-t="plans" aria-pressed="false">Plans d'épargne</button>
+          <button data-t="lignes" aria-pressed="false">Lignes</button>
+          <button data-t="params" aria-pressed="false">Paramètres</button>
+          <button data-t="releve" aria-pressed="false">Relevé TR</button>
+          <button data-t="connexion" aria-pressed="false">Connexion GitHub</button>
+        </div>
+        <div id="ed-msg"></div>
+        <div id="ed-body"></div>
       </section>
 
       <!-- ============================ TRANSACTIONS -->
@@ -253,11 +297,16 @@
         <div class="panel"><div class="panel-b flush tbl-wrap" id="tx-table"></div></div>
       </section>
     </main>
-    <div class="ticker" id="ticker" aria-hidden="true"></div>
+    <div class="ticker" aria-hidden="true"><span class="tag">● Marchés</span><div class="tview"><div class="track" id="ticker"></div></div></div>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
-<script src="data/dashboard.js"></script>
-<script src="assets/app.js"></script>
+<script>
+(function () {
+  var v = Date.now();
+  function load(src, cb) { var s = document.createElement('script'); s.src = src + '?v=' + v; s.onload = cb; s.onerror = cb; document.body.appendChild(s); }
+  load('data/dashboard.js', function () { load('assets/app.js', function () { load('assets/editor.js'); }); });
+})();
+</script>
 </body>
 </html>

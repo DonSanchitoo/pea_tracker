@@ -36,7 +36,7 @@
   <h2 id="principes">1. D'où viennent les chiffres</h2>
   <p><b>Le registre fait foi.</b> Toutes tes opérations Trade Republic sont saisies dans <code>data/transactions.csv</code> : date, type, ligne, quantité, montant débité ou crédité, taxe. Tout le reste en découle : positions, PRU, historique jour par jour, performance.</p>
   <p><b>Les cours viennent de Yahoo Finance</b> : clôture Euronext Paris pour les ETF et actions, ETH-EUR pour l'Ethereum. Les cours sont « dé-ajustés » des attributions gratuites : Yahoo divise par 1,1 les cours d'Air Liquide d'avant juin 2026 (attribution 1 pour 10), le dashboard les remet à leur vrai niveau puisque ta quantité, elle, est restée à 1.</p>
-  <p><b>Mise à jour automatique</b> : chaque soir de bourse vers 18h30 (cours de clôture) et chaque matin de semaine (enregistrement des plans exécutés la veille et mails). Le robot GitHub peut avoir 15 à 60 minutes de retard.</p>
+  <p><b>Mise à jour automatique</b> : chaque soir de bourse vers 18h30 et chaque matin de semaine. Plans, dividendes, staking, taux officiels et actus sont récupérés seuls (détail en <a href="#auto">section 9</a>). Tu modifies tout le reste depuis <a href="index.html#donnees">Mes données</a>.</p>
 
   <h3 id="ecart-tr">Pourquoi un écart de quelques euros avec l'appli TR ?</h3>
   <p>Les quantités, le PRU et le capital investi sont identiques à TR (vérifié par le <a href="#reconciliation">contrôle</a>). La seule différence possible est le <b>cours</b> : TR affiche un prix en continu (Lang &amp; Schwarz, de 7h30 à 23h), le dashboard prend la clôture Euronext de 17h35. Si le marché bouge le soir, l'écart vaut quantité × différence de cours. Exemple : 470 parts du PEA Monde × 0,01 € = 4,70 €. Compare le soir après 17h35 : l'écart est en général de quelques centimes à quelques euros.</p>
@@ -220,9 +220,15 @@ Ratio d'information = (ta perf annualisée − MSCI World annualisé) / tracking
   <span class="you">Économie d'impôt si tu attends 2030, à valeur égale : <b data-v="fiscal.saving" data-f="eur"></b></span>
   <p><b>Plafond</b> : 150 000 € de versements (pas de valeur). Les gains n'en consomment pas. <b>Crypto</b> : hors PEA, les plus-values sont imposées au PFU lors d'une vente contre des euros (exonération si le total des cessions de l'année ne dépasse pas 305 €).</p>
 
-  <h3 id="projection">Projection</h3>
-  <div class="formula">V(mois + 1) = V(mois) × (1 + taux annuel)^(1/12) + versement mensuel</div>
-  <p>PEA seul, plans actuels maintenus (395 €/mois), trois rendements annuels constants : prudent 3 %, central 6 %, dynamique 8 %. Repère : les actions monde ont fait autour de 7 à 8 % par an sur longue période, avec des décennies bien pires. « Net » = après 18,6 % de prélèvements sociaux sur les gains (retrait après 5 ans). Ce n'est pas une prévision : la vraie trajectoire sera faite de hausses et de baisses.</p>
+  <h3 id="projection">Simulateur de projection</h3>
+  <p>Il part de <b>ton portefeuille réel, ligne par ligne</b> : valeur du jour, versements mensuels de tes plans, rendement attendu, dividendes et volatilité par défaut selon la classe d'actif (réglables dans « Mes données › Paramètres »). Tout est modifiable sur la page et se recalcule instantanément ; tes réglages restent en mémoire sur l'appareil. « Revenir à mon portefeuille » efface tes réglages.</p>
+  <div class="formula">Chaque mois, pour chaque ligne : valeur × (1 + rendement)^(1/12) + dividendes (réinvestis ou non) + versement
+Valeur en euros d'aujourd'hui = valeur / (1 + inflation)^(années)
+Impôts au retrait : PEA (valeur + dividendes − versements) × 18,6 % après 5 ans, × 31,4 % avant ; crypto × 31,4 %
+Revenu mensuel possible = net en euros d'aujourd'hui × 4 % / 12</div>
+  <p><b>Options</b> : versement exceptionnel annuel (ex. 600 € à Noël, réparti comme tes plans), hausse annuelle des versements, ligne fictive (« et si j'ajoutais 50 €/mois sur le Nasdaq ? »), périmètre PEA seul ou PEA + crypto.</p>
+  <p><b>Fourchette probable</b> : 500 scénarios aléatoires, mois par mois, à partir de la volatilité de chaque ligne, avec des actions fortement corrélées entre elles et une crypto qui l'est moins. La zone grise contient 8 scénarios sur 10. « Risque de finir sous le capital investi » = part des scénarios où la valeur finale est inférieure à ce que tu as versé.</p>
+  <p><b>Repères</b> : les actions monde ont rapporté autour de 7 % par an sur longue période, avec des décennies bien pires. La règle des 4 % : retirer chaque année 4 % d'un portefeuille actions l'a historiquement fait durer 30 ans ou plus. Ce sont des ordres de grandeur, pas des prévisions.</p>
 
   <!-- ===================================================== CONTRÔLE -->
   <h2 id="reconciliation">7. Contrôle Trade Republic</h2>
@@ -240,40 +246,61 @@ Ratio d'information = (ta perf annualisée − MSCI World annualisé) / tracking
   <p>Seuils réglables dans <code>config.json</code>, rubrique <code>alerts</code>.</p>
 
   <!-- ===================================================== MAJ -->
-  <h2 id="maj">9. Mettre à jour mes données</h2>
-  <p>Tout se fait dans <code>data/transactions.csv</code>, directement sur GitHub (icône crayon, depuis le téléphone aussi), puis « Commit changes ». Le dashboard se recalcule au passage suivant du robot, ou tout de suite via <i>Actions → PEA Tracker → Run workflow</i>.</p>
-  <p>Format d'une ligne :</p>
+  <h2 id="auto">9. Ce qui se met à jour tout seul</h2>
+  <table class="t"><thead><tr><th>Donnée</th><th>Source</th><th>Quand</th></tr></thead><tbody>
+    <tr><td>Cours de toutes les lignes</td><td>Yahoo Finance (clôture Euronext, ETH-EUR…)</td><td>chaque soir de bourse et chaque matin</td></tr>
+    <tr><td>Plans d'épargne exécutés</td><td>tes plans × cours du jour d'exécution</td><td>le soir de l'exécution (le 16 ou jour ouvré suivant)</td></tr>
+    <tr><td>Dividendes encaissés</td><td>Yahoo (date de détachement, montant par action) × tes actions</td><td>2 jours ouvrés après le détachement, comme TR</td></tr>
+    <tr><td>Staking</td><td>taux annuel paramétré (2,32 % pour l'ETH) × quantité détenue chaque jour</td><td>le 1er de chaque mois pour le mois écoulé</td></tr>
+    <tr><td>Inflation, Livret A, prélèvements sociaux, €STR</td><td>Eurostat, service-public.gouv.fr, BCE</td><td>à chaque passage</td></tr>
+    <tr><td>Actualités</td><td>Google Actualités (presse française et internationale)</td><td>à chaque passage, sur 7 jours</td></tr>
+    <tr><td>Catalogue des instruments</td><td>Euronext (actions et ETF de Paris), CoinGecko (cryptos)</td><td>chaque semaine</td></tr>
+  </tbody></table>
+  <p>Toutes ces opérations sont ajoutées au registre avec la source <b>AUTO</b> : elles apparaissent dans « Transactions », comptent dans les gains, et sont modifiables. Seuls tes achats et ventes ponctuels restent à saisir, depuis « Mes données ».</p>
+
+  <h3 id="staking">Staking</h3>
+  <p>TR verse des récompenses en ETH sur l'ETH détenu. Le robot les calcule jour par jour (quantité détenue × taux annuel / 365) et les ajoute le 1er de chaque mois. Elles n'ont pas de coût d'achat : elles augmentent ta plus-value. Le taux (2,32 % par an) et la date de départ se règlent dans « Mes données › Paramètres ». Le registre contient aussi une ligne « estimée » de 3 € qui reprend le cumul affiché par TR le 05/11/2026.</p>
+
+  <h3 id="parametres">Paramètres live ou manuels</h3>
+  <p>Chaque taux a deux valeurs : la <b>valeur live</b>, lue à chaque mise à jour sur une source officielle, et ta <b>valeur manuelle</b>. En mode « Auto », la valeur live est utilisée ; si la source ne répond pas, c'est la dernière valeur connue, puis ta valeur manuelle. En mode « Manuel », ta valeur s'impose (utile pour simuler une hausse d'impôt). Sources : inflation = IPCH France sur 12 mois (Eurostat) ; Livret A et prélèvements sociaux = service-public.gouv.fr ; €STR = BCE. L'impôt sur le revenu du PFU (12,8 %) et la TTF (0,4 %) n'ont pas de source lisible automatiquement : ils sont manuels.</p>
+
+  <h3 id="actus">Actualités</h3>
+  <p>Pour chaque ligne détenue ou avec un plan actif, plus un fil « Marchés », le robot interroge Google Actualités en français et en anglais sur les 7 derniers jours, avec les mots-clés de la ligne (modifiables dans « Lignes »). Chaque article est noté selon la <b>réputation de la source</b> (Bloomberg, Reuters, Financial Times, WSJ, Les Echos, L'Agefi, Le Monde… en tête), sa <b>fraîcheur</b> et sa <b>pertinence</b>. Les doublons et les annonces (offres d'emploi…) sont écartés. Le <b>top 5 de la semaine</b> (en bas du mail du lundi et en tête de la vue d'ensemble) favorise les lignes qui pèsent le plus dans ton portefeuille, avec 2 articles maximum par ligne et par source. Ajoute une ligne : ses actus arrivent au passage suivant du robot.</p>
+
+  <h3 id="mail">Le mail</h3>
+  <p><b>Lundi matin</b> : synthèse de la semaine. <b>Le jour ouvré qui suit une exécution de plan</b> : mail « plans exécutés » avec le détail des achats. Il est construit avec les mêmes données que le dashboard, juste après le recalcul, donc toutes tes modifications y figurent. Il contient : valeur, PEA, crypto, plus-value, plans exécutés, évolution, performance, positions, <b>mouvements de la semaine</b> (plans, dividendes, staking, tes saisies, versements prévus), plans actifs, risque, alertes, agenda et, en bas, le <b>top 5 des actus de la semaine</b>.</p>
+
+  <h2 id="maj">10. Mes données : tout modifier depuis le dashboard</h2>
+  <p>La vue <b>Mes données</b> (menu de gauche) modifie directement tes fichiers sur GitHub, avec un historique complet de chaque changement. Après chaque enregistrement, le dashboard se recalcule (1 à 2 minutes) puis la page se recharge toute seule.</p>
+  <h3>Connexion (une fois par appareil)</h3>
+  <p>Onglet « Connexion GitHub » : crée un jeton personnel limité à ce dépôt (permissions <i>Contents</i> et <i>Actions</i> en lecture et écriture), colle-le, c'est fait. Le jeton reste dans le navigateur, jamais dans le dépôt. Sans jeton, tout est consultable mais rien n'est enregistrable.</p>
+  <h3>Les onglets</h3>
+  <dl>
+    <dt>Opérations</dt><dd>tout le registre ; ajouter, modifier ou supprimer un achat, une vente, un dividende, un transfert, du staking. Pour un achat, laisse la quantité vide : elle sera calculée au cours du jour. La TTF se calcule seule pour les actions françaises. C'est ici que tu remplaces un montant AUTO par le montant exact de TR.</dd>
+    <dt>Versement ponctuel</dt><dd>ex. 600 € à Noël : un montant, une date, une répartition entre lignes (bouton « Répartir comme mes plans »). Une date future crée un versement « prévu », exécuté et valorisé le jour venu.</dd>
+    <dt>Plans d'épargne</dt><dd>créer, modifier, arrêter (l'historique reste) ou supprimer un plan : montant, fréquence (chaque mois, 2 fois par mois, tous les 2 mois, chaque trimestre), jour, début, fin.</dd>
+    <dt>Lignes</dt><dd>ajouter une action, un ETF ou une crypto en tapant son nom, son mnémonique ou son ISIN : le catalogue Euronext + CoinGecko propose les instruments, la fiche se pré-remplit (compte, classe, frais, zones, mots-clés d'actus) et tu peux créer son plan en même temps.</dd>
+    <dt>Paramètres</dt><dd>taux live/manuels, staking, indice de référence, seuils d'alerte, hypothèses par défaut du simulateur.</dd>
+    <dt>Relevé TR</dt><dd>recopier les chiffres de l'appli TR pour que le contrôle vérifie que tout concorde.</dd>
+  </dl>
+  <p>Partout où tu choisis une ligne, la recherche couvre aussi les instruments que tu n'as pas encore : choisir un nouvel ETF dans un versement ou un plan l'ajoute automatiquement à tes lignes.</p>
+  <h3>Bon à savoir</h3>
+  <ul>
+    <li><b>Parts entières dans le PEA</b> : un plan de 20 €/mois sur un ETF à 100 € n'achète rien. L'alerte « Plan … non investis » te le signale, avec le montant conseillé.</li>
+    <li>Le robot GitHub peut avoir 15 à 60 minutes de retard sur ses horaires planifiés ; « Recalculer maintenant » force un passage immédiat.</li>
+    <li>Sans le dashboard, tout reste modifiable à la main dans <code>data/transactions.csv</code> et <code>config.json</code> (format ci-dessous).</li>
+  </ul>
   <pre>date,account,type,ticker,quantity,amount,taxes,source,note
 2026-11-16,PEA,BUY,DCAM.PA,55,349.21,0,TR,Plan d'épargne</pre>
-  <dl>
-    <dt>date</dt><dd>AAAA-MM-JJ, date d'exécution affichée par TR</dd>
-    <dt>account</dt><dd><code>PEA</code> ou <code>CRYPTO</code></dd>
-    <dt>type</dt><dd><code>BUY</code> achat, <code>SELL</code> vente, <code>DIVIDEND</code> dividende, <code>TRANSFER_IN</code>/<code>TRANSFER_OUT</code> transfert de crypto, <code>STAKING</code> récompense, <code>BONUS</code> action gratuite, <code>FEE</code> frais</dd>
-    <dt>ticker</dt><dd>DCAM.PA (PEA Monde), PAASI.PA (Asie émergente), AI.PA, TTE.PA, ETH-EUR, WPEA.PA</dd>
-    <dt>quantity</dt><dd>nombre de parts (0 pour un dividende)</dd>
-    <dt>amount</dt><dd>montant en euros affiché par TR, sans signe, point décimal</dd>
-    <dt>taxes</dt><dd>TTF incluse dans le montant (0,4 % pour une action française), sinon 0</dd>
-    <dt>source</dt><dd><code>TR</code> = montant exact, <code>AUTO</code> = estimé par le robot, <code>ESTIME</code> = hypothèse</dd>
-  </dl>
 
-  <h3>Corriger un plan enregistré par le robot (AUTO)</h3>
-  <p>Le 16 (ou le jour ouvré suivant), le robot enregistre les plans : nombre de parts calculé sur le cours du jour (règle vérifiée sur tes 14 exécutions réelles : 14/14 bons nombres de parts) et montant estimé à quelques dizaines de centimes près. Pour être au centime : remplace le montant par celui de la liste des transactions TR et remplace <code>AUTO</code> par <code>TR</code>. Si le nombre de parts diffère de TR, corrige-le aussi. Si TR affiche « Échec du plan » (compte pas assez approvisionné par exemple), supprime la ligne AUTO.</p>
-
-  <h3>Achat ou vente ponctuel, dividende</h3>
-  <p>Ajoute une ligne à la fin, dans n'importe quel ordre (le registre est trié par date). Pour un achat d'action française, mets la TTF dans <code>taxes</code> : montant × 0,004 / 1,004, arrondi au centime.</p>
-
-  <h3>Nouveau plan, nouveau montant, nouvel actif</h3>
-  <p>Montant ou date d'un plan : rubrique <code>plans</code> de <code>config.json</code> (<code>start</code> = date de la première exécution, le robot n'enregistre rien avant). Nouvel actif : ajoute-le dans <code>assets</code> (nom, ticker Yahoo, compte, classe, frais, poids pays, couleur <code>slot</code> de 1 à 8 non utilisée), puis ses opérations dans le registre.</p>
-
-  <h3>Relevé de contrôle TR</h3>
-  <p>Dans <code>data/reconciliation.csv</code>, une ligne par position avec la quantité, le PRU et la valeur affichés par TR, et une ligne par compte. Le contrôle utilise le relevé le plus récent.</p>
-
-  <h2 id="limites">10. Limites connues</h2>
+  <h2 id="limites">11. Limites connues</h2>
   <ul>
-    <li><b>Historique crypto</b> : la date et la quantité exactes des 2 transferts ETH entrants ne sont pas connues. Ils sont regroupés au 20/08/2026 avec leur coût réel (222,62 €). La valeur et le coût actuels collent à TR ; la courbe crypto avant cette date est approximative. Les quantités ETH des plans sont estimées au cours moyen du jour.</li>
-    <li><b>Liquidités</b> : l'argent non investi (reliquats de plans, dividendes, ventes) n'est pas suivi, comme dans l'écran PEA de TR.</li>
-    <li><b>Frais de courtage</b> : les montants TR sont repris tels quels. S'ils incluent 1 € de frais sur un ordre, ce dernier est dans le coût, sans être isolé.</li>
-    <li><b>Annualisations</b> : TWR, TRI, Sharpe, alpha et Calmar portent sur 14 mois de données, dont 8 avec un vrai capital. Les chiffres annualisés deviendront significatifs après 2 à 3 ans.</li>
+    <li><b>Historique crypto avant le 20/08/2026</b> : les 2 transferts ETH entrants sont regroupés, avec leur coût réel (222,62 €) ; la courbe avant cette date est approximative.</li>
+    <li><b>Montants AUTO</b> : nombre de parts fiable, montant estimé à quelques dizaines de centimes près jusqu'à correction.</li>
+    <li><b>Staking</b> : estimé avec le taux saisi ; TR peut verser un peu plus ou un peu moins.</li>
+    <li><b>Actualités</b> : titres et liens issus de Google Actualités ; certains articles (Bloomberg, FT, WSJ, Les Echos) sont réservés aux abonnés.</li>
+    <li><b>Liquidités</b> : l'argent non investi (reliquats de plans, ventes) n'est pas suivi, comme dans l'écran PEA de TR.</li>
+    <li><b>Annualisations</b> : TWR, TRI, Sharpe, alpha et Calmar deviendront significatifs après 2 à 3 ans de données.</li>
   </ul>
 </article>
 
@@ -290,13 +317,23 @@ Ratio d'information = (ta perf annualisée − MSCI World annualisé) / tracking
   <b>Allocation</b>
   <a href="#geographie">Géographie</a><a href="#concentration">Concentration</a><a href="#derive">Réel vs plan</a><a href="#plans">Efficacité des plans</a>
   <b>Le reste</b>
-  <a href="#fiscalite">Fiscalité</a><a href="#projection">Projection</a><a href="#reconciliation">Contrôle TR</a><a href="#alertes">Alertes</a><a href="#maj">Mettre à jour</a><a href="#limites">Limites</a>
+  <a href="#fiscalite">Fiscalité</a><a href="#projection">Simulateur</a><a href="#reconciliation">Contrôle TR</a><a href="#alertes">Alertes</a>
+  <b>Automatique</b>
+  <a href="#auto">Ce qui se met à jour seul</a><a href="#staking">Staking</a><a href="#parametres">Paramètres live</a><a href="#actus">Actualités</a><a href="#mail">Le mail</a>
+  <b>Modifier</b>
+  <a href="#maj">Mes données</a><a href="#limites">Limites</a>
 </nav>
 </div>
 </div>
 
-<script src="data/dashboard.js"></script>
 <script>
+(function () {
+  var s = document.createElement('script');
+  s.src = 'data/dashboard.js?v=' + Date.now();
+  s.onload = s.onerror = run;
+  document.body.appendChild(s);
+})();
+function run() {
 (function () {
   var D = window.PEA_DATA;
   var root = document.documentElement;
@@ -323,6 +360,7 @@ Ratio d'information = (ta perf annualisée − MSCI World annualisé) / tracking
     el.textContent = (typeof v === 'number' && isFinite(v)) ? F[el.getAttribute('data-f')](v) : '–';
   });
 })();
+}
 </script>
 </body>
 </html>

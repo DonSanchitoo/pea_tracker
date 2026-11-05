@@ -1,4 +1,5 @@
 {
+  "repo": "DonSanchitoo/pea_tracker",
   "dashboard_url": "https://donsanchitoo.github.io/pea_tracker/",
   "timezone": "Europe/Paris",
   "accounts": {
@@ -31,6 +32,11 @@
         "Japon": 5.5,
         "Pacifique développé": 2.5,
         "Autres": 2
+      },
+      "ttf": false,
+      "news": {
+        "fr": "\"MSCI World\" OR \"bourses mondiales\" OR \"marchés mondiaux\"",
+        "en": "\"MSCI World\" OR \"global stocks\" OR \"world stocks\""
       }
     },
     "PAASI.PA": {
@@ -49,6 +55,11 @@
         "Inde": 24,
         "Corée du Sud": 13,
         "Autres émergents": 8
+      },
+      "ttf": false,
+      "news": {
+        "fr": "\"marchés asiatiques\" OR \"Bourse de Shanghai\" OR \"Hang Seng\" OR \"Bourse de Taïwan\"",
+        "en": "\"Asian stocks\" OR \"Asian markets\" OR \"Hang Seng\" OR \"emerging markets\""
       }
     },
     "AI.PA": {
@@ -63,6 +74,11 @@
       "slot": 3,
       "zones": {
         "France": 100
+      },
+      "ttf": true,
+      "news": {
+        "fr": "\"Air Liquide\"",
+        "en": "\"Air Liquide\""
       }
     },
     "TTE.PA": {
@@ -77,6 +93,11 @@
       "slot": 4,
       "zones": {
         "France": 100
+      },
+      "ttf": true,
+      "news": {
+        "fr": "TotalEnergies",
+        "en": "TotalEnergies"
       }
     },
     "ETH-EUR": {
@@ -91,6 +112,15 @@
       "slot": 5,
       "zones": {
         "Crypto (hors zone)": 100
+      },
+      "ttf": false,
+      "news": {
+        "fr": "Ethereum",
+        "en": "Ethereum price OR \"ether ETF\""
+      },
+      "staking": {
+        "rate": 0.0232,
+        "since": "2026-11-06"
       }
     },
     "WPEA.PA": {
@@ -109,61 +139,131 @@
         "Japon": 5.5,
         "Pacifique développé": 2.5,
         "Autres": 2
+      },
+      "ttf": false,
+      "news": {
+        "fr": "\"MSCI World\" OR \"bourses mondiales\" OR \"marchés mondiaux\"",
+        "en": "\"MSCI World\" OR \"global stocks\" OR \"world stocks\""
       }
     }
   },
   "plans": [
     {
+      "id": "pea-monde",
       "ticker": "DCAM.PA",
       "amount": 350,
-      "day": 16,
-      "start": "2026-03-16"
+      "every": 1,
+      "days": [
+        16
+      ],
+      "start": "2026-03-16",
+      "end": null
     },
     {
+      "id": "asie",
       "ticker": "PAASI.PA",
       "amount": 45,
-      "day": 16,
-      "start": "2026-03-16"
+      "every": 1,
+      "days": [
+        16
+      ],
+      "start": "2026-03-16",
+      "end": null
     },
     {
+      "id": "eth",
       "ticker": "ETH-EUR",
       "amount": 25,
-      "day": 16,
-      "start": "2026-05-18"
+      "every": 1,
+      "days": [
+        16
+      ],
+      "start": "2026-05-18",
+      "end": null
     }
   ],
   "benchmark": {
     "ticker": "DCAM.PA",
     "label": "MSCI World"
   },
-  "risk_free": {
-    "label": "Livret A",
-    "rate": 0.017
+  "params": {
+    "livret_a": {
+      "label": "Taux du Livret A",
+      "value": 0.017,
+      "mode": "auto"
+    },
+    "inflation": {
+      "label": "Inflation France sur 1 an",
+      "value": 0.02,
+      "mode": "auto"
+    },
+    "ps_rate": {
+      "label": "Prélèvements sociaux",
+      "value": 0.186,
+      "mode": "auto"
+    },
+    "ir_rate_pfu": {
+      "label": "Impôt sur le revenu (PFU)",
+      "value": 0.128,
+      "mode": "manual"
+    },
+    "ttf_rate": {
+      "label": "Taxe sur les transactions financières",
+      "value": 0.004,
+      "mode": "manual"
+    },
+    "estr": {
+      "label": "Taux monétaire €STR (BCE)",
+      "value": 0.02,
+      "mode": "auto"
+    }
   },
-  "tax": {
-    "ps_rate": 0.186,
-    "ir_rate_pfu": 0.128,
-    "ttf_rate": 0.004
+  "news": {
+    "market": {
+      "fr": "\"CAC 40\" OR \"Wall Street\" OR \"marchés financiers\"",
+      "en": "\"stock market\" OR \"Wall Street\" OR \"global markets\""
+    },
+    "per_line": 4
   },
   "projection": {
     "years": 20,
-    "scenarios": [
-      {
-        "key": "prudent",
-        "label": "Prudent",
-        "rate": 0.03
+    "class_defaults": {
+      "Actions Monde (ETF)": {
+        "return": 0.07,
+        "vol": 0.15,
+        "yield": 0
       },
-      {
-        "key": "central",
-        "label": "Central",
-        "rate": 0.06
+      "Actions Asie émergente (ETF)": {
+        "return": 0.07,
+        "vol": 0.2,
+        "yield": 0
       },
-      {
-        "key": "dynamique",
-        "label": "Dynamique",
-        "rate": 0.08
+      "Actions françaises": {
+        "return": 0.05,
+        "vol": 0.2,
+        "yield": 0.03
+      },
+      "Crypto-actifs": {
+        "return": 0.08,
+        "vol": 0.65,
+        "yield": 0
+      },
+      "Actions Europe (ETF)": {
+        "return": 0.06,
+        "vol": 0.16,
+        "yield": 0
+      },
+      "Actions européennes": {
+        "return": 0.05,
+        "vol": 0.2,
+        "yield": 0.03
+      },
+      "default": {
+        "return": 0.06,
+        "vol": 0.18,
+        "yield": 0
       }
-    ]
+    }
   },
   "alerts": {
     "drawdown_pct": -10,

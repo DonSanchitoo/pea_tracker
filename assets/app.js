@@ -14,7 +14,7 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } },
   };
-  const VIEWS = ['overview', 'performance', 'risque', 'positions', 'allocation', 'crypto', 'projection', 'transactions'];
+  const VIEWS = ['overview', 'performance', 'risque', 'positions', 'allocation', 'crypto', 'projection', 'transactions', 'news', 'donnees'];
   const SCOPE_LABEL = { TOTAL: 'Consolidé', PEA: 'PEA', CRYPTO: 'Crypto' };
   const state = {
     scope: D.meta.scopes.includes(store.get('pea-scope', 'TOTAL')) ? store.get('pea-scope', 'TOTAL') : 'TOTAL',
@@ -81,7 +81,7 @@
     return c;
   }
   function timeLabel(spanDays) {
-    return (v) => { const d = new Date(v); return spanDays > 150 ? `${MONTHS[d.getMonth()]} ${String(d.getFullYear()).slice(2)}` : `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+    return (v) => { const d = new Date(v); return spanDays > 1100 ? String(d.getFullYear()) : spanDays > 150 ? `${MONTHS[d.getMonth()]} ${String(d.getFullYear()).slice(2)}` : `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
   }
   function base(extra) {
     const o = {
@@ -157,11 +157,11 @@
         <div class="row"><span class="big">${dShort(f.maturity)}</span><span class="lbl">${nf(0).format(f.days_left)} j</span></div>
         <div class="meter"><div style="width:${(f.progress * 100).toFixed(1)}%"></div></div>
         <div class="lbl">${pct(f.progress, 0)} du chemin vers l'exonération d'IR</div></div>
-      <a class="btn" href="aide.html#maj">Mettre à jour mes données</a>`;
+      <a class="btn" href="#donnees">Mettre à jour mes données</a>`;
     const open = D.positions.filter((p) => p.open);
     const items = open.map((p) => `<span class="item"><b>${esc(p.short)}</b>${eur(p.price, p.price > 1000 ? 0 : 2)} <span class="${p.day_pct >= 0 ? 'tu' : 'td'}">${arrow(p.day_pct)}${pctS(p.day_pct)}</span></span>`).join('');
     const k = D.kpi.TOTAL;
-    $('#ticker').innerHTML = `<span class="tag">● Marchés</span><div class="track">${items}<span class="item"><b>Total</b>${eur(k.value)}</span>${items}<span class="item"><b>Total</b>${eur(k.value)}</span></div>`;
+    $('#ticker').innerHTML = `${items}<span class="item"><b>Total</b>${eur(k.value)}</span>${items}<span class="item"><b>Total</b>${eur(k.value)}</span>`;
   }
 
   // ------------------------------------------------------------ VUE D'ENSEMBLE
@@ -209,6 +209,8 @@
     $('#ov-events').innerHTML = D.events.slice(0, 6).map((e) => `<li><span class="d">${dShort(e.date)}</span><span class="l">${esc(e.label)}<small>${esc(e.detail)}</small></span><span class="num">${e.amount != null ? eur(e.amount) : ''}</span></li>`).join('');
 
     renderReconMini();
+    const topN = D.news.top && D.news.top.length ? D.news.top.concat((D.news.items || []).filter((n) => !D.news.top.find((t) => t.url === n.url)).slice(0, 3)) : (D.news.items || []).slice(0, 8);
+    $('#ov-news').innerHTML = newsItems(topN) || '<div class="empty">Pas encore d\'actus : elles arrivent au prochain passage du robot.</div>';
   }
 
   function allocBlock(pos, tot) {
@@ -539,11 +541,11 @@
         <div class="segbar thin" style="margin:2px 0"><div style="flex:${r.plan};background:${cv('--muted')}"></div><div style="flex:${Math.max(1 - r.plan, 0)};background:var(--surface-3)"></div></div></div>`).join('') +
       `<div class="note">Les lignes sans plan (actions) ne reçoivent plus d'argent : leur poids baisse mécaniquement à chaque versement.</div>`;
     $('#al-plans').innerHTML = `<table class="t"><thead><tr><th>Plan</th><th class="n">Montant</th><th>Prochaine exécution</th><th class="n">Cours actuel</th><th class="n">Parts achetées (est.)</th><th class="n">Investi (est.)</th><th class="n">Non investi</th><th>Montant conseillé</th></tr></thead><tbody>
-      ${D.plans.map((p) => `<tr><td><div class="name"><span class="dot" style="background:${assetColor(p.ticker)}"></span>${esc(p.short)}</div></td><td class="n">${eur(p.amount, 0)}</td><td>${dShort(p.next)} <small style="color:var(--muted)">J−${p.days_to}</small></td>
+      ${D.plans.filter((p) => p.active).map((p) => `<tr><td><div class="name"><span class="dot" style="background:${assetColor(p.ticker)}"></span><div>${esc(p.short)}<small>${esc(p.freq)}</small></div></div></td><td class="n">${eur(p.amount, 0)}</td><td>${p.next ? `${dShort(p.next)} <small style="color:var(--muted)">J−${p.days_to}</small>` : '–'}</td>
         <td class="n">${eur(p.price, p.price < 10 ? 3 : 2)}</td><td class="n">${p.shares != null ? p.shares : 'fractionné'}</td><td class="n">${eur(p.invested)}</td>
         <td class="n">${p.residual > 0.005 ? `<span class="${p.residual_pct >= 0.1 ? 'down' : 'flat'}">${eur(p.residual)} (${pct(p.residual_pct, 1)})</span>` : '–'}</td>
         <td>${p.suggest && p.residual_pct >= 0.05 ? p.suggest.map((s) => `${s.amount} € → ${s.shares} part${s.shares > 1 ? 's' : ''}`).join(' · ') : '<span style="color:var(--muted)">OK</span>'}</td></tr>`).join('')}
-      <tr class="total"><td>Total mensuel</td><td class="n">${eur(D.plans.reduce((a, p) => a + p.amount, 0), 0)}</td><td></td><td></td><td></td><td class="n">${eur(D.plans.reduce((a, p) => a + p.invested, 0))}</td><td class="n">${eur(D.plans.reduce((a, p) => a + p.residual, 0))}</td><td></td></tr>
+      <tr class="total"><td>Total par mois</td><td class="n">${eur(D.plans.reduce((a, p) => a + p.monthly, 0), 0)}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
       </tbody></table>`;
   }
 
@@ -553,6 +555,7 @@
     const k = D.kpi.CRYPTO, r = D.risk.CRYPTO;
     const eth = D.positions.find((p) => p.account === 'CRYPTO' && p.open) || D.positions.find((p) => p.account === 'CRYPTO');
     const stak = D.transactions.filter((t) => t.ticker === eth.ticker && t.type === 'STAKING').reduce((a, t) => a + t.quantity, 0);
+    const sk = (D.staking || []).find((x) => x.ticker === eth.ticker);
     $('#cr-sub').textContent = `${eth.name} · depuis le ${dShort(k.start)} · cours au ${dShort(eth.price_date)}`;
     $('#cr-kpis').innerHTML = kgrid([
       { label: 'Valeur', help: 'valeur', value: eur(k.value) },
@@ -563,8 +566,8 @@
       { label: 'TRI annualisé', help: 'tri', value: dPct(k.xirr) },
       { label: 'Volatilité', help: 'volatilite', value: pct(r.vol, 0), delta: 'annualisée (365 j)' },
       { label: 'Max drawdown', help: 'drawdown', value: `<span class="down">${pctS(r.dd_mdd, 1)}</span>` },
-      { label: 'Staking', value: eur(stak * eth.price), delta: 'récompenses cumulées' },
-      { label: 'Plan mensuel', value: eur((D.plans.find((p) => p.ticker === eth.ticker) || {}).amount || 0, 0) },
+      { label: 'Staking', help: 'staking', value: eur(stak * eth.price), delta: sk ? `${pct(sk.rate)} / an, ajouté chaque mois` : 'récompenses cumulées' },
+      { label: 'Plan', value: eur(D.plans.filter((p) => p.ticker === eth.ticker && p.active).reduce((a, p) => a + p.monthly, 0), 0) + ' / mois' },
     ]);
     const S = D.series.CRYPTO;
     const { i0, dates } = scopeWindow('CRYPTO');
@@ -586,19 +589,241 @@
   }
 
   // ------------------------------------------------------------ PROJECTION & FISCALITÉ
+  const SIM_KEY = 'pea-sim-v1';
+  const MONTHS_LONG = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  function simDefaults() {
+    const S = D.sim;
+    return {
+      scope: 'PEA', years: S.years, infl: S.inflation, ps: S.ps_rate, ir: S.ir_rate,
+      exc: 0, excMonth: 12, idx: 0, reinvest: true, mc: true,
+      lines: S.lines.map((l) => ({ ticker: l.ticker, short: l.short, account: l.account, value: Math.round(l.value * 100) / 100,
+        monthly: Math.round(l.monthly * 100) / 100, ret: l.ret, vol: l.vol, yld: Math.round((l.yld || 0) * 10000) / 10000, hist: l.hist_vol, on: true })),
+    };
+  }
+  let sim = null;
+  function loadSim() {
+    const def = simDefaults();
+    let saved = null;
+    try { saved = JSON.parse(store.get(SIM_KEY, 'null')); } catch (e) { saved = null; }
+    if (!saved || !Array.isArray(saved.lines)) return def;
+    // garde tes hypothèses, mais repart des valeurs du jour pour tes vraies lignes
+    const lines = def.lines.map((l) => { const o = saved.lines.find((x) => x.ticker === l.ticker); return o ? Object.assign({}, o, { value: l.value, hist: l.hist, short: l.short }) : l; });
+    saved.lines.filter((x) => x.custom).forEach((x) => lines.push(x));
+    return Object.assign({}, def, saved, { lines });
+  }
+  function saveSim() { store.set(SIM_KEY, JSON.stringify(sim)); }
+
+  function rng(seed) { // mulberry32 : tirages reproductibles d'un rendu à l'autre
+    let a = seed >>> 0;
+    return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function gauss(r) { let u = 0, v = 0; while (u === 0) u = r(); while (v === 0) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+  function simulate(P) {
+    const M = Math.max(1, Math.round(P.years * 12));
+    const lines = P.lines.filter((l) => l.on && (P.scope === 'ALL' || l.account === 'PEA'));
+    const start = parseISO(D.sim.today);
+    const dates = [];
+    for (let m = 0; m <= M; m++) { const d = new Date(start); d.setMonth(d.getMonth() + m); dates.push(iso(d)); }
+    const mat = D.sim.maturity;
+    const totMonthly = lines.reduce((a, l) => a + (+l.monthly || 0), 0);
+    const share = lines.map((l) => (totMonthly ? (+l.monthly || 0) / totMonthly : 1 / Math.max(lines.length, 1)));
+    const inv0 = { PEA: D.sim.invested.PEA || 0, CRYPTO: P.scope === 'ALL' ? (D.sim.invested.CRYPTO || 0) : 0 };
+    const cash0 = { PEA: (D.sim.dividends && D.sim.dividends.PEA) || 0, CRYPTO: 0 };
+    // rendement de départ = ce que tu as déjà (valeurs saisies) ; le capital investi de départ suit les valeurs saisies si tu les changes
+    const realVal = { PEA: 0, CRYPTO: 0 }, simVal = { PEA: 0, CRYPTO: 0 };
+    D.sim.lines.forEach((l) => { realVal[l.account] += l.value; });
+    lines.forEach((l) => { simVal[l.account] += +l.value || 0; });
+    ['PEA', 'CRYPTO'].forEach((a) => { if (Math.abs(simVal[a] - realVal[a]) > 0.5) inv0[a] = Math.max(0, inv0[a] + (simVal[a] - realVal[a])); });
+    if (P.scope !== 'ALL') { simVal.CRYPTO = 0; inv0.CRYPTO = 0; }
+
+    function run(r) {
+      const v = lines.map((l) => +l.value || 0);
+      const cash = Object.assign({}, cash0), inv = Object.assign({}, inv0);
+      const out = r ? null : { total: [], invested: [], net: [], real: [], netReal: [], pea: [], crypto: [], contrib: lines.map(() => 0) };
+      const totals = r ? new Float64Array(M + 1) : null;
+      const snap = (m) => {
+        let vp = 0, vc = 0;
+        lines.forEach((l, i) => { if (l.account === 'PEA') vp += v[i]; else vc += v[i]; });
+        const total = vp + vc + cash.PEA + cash.CRYPTO;
+        if (r) { totals[m] = total; return; }
+        const rate = dates[m] >= mat ? P.ps : P.ps + P.ir;
+        const tax = Math.max(vp + cash.PEA - inv.PEA, 0) * rate + Math.max(vc + cash.CRYPTO - inv.CRYPTO, 0) * (P.ps + P.ir);
+        const defl = Math.pow(1 + P.infl, m / 12);
+        out.total.push(total); out.invested.push(inv.PEA + inv.CRYPTO); out.net.push(total - tax);
+        out.real.push(total / defl); out.netReal.push((total - tax) / defl); out.pea.push(vp + cash.PEA); out.crypto.push(vc + cash.CRYPTO);
+        if (m === M) { out.tax = tax; out.lineValues = v.slice(); }
+      };
+      snap(0);
+      const z0 = lines.map((l) => ({ mu: Math.log(1 + (+l.ret || 0)) / 12, s: (+l.vol || 0) / Math.sqrt(12), rho: l.account === 'CRYPTO' ? 0.35 : 0.85 }));
+      for (let m = 1; m <= M; m++) {
+        const zc = r ? gauss(r) : 0;
+        const month = parseISO(dates[m]).getMonth() + 1;
+        const grow = Math.pow(1 + (+P.idx || 0), Math.floor((m - 1) / 12));
+        lines.forEach((l, i) => {
+          const z = z0[i];
+          const g = r ? Math.exp(z.mu - z.s * z.s / 2 + z.s * (z.rho * zc + Math.sqrt(1 - z.rho * z.rho) * gauss(r))) : Math.exp(z.mu);
+          const div = v[i] * (+l.yld || 0) / 12;
+          v[i] *= g;
+          if (P.reinvest) v[i] += div; else cash[l.account] += div;
+          let c = (+l.monthly || 0) * grow;
+          if (+P.exc && month === +P.excMonth) c += (+P.exc) * share[i];
+          v[i] += c; inv[l.account] += c;
+          if (!r) out.contrib[i] += c;
+        });
+        snap(m);
+      }
+      return r ? totals : out;
+    }
+    const det = run(null);
+    let band = null, pLoss = null;
+    if (P.mc && lines.length) {
+      const N = 500, r = rng(20261105);
+      const all = [];
+      for (let k = 0; k < N; k++) all.push(run(r));
+      band = { p10: [], p50: [], p90: [] };
+      for (let m = 0; m <= M; m++) {
+        const col = all.map((a) => a[m]).sort((x, y) => x - y);
+        band.p10.push(col[Math.floor(N * 0.1)]); band.p50.push(col[Math.floor(N * 0.5)]); band.p90.push(col[Math.floor(N * 0.9)]);
+      }
+      pLoss = all.filter((a) => a[M] < det.invested[M]).length / N;
+    }
+    return { dates, det, band, pLoss, lines, M };
+  }
+
+  function simField(label, html, hint) { return `<div class="field"><label>${label}</label>${html}${hint ? `<small>${hint}</small>` : ''}</div>`; }
+  const pctIn = (k, v, step = 0.1) => `<input type="number" step="${step}" data-k="${k}" value="${(v * 100).toFixed(2).replace(/\.?0+$/, '')}">`;
+
+  function renderSimForm() {
+    const P = sim, prm = D.params || {};
+    const live = (k) => (prm[k] && prm[k].live != null ? `live : ${pct(prm[k].live, 1)}` : '');
+    $('#sim-form').innerHTML = `<div class="form wide">
+      ${simField('Périmètre', `<select data-k="scope"><option value="PEA" ${P.scope === 'PEA' ? 'selected' : ''}>PEA seul</option><option value="ALL" ${P.scope === 'ALL' ? 'selected' : ''}>PEA + crypto</option></select>`)}
+      ${simField('Horizon (années)', `<input type="number" min="1" max="50" step="1" data-k="years" value="${P.years}">`, `jusqu'en ${parseISO(D.sim.today).getFullYear() + (+P.years || 0)}`)}
+      ${simField('Inflation (%/an)', pctIn('infl', P.infl), live('inflation'))}
+      ${simField('Prélèvements sociaux (%)', pctIn('ps', P.ps), live('ps_rate'))}
+      ${simField('Impôt sur le revenu PFU (%)', pctIn('ir', P.ir), 'appliqué avant les 5 ans du PEA et sur la crypto')}
+      ${simField('Versement exceptionnel chaque année (€)', `<input type="number" min="0" step="50" data-k="exc" value="${P.exc}">`, 'ex. 600 € à Noël, réparti comme tes plans')}
+      ${simField('Mois du versement exceptionnel', `<select data-k="excMonth">${MONTHS_LONG.map((m, i) => `<option value="${i + 1}" ${+P.excMonth === i + 1 ? 'selected' : ''}>${m}</option>`).join('')}</select>`)}
+      ${simField('Hausse annuelle des versements (%)', pctIn('idx', P.idx), 'ex. 2 % pour suivre ton salaire')}
+      <div class="field"><label>Options</label>
+        <label class="check-row"><input type="checkbox" data-k="reinvest" ${P.reinvest ? 'checked' : ''}> Dividendes réinvestis</label>
+        <label class="check-row"><input type="checkbox" data-k="mc" ${P.mc ? 'checked' : ''}> Fourchette probable (500 scénarios)</label></div>
+    </div>`;
+    $('#sim-lines').innerHTML = `<table class="t"><thead><tr><th>Ligne</th><th>Compte</th><th class="n">Valeur de départ (€)</th><th class="n">Versement / mois (€)</th><th class="n">Rendement attendu (%/an)</th><th class="n">Dividende (%/an)</th><th class="n">Volatilité (%)</th><th></th></tr></thead><tbody>
+      ${P.lines.map((l, i) => `<tr data-i="${i}" class="${l.on ? '' : 'closed'}">
+        <td><label class="check-row"><input type="checkbox" data-l="on" ${l.on ? 'checked' : ''}>${l.custom ? `<input class="in" data-l="short" value="${esc(l.short)}" style="width:140px">` : `<span class="dot" style="background:${assetColor(l.ticker)}"></span>${esc(l.short)}`}</label></td>
+        <td>${l.custom ? `<select class="in" data-l="account"><option ${l.account === 'PEA' ? 'selected' : ''}>PEA</option><option value="CRYPTO" ${l.account === 'CRYPTO' ? 'selected' : ''}>CRYPTO</option></select>` : esc(l.account)}</td>
+        <td class="n"><input class="in" type="number" step="10" data-l="value" value="${l.value}"></td>
+        <td class="n"><input class="in" type="number" step="5" data-l="monthly" value="${l.monthly}"></td>
+        <td class="n"><input class="in" type="number" step="0.5" data-l="ret" value="${+(l.ret * 100).toFixed(2)}"></td>
+        <td class="n"><input class="in" type="number" step="0.1" data-l="yld" value="${+(l.yld * 100).toFixed(2)}"></td>
+        <td class="n"><input class="in" type="number" step="1" data-l="vol" value="${+(l.vol * 100).toFixed(1)}">${l.hist ? `<br><small style="color:var(--muted)">historique ${nf(0).format(l.hist * 100)} %</small>` : ''}</td>
+        <td>${l.custom ? '<button class="btn sm danger" data-del="1">×</button>' : ''}</td></tr>`).join('')}
+      </tbody></table>
+      <div class="actions" style="padding:0 12px 12px"><button class="btn" id="sim-add">+ Ajouter une ligne fictive</button>
+      <span class="note" style="margin:0">Rendement attendu = hausse moyenne du cours par an (hors dividendes pour les actions). Volatilité = ampleur des variations, utilisée pour la fourchette.</span></div>`;
+    $('#sim-sub').textContent = `départ : ${D.sim.lines.filter((l) => l.value > 0).length} lignes réelles au ${dShort(D.sim.today)}`;
+  }
+
+  function bindSimForm() {
+    const upd = () => { saveSim(); renderSimOutput(); };
+    let t;
+    const later = () => { clearTimeout(t); t = setTimeout(upd, 250); };
+    $('#sim-form').oninput = $('#sim-form').onchange = (e) => {
+      const k = e.target.dataset.k; if (!k) return;
+      if (e.target.type === 'checkbox') sim[k] = e.target.checked;
+      else if (['infl', 'ps', 'ir', 'idx'].includes(k)) sim[k] = (parseFloat(e.target.value) || 0) / 100;
+      else if (k === 'scope') sim[k] = e.target.value;
+      else sim[k] = parseFloat(e.target.value) || 0;
+      if (k === 'years') { const sm = e.target.parentElement.querySelector('small'); if (sm) sm.textContent = `jusqu'en ${parseISO(D.sim.today).getFullYear() + (+sim.years || 0)}`; }
+      later();
+    };
+    $('#sim-lines').oninput = $('#sim-lines').onchange = (e) => {
+      const tr = e.target.closest('tr[data-i]'); const k = e.target.dataset.l; if (!tr || !k) return;
+      const l = sim.lines[+tr.dataset.i];
+      if (k === 'on') { l.on = e.target.checked; tr.classList.toggle('closed', !l.on); }
+      else if (k === 'short' || k === 'account') l[k] = e.target.value;
+      else if (['ret', 'yld', 'vol'].includes(k)) l[k] = (parseFloat(e.target.value) || 0) / 100;
+      else l[k] = parseFloat(e.target.value) || 0;
+      later();
+    };
+    $('#sim-lines').onclick = (e) => {
+      if (e.target.id === 'sim-add') {
+        sim.lines.push({ ticker: 'X-' + Date.now(), short: 'Nouvelle ligne', account: 'PEA', value: 0, monthly: 50, ret: 0.07, vol: 0.18, yld: 0, on: true, custom: true });
+        saveSim(); renderSimForm(); renderSimOutput();
+      } else if (e.target.dataset.del) {
+        sim.lines.splice(+e.target.closest('tr').dataset.i, 1); saveSim(); renderSimForm(); renderSimOutput();
+      }
+    };
+  }
+
+  function renderSimOutput() {
+    const R = simulate(sim), P = sim, d = R.det, M = R.M;
+    const ink = cv('--ink'), mut = cv('--muted');
+    const ser = [];
+    if (R.band) {
+      ser.push({ name: 'p10', type: 'line', stack: 'band', data: R.dates.map((x, i) => [x, R.band.p10[i]]), lineStyle: { opacity: 0 }, showSymbol: false, silent: true, emphasis: { disabled: true } });
+      ser.push({ name: 'Fourchette 10-90 %', type: 'line', stack: 'band', data: R.dates.map((x, i) => [x, R.band.p90[i] - R.band.p10[i]]), lineStyle: { opacity: 0 }, areaStyle: { color: hexA(ink, 0.08) }, showSymbol: false, silent: true, emphasis: { disabled: true } });
+    }
+    ser.push(line('Valeur (rendements attendus)', R.dates.map((x, i) => [x, d.total[i]]), ink));
+    ser.push(line("En euros d'aujourd'hui", R.dates.map((x, i) => [x, d.real[i]]), slot(1)));
+    ser.push(line('Capital investi', R.dates.map((x, i) => [x, d.invested[i]]), mut, { lineStyle: { width: 1.5, color: mut } }));
+    const leg = [{ label: 'Valeur (rendements attendus)', color: ink }, { label: "En euros d'aujourd'hui (inflation déduite)", color: slot(1) }, { label: 'Capital investi', color: mut }];
+    if (R.band) leg.push({ label: '8 scénarios sur 10 dans cette zone', color: hexA(ink, 0.25), sq: true });
+    legend('pj-legend', leg);
+    const c = mk('pj-chart');
+    if (c) c.setOption(base({ xAxis: xTime(spanDays(R.dates[0], R.dates[M])), yAxis: yVal(axEur), series: ser,
+      tooltip: Object.assign(base().tooltip, { formatter: (ps) => {
+        const i = ps[0].dataIndex;
+        let h = `<div style="font-weight:650;margin-bottom:4px">${dLong(R.dates[i])}</div>`;
+        const row = (k, v) => `<div style="display:flex;justify-content:space-between;gap:14px"><span>${k}</span><b>${eur(v, 0)}</b></div>`;
+        h += row('Valeur', d.total[i]) + row("En euros d'aujourd'hui", d.real[i]) + row('Capital investi', d.invested[i]) + row('Net après impôts', d.net[i]);
+        if (R.band) h += `<div style="color:var(--muted);margin-top:4px">8 chances sur 10 entre ${eur(R.band.p10[i], 0)} et ${eur(R.band.p90[i], 0)}</div>`;
+        return h;
+      } }) }), true);
+    $('#sim-chart-sub').textContent = `${R.lines.length} ligne(s) · ${eur(R.lines.reduce((a, l) => a + (+l.monthly || 0), 0), 0)} / mois`;
+    const end = R.dates[M];
+    $('#sim-h-sub').textContent = dLong(end);
+    const gain = d.total[M] - d.invested[M];
+    $('#sim-kpis').innerHTML = kgrid([
+      { label: 'Valeur', value: eur(d.total[M], 0), delta: R.band ? `8 chances sur 10 : ${eur(R.band.p10[M], 0)} à ${eur(R.band.p90[M], 0)}` : '' },
+      { label: "En euros d'aujourd'hui", help: 'projection', value: eur(d.real[M], 0), delta: `inflation ${pct(P.infl, 1)} / an` },
+      { label: 'Capital investi', value: eur(d.invested[M], 0) },
+      { label: 'Plus-value', value: `<span class="${cls(gain)}">${eurS(gain, 0)}</span>` },
+      { label: 'Impôts si retrait', value: `<span class="down">−${eur(d.tax, 0)}</span>`, delta: end >= D.sim.maturity ? 'PEA de plus de 5 ans' : 'PEA de moins de 5 ans' },
+      { label: 'Net en poche', value: eur(d.net[M], 0), delta: `${eur(d.netReal[M], 0)} en euros d'aujourd'hui` },
+      { label: 'Revenu mensuel possible', help: 'projection', value: eur(d.netReal[M] * 0.04 / 12, 0), delta: "règle des 4 %, euros d'aujourd'hui" },
+      ...(R.pLoss != null ? [{ label: 'Risque de finir sous le capital investi', value: pct(R.pLoss, 0), delta: 'sur 500 scénarios' }] : []),
+    ]);
+    const marks = [];
+    const mi = R.dates.findIndex((x) => x >= D.sim.maturity);
+    if (mi > 0) marks.push(['Échéance fiscale PEA', mi]);
+    for (let y = 5; y * 12 < M; y += 5) marks.push([`${y} ans`, y * 12]);
+    marks.push([`Horizon (${P.years} ans)`, M]);
+    marks.sort((a, b) => a[1] - b[1]);
+    $('#pj-table').innerHTML = `<table class="t"><thead><tr><th>Étape</th><th>Date</th><th class="n">Investi</th><th class="n">Valeur</th>${R.band ? '<th class="n">Fourchette 10-90 %</th>' : ''}<th class="n">En € d'aujourd'hui</th><th class="n">Net après impôts</th></tr></thead><tbody>
+      ${marks.map(([lab, i]) => `<tr><td>${lab}</td><td>${dShort(R.dates[i])}</td><td class="n">${eur(d.invested[i], 0)}</td><td class="n">${eur(d.total[i], 0)}</td>
+        ${R.band ? `<td class="n">${eur(R.band.p10[i], 0)} – ${eur(R.band.p90[i], 0)}</td>` : ''}<td class="n">${eur(d.real[i], 0)}</td><td class="n">${eur(d.net[i], 0)}</td></tr>`).join('')}</tbody></table>`;
+    const tot = d.lineValues.reduce((a, b) => a + b, 0) || 1;
+    $('#sim-breakdown').innerHTML = `<table class="t"><thead><tr><th>Ligne</th><th class="n">Valeur à l'horizon</th><th class="n">Part</th><th class="n">Versé sur la période</th><th class="n">Rendement attendu</th></tr></thead><tbody>
+      ${R.lines.map((l, i) => `<tr><td><div class="name"><span class="dot" style="background:${l.custom ? cv('--muted') : assetColor(l.ticker)}"></span>${esc(l.short)}</div></td><td class="n">${eur(d.lineValues[i], 0)}</td><td class="n">${pct(d.lineValues[i] / tot, 1)}</td><td class="n">${eur(d.contrib[i], 0)}</td><td class="n">${pct(l.ret, 1)}</td></tr>`).join('')}
+      </tbody></table><div class="note" style="padding:0 12px 10px">Ordres de grandeur, pas une prévision : la vraie trajectoire alternera hausses et baisses. La fourchette vient de 500 scénarios aléatoires fondés sur les volatilités saisies.</div>`;
+  }
+
   function renderProjection() {
-    const F = D.fiscal, P = D.projection;
+    const F = D.fiscal;
+    const monthly = D.plans.filter((p) => p.active && p.account === 'PEA').reduce((a, p) => a + p.monthly, 0) || 1;
     $('#fx-counter').innerHTML = `<div style="font-size:30px;font-weight:650">${nf(0).format(F.days_left)} <span style="font-size:14px;color:var(--muted);font-weight:500">jours</span></div>
       <div class="meter"><div style="width:${(F.progress * 100).toFixed(1)}%"></div></div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>Ouvert le ${dShort(F.opened)}</span><span>5 ans le ${dShort(F.maturity)}</span></div>
       <div style="margin-top:14px;font-size:12px">Plafond de versements : <b>${eur(F.deposits, 0)}</b> / ${eur(F.ceiling, 0)}</div>
       <div class="meter"><div style="width:${Math.max(F.ceiling_used * 100, 0.5).toFixed(2)}%"></div></div>
-      <div class="note">${pct(F.ceiling_used, 2)} utilisé. À ${eur(P.monthly, 0)}/mois, plafond atteint dans ≈ ${nf(0).format((F.ceiling - F.deposits) / P.monthly / 12)} ans.</div>`;
+      <div class="note">${pct(F.ceiling_used, 2)} utilisé. À ${eur(monthly, 0)}/mois, plafond atteint dans ≈ ${nf(0).format((F.ceiling - F.deposits) / monthly / 12)} ans.</div>`;
     $('#fx-tax').innerHTML = `<table class="t"><thead><tr><th>Scénario de retrait</th><th class="n">Valeur PEA</th><th class="n">Gain imposable</th><th class="n">Taux</th><th class="n">Impôts</th><th class="n">Net en poche</th></tr></thead><tbody>
       <tr><td>Aujourd'hui (avant 5 ans : retrait = clôture du PEA)</td><td class="n">${eur(F.value)}</td><td class="n">${eurS(F.gain)}</td><td class="n">${pct(F.pfu_rate, 1)}</td><td class="n down">−${eur(F.tax_now)}</td><td class="n">${eur(F.net_now)}</td></tr>
       <tr><td>Après le ${dShort(F.maturity)} (à valeur égale)</td><td class="n">${eur(F.value)}</td><td class="n">${eurS(F.gain)}</td><td class="n">${pct(F.ps_rate, 1)}</td><td class="n down">−${eur(F.tax_after)}</td><td class="n">${eur(F.net_after)}</td></tr>
-      </tbody></table><div class="note" style="padding:0 12px 10px">Écart aujourd'hui : <b>${eur(F.saving)}</b>. PFU = 12,8 % d'impôt + 18,6 % de prélèvements sociaux (taux 2026). Gain = valeur + dividendes − capital net investi.</div>`;
-
+      </tbody></table><div class="note" style="padding:0 12px 10px">Écart aujourd'hui : <b>${eur(F.saving)}</b>. PFU = ${pct(F.pfu_rate - F.ps_rate, 1)} d'impôt + ${pct(F.ps_rate, 1)} de prélèvements sociaux (valeurs de « Paramètres »). Gain = valeur + dividendes − capital net investi.</div>`;
     const D2 = D.dividends;
     $('#fx-divs').innerHTML = `<table class="t compact"><tbody>
       <tr><td style="color:var(--muted)">Encaissés depuis l'ouverture</td><td class="n">${eur(D2.total)}</td></tr>
@@ -606,29 +831,45 @@
       <tr><td style="color:var(--muted)">Rendement sur coût (actions)</td><td class="n">${pct(D2.yield_on_cost)}</td></tr>
       <tr><td style="color:var(--muted)">Estimation 12 mois à venir</td><td class="n">${eur(D2.forward)}</td></tr></tbody></table>
       <table class="t compact"><thead><tr><th>Prochains (estimés)</th><th class="n">Montant</th></tr></thead><tbody>
-      ${D2.next.map((d) => `<tr><td>${esc(d.short)} · ${dShort(d.ex_date)}</td><td class="n">${eur(d.amount)}</td></tr>`).join('')}</tbody></table>
-      <table class="t compact"><thead><tr><th>Reçus</th><th class="n">Montant</th></tr></thead><tbody>
-      ${D2.received.slice().reverse().map((d) => `<tr><td>${dShort(d.date)} · ${esc(d.short)}</td><td class="n">${eur(d.amount)}</td></tr>`).join('')}</tbody></table>`;
-
-    const mat = P.scenarios[0].horizons[0].date;
-    const nEnd = state.pjH === 'mat' ? P.dates.findIndex((d) => d >= mat) : +state.pjH;
-    const ds = P.dates.slice(0, nEnd + 1);
-    const dark = document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
-    const ramp = dark ? ['#1c5cab', '#3987e5', '#9ec5f4'] : ['#86b6ef', '#2a78d6', '#104281'];
-    const mut = cv('--muted');
-    const ser = P.scenarios.map((s, i) => line(`${s.label} (${pct(s.rate, 0)}/an)`, ds.map((d, j) => [d, s.values[j]]), ramp[i], { lineStyle: { width: 2, color: ramp[i], type: 'dashed' } }));
-    ser.push(line('Capital investi', ds.map((d, j) => [d, P.invested[j]]), mut, { lineStyle: { width: 1.5, color: mut } }));
-    legend('pj-legend', [...P.scenarios.map((s, i) => ({ label: `${s.label} ${pct(s.rate, 0)}/an`, color: ramp[i] })), { label: 'Capital investi', color: mut }]);
-    const c = mk('pj-chart');
-    if (c) c.setOption(base({ xAxis: xTime(spanDays(ds[0], ds[ds.length - 1])), yAxis: yVal(axEur), series: ser, tooltip: Object.assign(base().tooltip, { formatter: tip((v) => eur(v, 0)) }) }), true);
-
-    const hz = P.scenarios[0].horizons.map((h) => h.label);
-    $('#pj-table').innerHTML = `<table class="t"><thead><tr><th>Horizon</th><th>Date</th><th class="n">Capital investi</th>${P.scenarios.map((s) => `<th class="n">${esc(s.label)} ${pct(s.rate, 0)}</th>`).join('')}<th class="n">Net central (après PS)</th></tr></thead><tbody>
-      ${hz.map((label, i) => `<tr><td>${esc(label)}</td><td>${dShort(P.scenarios[0].horizons[i].date)}</td><td class="n">${eur(P.scenarios[0].horizons[i].invested, 0)}</td>
-        ${P.scenarios.map((s) => `<td class="n">${eur(s.horizons[i].value, 0)}<br><small class="${cls(s.horizons[i].gain)}">${eurS(s.horizons[i].gain, 0)}</small></td>`).join('')}
-        <td class="n">${eur(P.scenarios[1].horizons[i].net, 0)}</td></tr>`).join('')}</tbody></table>
-      <div class="note" style="padding:0 12px 10px">Point de départ : PEA à ${eur(P.start_value)}, ${eur(P.monthly, 0)} versés chaque mois. Les rendements ne sont pas garantis : c'est un ordre de grandeur, pas une prévision.</div>`;
+      ${D2.next.map((x) => `<tr><td>${esc(x.short)} · ${dShort(x.ex_date)}</td><td class="n">${eur(x.amount)}</td></tr>`).join('')}</tbody></table>
+      <table class="t compact"><thead><tr><th>Reçus (ajoutés automatiquement)</th><th class="n">Montant</th></tr></thead><tbody>
+      ${D2.received.slice().reverse().map((x) => `<tr><td>${dShort(x.date)} · ${esc(x.short)}</td><td class="n">${eur(x.amount)}</td></tr>`).join('')}</tbody></table>`;
+    if (!sim) sim = loadSim();
+    renderSimForm(); bindSimForm(); renderSimOutput();
   }
+
+  // ------------------------------------------------------------ ACTUALITÉS
+  const newsState = { lang: '', sort: 'score', line: '' };
+  function ago(isoStr) {
+    const h = (Date.now() - new Date(isoStr).getTime()) / 36e5;
+    if (h < 1) return "à l'instant";
+    if (h < 24) return `il y a ${Math.floor(h)} h`;
+    if (h < 48) return 'hier';
+    return `il y a ${Math.floor(h / 24)} j`;
+  }
+  function newsName(t) { return t === 'MARCHE' ? 'Marchés' : ((D.assets[t] || {}).short || t); }
+  function newsItems(items) {
+    return items.map((n) => `<a class="news-item" href="${esc(n.url)}" target="_blank" rel="noopener">
+      <div class="meta"><b>${esc(n.source)}</b><span>${ago(n.date)}</span><span class="lang">${esc(n.lang.toUpperCase())}</span>
+      ${n.tickers.map((t) => `<span class="tagline"><span class="dot" style="background:${t === 'MARCHE' ? cv('--muted') : assetColor(t)}"></span>${esc(newsName(t))}</span>`).join('')}</div>
+      <div class="tt">${esc(n.title)}</div></a>`).join('');
+  }
+  function renderNews() {
+    const all = D.news.items || [];
+    $('#news-sub').textContent = all.length ? `${all.length} articles des 7 derniers jours, en français et en anglais · mis à jour le ${esc((D.news.updated_at || '').replace(' UTC', ''))} (UTC)` : "Les actus arrivent au prochain passage du robot.";
+    const counts = {};
+    all.forEach((n) => n.tickers.forEach((t) => { counts[t] = (counts[t] || 0) + 1; }));
+    const keys = ['MARCHE', ...Object.keys(counts).filter((t) => t !== 'MARCHE')].filter((t) => counts[t]);
+    $('#news-lines').innerHTML = `<button class="chip" data-line="" aria-pressed="${!newsState.line}">Toutes <span class="n">${all.length}</span></button>` +
+      keys.map((t) => `<button class="chip" data-line="${esc(t)}" aria-pressed="${newsState.line === t}"><span class="dot" style="background:${t === 'MARCHE' ? cv('--muted') : assetColor(t)}"></span>${esc(newsName(t))} <span class="n">${counts[t]}</span></button>`).join('');
+    let items = all.filter((n) => (!newsState.lang || n.lang === newsState.lang) && (!newsState.line || n.tickers.includes(newsState.line)));
+    items = items.slice().sort((a, b) => (newsState.sort === 'date' ? b.date.localeCompare(a.date) : b.score - a.score));
+    $('#news-list').innerHTML = items.length ? `<div class="news-grid">${newsItems(items)}</div>` : '<div class="empty">Aucune actu pour ce filtre.</div>';
+  }
+  $('#news-lang').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; newsState.lang = b.dataset.l; $$('#news-lang button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); renderNews(); });
+  $('#news-sort').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; newsState.sort = b.dataset.s; $$('#news-sort button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); renderNews(); });
+  $('#news-lines').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; newsState.line = b.dataset.line; renderNews(); });
+  $('#sim-reset').addEventListener('click', () => { sim = simDefaults(); saveSim(); renderProjection(); });
 
   // ------------------------------------------------------------ TRANSACTIONS
   const TYPE_LABEL = { BUY: ['Achat', 'b-buy'], SELL: ['Vente', 'b-sell'], DIVIDEND: ['Dividende', 'b-div'], TRANSFER_IN: ['Transfert entrant', 'b-other'], TRANSFER_OUT: ['Transfert sortant', 'b-other'], STAKING: ['Staking', 'b-div'], BONUS: ['Attribution', 'b-other'], FEE: ['Frais', 'b-sell'] };
@@ -648,7 +889,8 @@
   }
 
   // ------------------------------------------------------------ routage
-  const RENDER = { overview: renderOverview, performance: renderPerformance, risque: renderRisk, positions: renderPositions, allocation: renderAllocation, crypto: renderCrypto, projection: renderProjection, transactions: renderTransactions };
+  const RENDER = { overview: renderOverview, performance: renderPerformance, risque: renderRisk, positions: renderPositions, allocation: renderAllocation, crypto: renderCrypto, projection: renderProjection, transactions: renderTransactions, news: renderNews,
+    donnees: () => { if (window.PEA_EDITOR) window.PEA_EDITOR.render(); else $('#ed-body').innerHTML = '<div class="empty"><span class="spin"></span> Chargement…</div>'; } };
   function show(view) {
     if (!VIEWS.includes(view)) view = 'overview';
     state.view = view;
@@ -679,5 +921,6 @@
   window.addEventListener('hashchange', () => show(location.hash.slice(1)));
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => Object.values(charts).forEach((c) => c.getDom().offsetParent && c.resize()), 120); });
+  window.PEA_APP = { rerender, show, state, store, fmt: { eur, eurS, pct, pctS, num, qty, dShort, dLong, esc, cls }, assetColor, help };
   show(location.hash.slice(1) || 'overview');
 })();
