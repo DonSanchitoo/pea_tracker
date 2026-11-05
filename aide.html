@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide des indicateurs</title>
+<meta name="description" content="Définition, calcul et lecture de chaque indicateur et graphique du PEA Tracker.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111'/%3E%3Cpath d='M7 21l6-6 4 4 8-9' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script>try{var t=localStorage.getItem('pea-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .live { font-variant-numeric: tabular-nums; font-weight: 650; }
+  .you { display: inline-block; background: var(--surface-3); border-radius: 4px; padding: 1px 8px; font-size: 12.5px; color: var(--text-2); margin: 2px 0 6px; }
+  .you b { color: var(--text); }
+  .topbar a.back { text-decoration: none; font-weight: 600; display: inline-flex; gap: 6px; align-items: center; }
+  .topbar a.back svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  table.t { margin: 6px 0 12px; }
+  .doc table.t td { white-space: normal; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Retour au dashboard</a>
+  <div class="grow"></div>
+  <span class="asof" id="asof"></span>
+  <button class="icon-btn" id="theme-btn" title="Thème clair / sombre" aria-label="Changer de thème"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</header>
+
+<div class="content" style="padding-bottom:40px">
+<div class="doc-layout">
+<article class="doc">
+  <h1>Guide des indicateurs</h1>
+  <p class="lead">Chaque chiffre du dashboard : ce qu'il mesure, comment il est calculé, comment le lire et ses limites. Les encadrés gris donnent ta valeur actuelle.</p>
+
+  <!-- ===================================================== PRINCIPES -->
+  <h2 id="principes">1. D'où viennent les chiffres</h2>
+  <p><b>Le registre fait foi.</b> Toutes tes opérations Trade Republic sont saisies dans <code>data/transactions.csv</code> : date, type, ligne, quantité, montant débité ou crédité, taxe. Tout le reste en découle : positions, PRU, historique jour par jour, performance.</p>
+  <p><b>Les cours viennent de Yahoo Finance</b> : clôture Euronext Paris pour les ETF et actions, ETH-EUR pour l'Ethereum. Les cours sont « dé-ajustés » des attributions gratuites : Yahoo divise par 1,1 les cours d'Air Liquide d'avant juin 2026 (attribution 1 pour 10), le dashboard les remet à leur vrai niveau puisque ta quantité, elle, est restée à 1.</p>
+  <p><b>Mise à jour automatique</b> : chaque soir de bourse vers 18h30 (cours de clôture) et chaque matin de semaine (enregistrement des plans exécutés la veille et mails). Le robot GitHub peut avoir 15 à 60 minutes de retard.</p>
+
+  <h3 id="ecart-tr">Pourquoi un écart de quelques euros avec l'appli TR ?</h3>
+  <p>Les quantités, le PRU et le capital investi sont identiques à TR (vérifié par le <a href="#reconciliation">contrôle</a>). La seule différence possible est le <b>cours</b> : TR affiche un prix en continu (Lang &amp; Schwarz, de 7h30 à 23h), le dashboard prend la clôture Euronext de 17h35. Si le marché bouge le soir, l'écart vaut quantité × différence de cours. Exemple : 470 parts du PEA Monde × 0,01 € = 4,70 €. Compare le soir après 17h35 : l'écart est en général de quelques centimes à quelques euros.</p>
+
+  <!-- ===================================================== MONTANTS -->
+  <h2 id="montants">2. Les montants</h2>
+
+  <h3 id="valeur">Valeur</h3>
+  <div class="formula">Valeur = Σ (quantité détenue × dernier cours)</div>
+  <p>Ce que vaudraient tes titres au dernier cours connu. Le sélecteur « Périmètre » choisit Consolidé (PEA + crypto, comme le « Total » de l'onglet Épargne TR), PEA seul ou Crypto seule. Les liquidités ne sont pas comptées, comme dans l'écran PEA de TR.</p>
+  <span class="you">Chez toi : <b data-v="kpi.TOTAL.value" data-f="eur"></b> dont PEA <b data-v="kpi.PEA.value" data-f="eur"></b> et crypto <b data-v="kpi.CRYPTO.value" data-f="eur"></b></span>
+
+  <h3 id="investi">Capital investi net</h3>
+  <div class="formula">Capital investi net = achats + transferts entrants − ventes</div>
+  <p>L'argent que tu as réellement sorti de ta poche et qui est encore placé. Les montants sont ceux débités par TR, taxe sur les transactions financières (TTF) incluse. Les dividendes n'en sont pas déduits : ils comptent comme un gain.</p>
+  <span class="you">Chez toi : <b data-v="kpi.TOTAL.invested" data-f="eur"></b> (PEA <b data-v="kpi.PEA.invested" data-f="eur"></b>)</span>
+
+  <h3 id="latente">Plus-value latente (méthode TR) et PRU</h3>
+  <div class="formula">PRU = Σ (montant payé − TTF) / quantité          (coût moyen pondéré)
+Plus-value latente = valeur − quantité × PRU
+Performance ligne = valeur / (quantité × PRU) − 1</div>
+  <p>Exactement le calcul de TR : la fiche d'une position affiche ce PRU (« Prix d'acquisition moyen ») et cette performance. TR exclut la TTF de 0,4 % (actions françaises) du PRU : le dashboard fait pareil. Quand tu vends une partie d'une ligne, le PRU ne change pas, le coût sorti part dans le réalisé.</p>
+  <p><b>Limite</b> : c'est une plus-value « sur ce qui reste ». Elle ignore ce que tu as déjà encaissé (ventes, dividendes). Pour ça, regarde le gain total.</p>
+  <span class="you">Chez toi : <b data-v="kpi.TOTAL.unreal" data-f="eurS"></b> soit <b data-v="kpi.TOTAL.unreal_pct" data-f="pctS"></b></span>
+
+  <h3 id="realise">Plus-values réalisées</h3>
+  <div class="formula">Réalisé = prix de vente − quantité vendue × PRU au moment de la vente</div>
+  <p>Gains ou pertes déjà encaissés. Chez toi : l'aller-retour sur l'ETF iShares MSCI World Swap (achat 12/09/2025, vente 30/01/2026, puis 1 part achetée et revendue).</p>
+  <span class="you">Chez toi : <b data-v="kpi.TOTAL.realized" data-f="eurS"></b></span>
+
+  <h3 id="dividendes">Dividendes</h3>
+  <p>Montants versés par TotalEnergies (trimestriel) et Air Liquide (annuel). Dans le PEA, pas de retenue à la source française : brut = net. Le <b>rendement sur coût</b> = dividendes des 12 derniers mois / coût de revient des actions qui en versent. Les <b>prochains dividendes</b> sont estimés à partir du dernier montant et du rythme habituel : ce sont des estimations, pas des annonces.</p>
+  <span class="you">Chez toi : <b data-v="dividends.total" data-f="eur"></b> encaissés, rendement sur coût <b data-v="dividends.yield_on_cost" data-f="pct"></b></span>
+
+  <h3 id="gain-total">Plus-value totale (gain total)</h3>
+  <div class="formula">Gain total = valeur + ventes + dividendes − achats − transferts entrants
+           = plus-value latente + réalisé + dividendes − TTF
+Rendement sur capital investi = gain total / total versé</div>
+  <p>Le chiffre le plus honnête : combien tu as gagné en euros, tout compris, depuis l'ouverture. C'est celui à regarder en premier.</p>
+  <span class="you">Chez toi : <b data-v="kpi.TOTAL.pnl" data-f="eurS"></b> soit <b data-v="kpi.TOTAL.roi" data-f="pctS"></b> de ce que tu as versé</span>
+
+  <h3 id="frais">Frais et taxes</h3>
+  <p><b>TTF</b> : 0,4 % des achats d'actions françaises de plus d'1 Md€ de capitalisation (Air Liquide, TotalEnergies), comptée dans le montant débité. <b>Frais courants des ETF (TER)</b> : prélevés chaque jour dans le cours de l'ETF, tu ne les paies jamais directement. Le dashboard les estime par an : valeur × TER. Plans d'épargne TR : sans frais.</p>
+  <span class="you">Chez toi : TTF payée <b data-v="kpi.TOTAL.taxes" data-f="eur"></b>, frais ETF ≈ <b data-v="allocation.fee_year" data-f="eur"></b> par an</span>
+
+  <!-- ===================================================== PERFORMANCE -->
+  <h2 id="performance">3. La performance</h2>
+  <p>Avec des versements tous les mois, « combien j'ai gagné en % » a trois réponses justes, qui mesurent des choses différentes. Le dashboard affiche les trois.</p>
+  <table class="t"><thead><tr><th>Indicateur</th><th>Répond à</th><th>Influencé par tes versements ?</th></tr></thead><tbody>
+    <tr><td>Rendement sur capital investi</td><td>Combien j'ai gagné par rapport à ce que j'ai mis ?</td><td>Oui, totalement</td></tr>
+    <tr><td>TWR</td><td>Mes placements ont-ils bien performé, comme un fonds ?</td><td>Non</td></tr>
+    <tr><td>TRI</td><td>Quel taux annuel ont rapporté mes euros, au moment où je les ai mis ?</td><td>Oui, tient compte des dates</td></tr>
+  </tbody></table>
+
+  <h3 id="twr">TWR (performance pondérée par le temps)</h3>
+  <div class="formula">r(jour) = (V(jour) + dividendes − V(veille) − flux) / (V(veille) + flux)
+TWR = Π (1 + r) − 1          TWR annualisée = (1 + TWR)^(365 / nb jours) − 1</div>
+  <p>Les flux (achats, ventes) sont supposés au début de la journée, car les plans TR s'exécutent le matin. Le TWR neutralise l'effet des versements : c'est la perf qu'aurait affichée un fonds qui aurait suivi exactement tes choix. C'est la mesure utilisée par les professionnels pour comparer à un indice.</p>
+  <p><b>À savoir</b> : chaque jour pèse pareil, quelle que soit la somme investie. Ton PEA a passé ses premiers mois avec 30 € puis 220 € (iShares, puis Air Liquide et TotalEnergies qui ont fortement monté début 2026). Ces mois gonflent le TWR alors qu'ils ont rapporté peu d'euros. C'est pour ça que ton TWR est bien supérieur à ton rendement sur capital investi : ce n'est pas une erreur.</p>
+  <span class="you">Chez toi : TWR <b data-v="kpi.TOTAL.twr" data-f="pctS"></b>, annualisée <b data-v="kpi.TOTAL.twr_ann" data-f="pctS"></b></span>
+
+  <h3 id="tri">TRI (taux de rendement interne, money-weighted)</h3>
+  <div class="formula">Σ flux_i / (1 + TRI)^(t_i / 365) = 0
+flux : achats (−), ventes et dividendes (+), valeur actuelle (+) à la date du jour</div>
+  <p>Le taux annuel d'un livret qui aurait produit exactement ton résultat avec tes versements aux mêmes dates. C'est ton rendement personnel réel.</p>
+  <p><b>Limite</b> : annualisé sur peu de temps, il s'emballe. Tes euros sont placés en moyenne depuis quelques mois seulement ; un gain de 7 % sur 4 mois devient ~20 % par an. Il deviendra fiable après 2 à 3 ans.</p>
+  <span class="you">Chez toi : <b data-v="kpi.TOTAL.xirr" data-f="pctS"></b> par an (PEA <b data-v="kpi.PEA.xirr" data-f="pctS"></b>)</span>
+
+  <h3 id="benchmark">Indice de référence (MSCI World)</h3>
+  <p>L'indice de comparaison est le cours de l'ETF Amundi PEA Monde (MSCI World), ta ligne principale. Il est capitalisant : sa performance inclut les dividendes réinvestis. Comparer ton TWR au sien dit si tes choix hors MSCI World (Asie émergente, Air Liquide, TotalEnergies) t'ont aidé ou freiné.</p>
+  <span class="you">MSCI World sur la même période : <b data-v="risk.TOTAL.bench_twr" data-f="pctS"></b></span>
+
+  <h3 id="graph-evolution">Graphique : évolution du patrimoine</h3>
+  <p>Trois modes. <b>Valeur</b> : la courbe noire est la valeur de marché, la grise en escalier le capital investi net (chaque marche = un versement). L'écart entre les deux est ta plus-value. <b>Plus-value €</b> : le gain total en euros au fil du temps, sans l'effet des versements. <b>Perf. %</b> : le TWR comparé au MSCI World, remis à 0 % au début de la période choisie.</p>
+
+  <h3 id="graph-perf">Graphique : performance cumulée vs indice et Livret A</h3>
+  <p>Trois courbes en %, remises à zéro au début de la période : ton TWR, le MSCI World et le Livret A (1,7 % par an, taux réglementé actuel, réglable dans <code>config.json</code>). Si ta courbe passe sous celle du Livret A sur longue période, ton risque n'a pas été rémunéré.</p>
+
+  <h3 id="periodes">Performance par période</h3>
+  <p>1J = dernière séance, 1S = 7 jours, 1M/3M/6M = mois glissants, YTD = depuis le 31 décembre, 1A = 12 mois glissants, Origine = depuis le premier achat. « Perf. » = TWR de la période, « Gain € » = variation du gain total (hors versements), « Écart » = ta perf moins celle du MSCI World. Mention « depuis l'origine » : la période demandée commence avant ton premier achat.</p>
+
+  <h3 id="mensuel">Rendements mensuels</h3>
+  <p>TWR de chaque mois (ligne du haut) et gain en euros (dessous). Bleu = mois positif, rouge = négatif, plus foncé = plus fort. La colonne « Année » chaîne les mois : (1 + r1) × (1 + r2) … − 1. Les premiers mois (septembre 2025 à janvier 2026) portent sur 30 € : leurs % sont réels mais pèsent peu en euros.</p>
+
+  <h3 id="contribution">Contribution par ligne</h3>
+  <div class="formula">Gain total d'une ligne = valeur + ventes + dividendes − achats</div>
+  <p>Qui a fait gagner quoi, en euros, depuis l'origine. Lignes soldées incluses. La somme des barres est égale au gain total.</p>
+
+  <h3 id="fantomes">Portefeuilles fantômes</h3>
+  <p>On rejoue tes versements, aux mêmes dates et pour les mêmes montants, sur deux placements simples : <b>100 % MSCI World</b> (chaque euro converti en parts d'Amundi PEA Monde au cours du jour) et <b>100 % Livret A</b> (intérêts quotidiens à 1,7 %). Ta valeur réelle inclut les dividendes encaissés.</p>
+  <p>Lecture : écart positif vs MSCI World = tes choix de diversification ont rapporté plus que la solution la plus simple. Écart vs Livret A = ce que le risque actions t'a rapporté en plus.</p>
+  <span class="you">PEA vs 100 % MSCI World : <b data-v="ghosts.PEA.diff_bench" data-f="eurS"></b></span>
+
+  <h3 id="versements">Versements et gain mensuels</h3>
+  <p>Barres bleues : argent net investi chaque mois (achats − ventes). Barres vertes : gain ou perte du mois en euros. Plus le capital grossit, plus une même variation en % pèse en euros.</p>
+
+  <!-- ===================================================== RISQUE -->
+  <h2 id="risque">4. Le risque</h2>
+  <p>Tous les indicateurs de risque sont calculés sur les variations journalières du TWR : séances Euronext (252 par an) pour le PEA et le consolidé, tous les jours (365) pour la crypto, qui cote en continu.</p>
+
+  <h3 id="volatilite">Volatilité annualisée</h3>
+  <div class="formula">Volatilité = écart-type des variations journalières × √252</div>
+  <p>Amplitude moyenne des secousses. Repères : 12 à 18 % pour un ETF actions monde, 20 à 25 % pour les émergents, 50 à 80 % pour l'ETH. Avec 68 % de probabilité, une année se termine dans ± 1 volatilité autour de sa moyenne. La <b>volatilité glissante</b> (graphique) la recalcule sur les 21 dernières séances (~1 mois) : ses pics signalent les phases agitées.</p>
+  <span class="you">Chez toi : <b data-v="risk.TOTAL.vol" data-f="pct"></b> (consolidé), <b data-v="risk.CRYPTO.vol" data-f="pct"></b> (crypto)</span>
+
+  <h3 id="drawdown">Drawdown (recul depuis le sommet)</h3>
+  <div class="formula">Drawdown(jour) = indice TWR(jour) / plus haut historique − 1
+Max drawdown = pire valeur atteinte</div>
+  <p>La pire baisse subie entre un sommet et un creux, versements neutralisés. Le graphique « underwater » montre chaque recul et le temps mis à revenir à zéro. C'est l'indicateur de risque le plus parlant : « jusqu'où ai-je déjà baissé ? ». Pour un PEA actions, des reculs de −20 à −35 % arrivent tous les 5 à 10 ans.</p>
+  <span class="you">Chez toi : max <b data-v="risk.TOTAL.dd_mdd" data-f="pctS"></b>, actuel <b data-v="risk.TOTAL.dd_current" data-f="pctS"></b></span>
+
+  <h3 id="sharpe">Ratio de Sharpe</h3>
+  <div class="formula">Sharpe = (TWR annualisée − taux sans risque) / volatilité          taux sans risque = Livret A</div>
+  <p>Rendement obtenu en plus du Livret A par unité de risque. &lt; 0 : tu aurais mieux fait de rester au Livret A. 0,3 à 0,6 : normal pour les actions sur longue période. &gt; 1 : très bon, rarement durable. Sur moins de 2 ans il est flatteur ou sévère selon le marché : ne pas en tirer de conclusion.</p>
+  <span class="you">Chez toi : <b data-v="risk.TOTAL.sharpe" data-f="num"></b></span>
+
+  <h3 id="sortino">Ratio de Sortino</h3>
+  <div class="formula">Sortino = (TWR annualisée − taux sans risque) / volatilité des seules baisses</div>
+  <p>Comme le Sharpe, mais ne pénalise que les variations négatives : une hausse brutale n'est pas un risque. Plus élevé que le Sharpe quand les mouvements sont surtout à la hausse.</p>
+
+  <h3 id="calmar">Ratio de Calmar</h3>
+  <div class="formula">Calmar = TWR annualisée / |max drawdown|</div>
+  <p>Combien de « pire chute » tu gagnes par an. &gt; 1 : la perf annuelle dépasse la pire baisse. N'a de sens que sur plusieurs années.</p>
+
+  <h3 id="var">VaR et CVaR 95 % (1 jour)</h3>
+  <div class="formula">VaR 95 % = −5e centile des variations journalières × valeur actuelle
+CVaR 95 % = moyenne des 5 % pires journées × valeur actuelle</div>
+  <p>VaR : une journée sur 20, tu perds au moins ce montant. CVaR : quand ces mauvaises journées arrivent, tu perds en moyenne ce montant. Méthode historique : basée sur tes vraies journées passées, sans hypothèse de loi normale.</p>
+  <span class="you">Chez toi : VaR <b data-v="risk.TOTAL.var95_eur" data-f="eur"></b>, CVaR <b data-v="risk.TOTAL.cvar95_eur" data-f="eur"></b></span>
+
+  <h3 id="distribution">Distribution des variations journalières</h3>
+  <p>Histogramme du nombre de séances par tranche de 0,5 %. Rouge = baisses, bleu = hausses. Une queue gauche longue signale des chutes brutales. Meilleure et pire séance, et part des séances positives (souvent 52 à 56 % pour les actions) complètent la lecture.</p>
+
+  <h3 id="beta">Bêta et corrélation</h3>
+  <div class="formula">Bêta = covariance(toi, MSCI World) / variance(MSCI World)</div>
+  <p>Bêta 1 : tu bouges comme le MSCI World. 0,8 : quand l'indice perd 10 %, tu perds 8 % en moyenne. La corrélation (−1 à 1) dit à quel point les mouvements vont dans le même sens. La crypto et l'Asie émergente font baisser l'une et l'autre.</p>
+  <span class="you">Chez toi : bêta <b data-v="risk.TOTAL.beta" data-f="num"></b>, corrélation <b data-v="risk.TOTAL.corr" data-f="num"></b></span>
+
+  <h3 id="alpha">Alpha de Jensen</h3>
+  <div class="formula">Alpha = TWR annualisée − [Livret A + bêta × (MSCI World annualisé − Livret A)]</div>
+  <p>Le surplus de perf que ton risque ne suffit pas à expliquer. Positif = tes choix ont créé de la valeur par rapport à l'indice, à risque égal. Sur moins de 2 ans, c'est surtout de la chance (bonne ou mauvaise).</p>
+
+  <h3 id="tracking">Tracking error et ratio d'information</h3>
+  <div class="formula">Tracking error = écart-type(ta perf − perf MSCI World) × √252
+Ratio d'information = (ta perf annualisée − MSCI World annualisé) / tracking error</div>
+  <p>La tracking error mesure à quel point tu t'écartes de l'indice (0 = copie parfaite). Le ratio d'information dit si cet écart a payé : au-dessus de 0,5, c'est bon.</p>
+
+  <!-- ===================================================== ALLOCATION -->
+  <h2 id="allocation">5. Allocation</h2>
+  <p><b>Par ligne</b> : poids de chaque position dans le total et dans son compte. <b>Par classe d'actif</b> : ETF monde, ETF Asie émergente, actions françaises, crypto.</p>
+
+  <h3 id="positions">Tableau des positions</h3>
+  <p>Quantité, PRU et performance identiques à la fiche TR. « 1 jour » et « 1 sem. » = variation du cours, pas de ta position. « Gain total » inclut réalisé et dividendes. Clique une ligne pour voir son graphique et sa fiche.</p>
+
+  <h3 id="graph-position">Graphique : cours et PRU</h3>
+  <p>Le cours (noir), ton PRU (orange, en escalier : il bouge à chaque achat) et tes achats (points bleus, au prix payé). Quand le cours est au-dessus du PRU, la ligne est en plus-value. Les points sous la courbe orange sont les achats qui ont fait baisser ton PRU.</p>
+
+  <h3 id="geographie">Exposition géographique (transparence)</h3>
+  <p>Chaque ETF est éclaté selon les poids pays approximatifs de son indice (renseignés dans <code>config.json</code> : MSCI World ≈ 74 % Amérique du Nord, 16 % Europe, 5,5 % Japon ; MSCI EM Asia ≈ Chine, Taïwan, Inde, Corée). C'est une vue indicative, à ±2 points : les poids réels bougent chaque mois. Air Liquide et TotalEnergies sont classées France (siège) alors qu'elles réalisent la majorité de leurs ventes à l'étranger.</p>
+
+  <h3 id="concentration">Concentration (nombre effectif de lignes)</h3>
+  <div class="formula">HHI = Σ poids²          Nombre effectif = 1 / HHI</div>
+  <p>Le nombre de lignes de poids égal qui donnerait la même concentration. 1,5 pour ton PEA : il est dominé par une ligne. Ce n'est pas un problème quand cette ligne est un ETF de ~1 400 sociétés : la concentration est de produit, pas de risque.</p>
+
+  <h3 id="derive">Répartition réelle vs versements du plan</h3>
+  <p>Compare le poids actuel de chaque ligne du PEA à sa part dans tes versements mensuels (350 € / 395 € = 88,6 % pour le PEA Monde). Les actions sans plan voient leur poids baisser à chaque versement. Un écart durable sur une ligne avec plan vient de sa performance relative.</p>
+
+  <h3 id="plans">Efficacité des plans d'épargne</h3>
+  <p>Dans un PEA, la loi interdit les fractions de titres : TR achète le nombre de parts entières que permet le montant, et le reste n'est pas investi. Le tableau estime, au cours actuel, combien de parts ton plan achètera et combien d'euros resteront de côté.</p>
+  <p><b>Ton cas</b> : le plan Asie émergente de 45 € n'achète qu'une part à ~36 € : environ 9 € par mois (≈ 19 %) ne travaillent pas. Deux options : baisser à 38 € (1 part, marge de 2 % pour les variations de cours) ou monter à ~75 € (2 parts). Le PEA Monde à ~6,35 € la part perd moins de 1 € par mois : rien à changer.</p>
+
+  <!-- ===================================================== FISCALITÉ -->
+  <h2 id="fiscalite">6. Fiscalité et projection</h2>
+  <h3>Compteur fiscal PEA</h3>
+  <p>Ton PEA est ouvert depuis le 02/09/2025. À partir du <b>02/09/2030</b> (5 ans), les gains sont exonérés d'impôt sur le revenu ; seuls les prélèvements sociaux restent dus au retrait.</p>
+  <table class="t"><thead><tr><th>Retrait</th><th>Conséquence</th><th>Taxation des gains</th></tr></thead><tbody>
+    <tr><td>Avant 5 ans</td><td>Clôture du PEA (sauf cas légaux : licenciement, invalidité, création d'entreprise…)</td><td>PFU 31,4 % = 12,8 % d'impôt + 18,6 % de prélèvements sociaux</td></tr>
+    <tr><td>Après 5 ans</td><td>Le PEA reste ouvert, versements toujours possibles</td><td>18,6 % de prélèvements sociaux</td></tr>
+  </tbody></table>
+  <p>Taux 2026 : la loi de financement de la Sécurité sociale a relevé la CSG sur les revenus du capital, les prélèvements sociaux passent de 17,2 % à 18,6 %. Ils sont modifiables dans <code>config.json</code> si la loi change. Le gain imposable est estimé par valeur + dividendes − capital net investi (approximation de la règle fiscale « valeur liquidative − versements »).</p>
+  <span class="you">Économie d'impôt si tu attends 2030, à valeur égale : <b data-v="fiscal.saving" data-f="eur"></b></span>
+  <p><b>Plafond</b> : 150 000 € de versements (pas de valeur). Les gains n'en consomment pas. <b>Crypto</b> : hors PEA, les plus-values sont imposées au PFU lors d'une vente contre des euros (exonération si le total des cessions de l'année ne dépasse pas 305 €).</p>
+
+  <h3 id="projection">Projection</h3>
+  <div class="formula">V(mois + 1) = V(mois) × (1 + taux annuel)^(1/12) + versement mensuel</div>
+  <p>PEA seul, plans actuels maintenus (395 €/mois), trois rendements annuels constants : prudent 3 %, central 6 %, dynamique 8 %. Repère : les actions monde ont fait autour de 7 à 8 % par an sur longue période, avec des décennies bien pires. « Net » = après 18,6 % de prélèvements sociaux sur les gains (retrait après 5 ans). Ce n'est pas une prévision : la vraie trajectoire sera faite de hausses et de baisses.</p>
+
+  <!-- ===================================================== CONTRÔLE -->
+  <h2 id="reconciliation">7. Contrôle Trade Republic</h2>
+  <p>Le fichier <code>data/reconciliation.csv</code> garde les chiffres relevés sur l'appli TR (capture du 05/11/2026). À chaque mise à jour, le dashboard vérifie que le registre redonne exactement les mêmes quantités, PRU, performances et coût de revient. ✓ = identique (tolérance : 0,6 centime sur un PRU, 0,02 point sur une performance affichée). Un « ! » rouge signale un écart : il manque une opération ou un montant est faux.</p>
+  <p>Ajoute un relevé de temps en temps (une ligne par position, voir plus bas) : c'est ce qui garantit que le dashboard reste juste à l'euro près.</p>
+
+  <h2 id="alertes">8. Alertes « À surveiller »</h2>
+  <ul>
+    <li><b>Plan avec argent non investi</b> : plus de 10 % du montant d'un plan reste de côté à cause des parts entières.</li>
+    <li><b>Opérations AUTO</b> : plans enregistrés par le robot avec un montant estimé, à remplacer par le montant TR.</li>
+    <li><b>Historique estimé</b> : lignes saisies avec une hypothèse (transferts ETH).</li>
+    <li><b>Drawdown</b> : PEA à plus de 10 % sous son plus haut.</li>
+    <li><b>Tes choix vs MSCI World</b>, <b>frais</b>, <b>contrôle TR</b> : rappels d'information.</li>
+  </ul>
+  <p>Seuils réglables dans <code>config.json</code>, rubrique <code>alerts</code>.</p>
+
+  <!-- ===================================================== MAJ -->
+  <h2 id="maj">9. Mettre à jour mes données</h2>
+  <p>Tout se fait dans <code>data/transactions.csv</code>, directement sur GitHub (icône crayon, depuis le téléphone aussi), puis « Commit changes ». Le dashboard se recalcule au passage suivant du robot, ou tout de suite via <i>Actions → PEA Tracker → Run workflow</i>.</p>
+  <p>Format d'une ligne :</p>
+  <pre>date,account,type,ticker,quantity,amount,taxes,source,note
+2026-11-16,PEA,BUY,DCAM.PA,55,349.21,0,TR,Plan d'épargne</pre>
+  <dl>
+    <dt>date</dt><dd>AAAA-MM-JJ, date d'exécution affichée par TR</dd>
+    <dt>account</dt><dd><code>PEA</code> ou <code>CRYPTO</code></dd>
+    <dt>type</dt><dd><code>BUY</code> achat, <code>SELL</code> vente, <code>DIVIDEND</code> dividende, <code>TRANSFER_IN</code>/<code>TRANSFER_OUT</code> transfert de crypto, <code>STAKING</code> récompense, <code>BONUS</code> action gratuite, <code>FEE</code> frais</dd>
+    <dt>ticker</dt><dd>DCAM.PA (PEA Monde), PAASI.PA (Asie émergente), AI.PA, TTE.PA, ETH-EUR, WPEA.PA</dd>
+    <dt>quantity</dt><dd>nombre de parts (0 pour un dividende)</dd>
+    <dt>amount</dt><dd>montant en euros affiché par TR, sans signe, point décimal</dd>
+    <dt>taxes</dt><dd>TTF incluse dans le montant (0,4 % pour une action française), sinon 0</dd>
+    <dt>source</dt><dd><code>TR</code> = montant exact, <code>AUTO</code> = estimé par le robot, <code>ESTIME</code> = hypothèse</dd>
+  </dl>
+
+  <h3>Corriger un plan enregistré par le robot (AUTO)</h3>
+  <p>Le 16 (ou le jour ouvré suivant), le robot enregistre les plans : nombre de parts calculé sur le cours du jour (règle vérifiée sur tes 14 exécutions réelles : 14/14 bons nombres de parts) et montant estimé à quelques dizaines de centimes près. Pour être au centime : remplace le montant par celui de la liste des transactions TR et remplace <code>AUTO</code> par <code>TR</code>. Si le nombre de parts diffère de TR, corrige-le aussi. Si TR affiche « Échec du plan » (compte pas assez approvisionné par exemple), supprime la ligne AUTO.</p>
+
+  <h3>Achat ou vente ponctuel, dividende</h3>
+  <p>Ajoute une ligne à la fin, dans n'importe quel ordre (le registre est trié par date). Pour un achat d'action française, mets la TTF dans <code>taxes</code> : montant × 0,004 / 1,004, arrondi au centime.</p>
+
+  <h3>Nouveau plan, nouveau montant, nouvel actif</h3>
+  <p>Montant ou date d'un plan : rubrique <code>plans</code> de <code>config.json</code> (<code>start</code> = date de la première exécution, le robot n'enregistre rien avant). Nouvel actif : ajoute-le dans <code>assets</code> (nom, ticker Yahoo, compte, classe, frais, poids pays, couleur <code>slot</code> de 1 à 8 non utilisée), puis ses opérations dans le registre.</p>
+
+  <h3>Relevé de contrôle TR</h3>
+  <p>Dans <code>data/reconciliation.csv</code>, une ligne par position avec la quantité, le PRU et la valeur affichés par TR, et une ligne par compte. Le contrôle utilise le relevé le plus récent.</p>
+
+  <h2 id="limites">10. Limites connues</h2>
+  <ul>
+    <li><b>Historique crypto</b> : la date et la quantité exactes des 2 transferts ETH entrants ne sont pas connues. Ils sont regroupés au 20/08/2026 avec leur coût réel (222,62 €). La valeur et le coût actuels collent à TR ; la courbe crypto avant cette date est approximative. Les quantités ETH des plans sont estimées au cours moyen du jour.</li>
+    <li><b>Liquidités</b> : l'argent non investi (reliquats de plans, dividendes, ventes) n'est pas suivi, comme dans l'écran PEA de TR.</li>
+    <li><b>Frais de courtage</b> : les montants TR sont repris tels quels. S'ils incluent 1 € de frais sur un ordre, ce dernier est dans le coût, sans être isolé.</li>
+    <li><b>Annualisations</b> : TWR, TRI, Sharpe, alpha et Calmar portent sur 14 mois de données, dont 8 avec un vrai capital. Les chiffres annualisés deviendront significatifs après 2 à 3 ans.</li>
+  </ul>
+</article>
+
+<nav class="toc">
+  <b>Sommaire</b>
+  <a href="#principes">D'où viennent les chiffres</a>
+  <a href="#ecart-tr">Écart avec l'appli TR</a>
+  <b>Montants</b>
+  <a href="#valeur">Valeur</a><a href="#investi">Capital investi</a><a href="#latente">Plus-value latente, PRU</a><a href="#realise">Réalisé</a><a href="#dividendes">Dividendes</a><a href="#gain-total">Gain total</a><a href="#frais">Frais et taxes</a>
+  <b>Performance</b>
+  <a href="#twr">TWR</a><a href="#tri">TRI</a><a href="#benchmark">Indice de référence</a><a href="#periodes">Par période</a><a href="#mensuel">Mensuel</a><a href="#contribution">Contribution</a><a href="#fantomes">Portefeuilles fantômes</a>
+  <b>Risque</b>
+  <a href="#volatilite">Volatilité</a><a href="#drawdown">Drawdown</a><a href="#sharpe">Sharpe</a><a href="#sortino">Sortino</a><a href="#calmar">Calmar</a><a href="#var">VaR / CVaR</a><a href="#beta">Bêta</a><a href="#alpha">Alpha</a><a href="#tracking">Tracking error</a>
+  <b>Allocation</b>
+  <a href="#geographie">Géographie</a><a href="#concentration">Concentration</a><a href="#derive">Réel vs plan</a><a href="#plans">Efficacité des plans</a>
+  <b>Le reste</b>
+  <a href="#fiscalite">Fiscalité</a><a href="#projection">Projection</a><a href="#reconciliation">Contrôle TR</a><a href="#alertes">Alertes</a><a href="#maj">Mettre à jour</a><a href="#limites">Limites</a>
+</nav>
+</div>
+</div>
+
+<script src="data/dashboard.js"></script>
+<script>
+(function () {
+  var D = window.PEA_DATA;
+  var root = document.documentElement;
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('pea-theme', next); } catch (e) {}
+  });
+  if (!D) return;
+  if (D.ghosts && D.ghosts.PEA) D.ghosts.PEA.diff_bench = D.ghosts.PEA.wealth_final - D.ghosts.PEA.bench_final;
+  document.getElementById('asof').textContent = 'Valeurs au ' + D.meta.today.split('-').reverse().join('/');
+  function nf(d) { return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function sign(v) { return v > 0 ? '+' : v < 0 ? '−' : ''; }
+  var F = {
+    eur: function (v) { return nf(2).format(v) + ' €'; },
+    eurS: function (v) { return sign(v) + nf(2).format(Math.abs(v)) + ' €'; },
+    pct: function (v) { return nf(2).format(v * 100) + ' %'; },
+    pctS: function (v) { return sign(v) + nf(2).format(Math.abs(v * 100)) + ' %'; },
+    num: function (v) { return nf(2).format(v); },
+  };
+  document.querySelectorAll('[data-v]').forEach(function (el) {
+    var v = el.getAttribute('data-v').split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, D);
+    el.textContent = (typeof v === 'number' && isFinite(v)) ? F[el.getAttribute('data-f')](v) : '–';
+  });
+})();
+</script>
+</body>
+</html>

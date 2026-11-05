@@ -1,148 +1,61 @@
-# PEA Tracker : Système Automatisé de Suivi de Portefeuille
+# PEA Tracker
 
-Ce projet implémente un pipeline ETL (Extract, Transform, Load) automatisé pour le suivi hebdomadaire d'un Plan d'Épargne en Actions (PEA). Il calcule les performances latentes, gère les investissements programmés (DCA) et génère des rapports visuels institutionnels.
+Suivi automatique du PEA et du wallet crypto Trade Republic : dashboard en ligne (GitHub Pages), page d'aide détaillée et mail de synthèse.
 
-## Architecture du système
+**Dashboard** : https://donsanchitoo.github.io/pea_tracker/
+**Guide des indicateurs** : https://donsanchitoo.github.io/pea_tracker/aide.html
 
-L'outil repose sur les composants suivants :
-* **Moteur d'extraction** : Script Python utilisant la bibliothèque `yfinance` pour l'accès aux données de marché en temps réel.
-* **Orchestration** : GitHub Actions configuré pour une exécution récurrente (Workflow hebdomadaire).
-* **Stockage de données** : Fichiers CSV structurés servant de registre transactionnel et historique.
-* **Reporting** : Expédition de rapports via protocole SMTP (HTML/CSS) avec intégration de graphiques analytiques.
+## Principe
 
----
+`data/transactions.csv` est le registre de toutes les opérations (achats, ventes, dividendes, transferts). Il fait foi. À partir de lui et des cours Yahoo Finance, le moteur reconstruit l'historique jour par jour depuis l'ouverture du PEA (02/09/2025) et calcule :
 
-## Documentation des fichiers de données (CSV)
+- valeur, capital investi, PRU et plus-value **calculés comme Trade Republic** ;
+- performance : gain total, TWR, TRI, comparaison au MSCI World et au Livret A, portefeuilles fantômes, rendements mensuels ;
+- risque : volatilité, drawdown, Sharpe, Sortino, Calmar, VaR/CVaR, bêta, alpha, tracking error ;
+- allocation : par ligne, classe, zone géographique (transparence des ETF), efficacité des plans en parts entières ;
+- fiscalité PEA (compteur 5 ans, impôt avant/après 2030, plafond) et projection.
 
-### 1. portfolio_state.csv
-Ce fichier consigne l'état actuel des positions et sert de base au calcul des achats périodiques (DCA).
+Un contrôle compare le registre aux écrans TR (`data/reconciliation.csv`) : quantités, PRU et performances doivent être identiques.
 
-| Colonne | Unité | Description |
-| :--- | :--- | :--- |
-| **Ticker** | - | Identifiant Yahoo Finance de l'actif (ex: ESE.PA). |
-| **Quantity** | Nombre | Quantité totale de parts détenues en portefeuille. |
-| **Total_Invested** | EUR | Capital total investi sur la ligne (somme des achats). |
-| **Last_Purchase_Month** | Index | Mois de la dernière exécution de l'achat automatique. |
+## Automatisation (GitHub Actions)
 
-### 2. pea_history.csv
-Ce fichier constitue la base de données historique du portefeuille pour l'analyse temporelle.
+| Quand | Quoi |
+| :--- | :--- |
+| Chaque soir de bourse, ~18h30 | Cours de clôture, dashboard recalculé |
+| Chaque matin de semaine, ~6h15 | Plans du 16 enregistrés (estimation `AUTO`), mails |
+| Lundi matin | Mail de synthèse hebdomadaire |
+| Jour ouvré après l'exécution des plans | Mail « plans exécutés » |
 
-* **Données de marché** : Cours de clôture pour chaque ticker configuré.
-* **Total_Invested (EUR)** : Somme cumulée des capitaux versés sur le compte.
-* **Total_Value (EUR)** : Valeur liquidative totale du portefeuille à la date du relevé.
-* **Total_Return_Pct (%)** : Rendement global du portefeuille calculé selon la formule :
+Secrets requis (`Settings > Secrets and variables > Actions`) : `EMAIL_USER`, `EMAIL_PASS` (mot de passe d'application Gmail), `EMAIL_RECEIVER`.
+Droits : `Settings > Actions > General > Workflow permissions > Read and write`.
+Lancement manuel : `Actions > PEA Tracker > Run workflow` (choix du mail).
 
-$$\text{Performance} = \left( \frac{\text{Valeur Totale} - \text{Total Investi}}{\text{Total Investi}} \right) \times 100$$
+## Fichiers
 
----
+| Fichier | Rôle |
+| :--- | :--- |
+| `config.json` | Actifs (ticker, ISIN, frais, zones), plans d'épargne, PEA, fiscalité, scénarios |
+| `data/transactions.csv` | Registre des opérations, **à maintenir** |
+| `data/reconciliation.csv` | Relevés de l'appli TR pour le contrôle |
+| `data/prices.csv`, `data/corporate_actions.json` | Cache des cours et splits (généré) |
+| `data/dashboard.js`, `data/history.csv` | Données du dashboard et historique journalier (générés) |
+| `data/state.json` | Mémoire des mails envoyés (généré) |
+| `index.html`, `aide.html`, `assets/` | Dashboard et guide |
+| `pea_tracker.py`, `tracker/` | Moteur Python |
 
-## Structure du rapport hebdomadaire
+## Mettre à jour
 
-Le rapport transmis par email est structuré pour une lecture rapide des indicateurs de performance clés :
+- **Plan du mois** : le robot l'enregistre avec un montant estimé (`source = AUTO`). Pour être au centime, remplace le montant par celui affiché dans TR et passe la source à `TR`.
+- **Achat ponctuel, vente, dividende** : ajoute une ligne dans `data/transactions.csv`.
+- **Changer un plan** : rubrique `plans` de `config.json`.
 
-### Analyse de la volatilité court terme
-Ce tableau présente la performance des actifs sur une période de 5 jours de bourse. Il permet d'isoler la dynamique récente du marché de la performance intrinsèque du portefeuille.
+Le détail (format des lignes, TTF, nouvel actif) est dans la section « Mettre à jour mes données » du guide.
 
-### Performance globale et plus-value latente
-Cette section détaille la situation patrimoniale réelle :
-* **Total investi (EUR)** : Le montant total décaissé par actif.
-* **Plus-value latente (EUR)** : Le gain ou la perte nominale.
-* **Performance (%)** : Le rendement pondéré par les entrées de capital.
+## En local
 
-### Graphique de performance
-Le graphique (format PNG) retrace l'historique de la rentabilité globale (`Total_Return_Pct`). Il permet de visualiser l'impact de la stratégie de Dollar Cost Averaging (DCA) sur la performance à long terme.
-
----
-
-## Configuration et Déploiement
-
-### Paramétrage des Secrets GitHub
-Pour le fonctionnement du service SMTP, les variables suivantes doivent être définies dans `Settings > Secrets and variables > Actions` :
-* `EMAIL_USER` : Identifiant de connexion au serveur mail.
-* `EMAIL_PASS` : Mot de passe d'application sécurisé.
-* `EMAIL_RECEIVER` : Adresse de destination du rapport.
-
-### Droits d'écriture
-Le workflow nécessite l'activation des droits d'écriture pour mettre à jour les registres CSV après chaque exécution. Configuration requise : `Settings > Actions > General > Workflow permissions > Read and write permissions`.
-
-
-
-# Guide de Maintenance : Automatisation vs Manuel
-
-Il est essentiel de comprendre que le script est "intelligent" pour les calculs, mais qu'il respecte strictement la structure des fichiers que tu lui donnes. Voici comment différencier ce que le robot fait seul et ce que tu dois préparer.
-
----
-
-## 1. Ce qui est 100% Automatisé (Ordi éteint)
-
-Une fois que tes tickers sont configurés dans le code et présents dans les fichiers, GitHub Actions gère seul :
-
-* **L'archivage hebdomadaire** : Chaque lundi, le script crée une nouvelle ligne à la fin de `pea_history.csv`.
-* **L'exécution du DCA** : Le 16 du mois, le script calcule le nombre de parts achetées avec tes 450€ (250+140+60) et met à jour les colonnes `Quantity` et `Total_Invested` dans `portfolio_state.csv`.
-* **La mise à jour graphique** : Le fichier `chart.png` est écrasé et remplacé par la nouvelle version incluant la semaine écoulée.
-
----
-
-## 2. Ce qui est Manuel (Intervention requise)
-
-Le script ne peut pas modifier la structure (les colonnes) de tes fichiers. Si tu décides d'ajouter un **nouvel actif** (ex: un ETF Nasdaq), tu dois effectuer ces trois étapes manuellement :
-
-### Étape A : Mise à jour de `pea_history.csv`
-Le fichier CSV est une grille fixe. Le script ne créera pas de nouvelle colonne tout seul.
-* **Action** : Tu dois ouvrir le fichier et ajouter `,NOM_DU_TICKER.PA` à la fin de la première ligne (l'en-tête).
-
-### Étape B : Mise à jour de `portfolio_state.csv`
-Le script boucle sur ce fichier pour connaître tes positions. S'il n'y a pas de ligne pour le nouvel actif, il l'ignorera.
-* **Action** : Ajoute une ligne à la fin : `NOM_DU_TICKER.PA,0.0,0.0,0`.
-
-### Étape C : Mise à jour de `pea_tracker.py`
-* **Action** : Ajoute le ticker et le montant du DCA mensuel dans le dictionnaire `MONTHLY_INVESTMENTS`.
-```python
-MONTHLY_INVESTMENTS = {
-    "ESE.PA": 250,
-    "NOUVEL_ACTIF.PA": 100,  # Ajouter la ligne ici (0 si pas de DCA)
-    ...
-}
+```bash
+pip install -r requirements.txt
+python pea_tracker.py                      # cours + plans + dashboard
+python pea_tracker.py --preview apercu     # + aperçu du mail dans ./apercu (sans envoi)
+python -m http.server                      # puis http://localhost:8000
 ```
----
-
-## 3. Synthèse des opérations
-
-| Action | Type | Fichier concerné |
-| :--- | :--- | :--- |
-| Enregistrer le prix de la semaine | **Automatique** | `pea_history.csv` |
-| Calculer l'achat du 16 du mois | **Automatique** | `portfolio_state.csv` |
-| Ajouter une colonne (Nouveau Ticker) | **Manuel** | `pea_history.csv` |
-| Initialiser un nouvel actif | **Manuel** | `portfolio_state.csv` |
-| Modifier le montant d'un virement | **Manuel** | `pea_tracker.py` |
-
----
-
-## 4. Formule de calcul utilisée
-
-Pour ton information, la performance affichée dans le mail et le graphique est calculée ainsi :
-
-$$\text{Performance} = \left( \frac{\text{Valeur Totale du Portefeuille} - \text{Total Investi}}{\text{Total Investi}} \right) \times 100$$
-
-> **Rappel** : Pour toute modification manuelle, fais-la sur ton PC, puis envoie-la sur GitHub (`git push`). Le robot reprendra sa routine dès le lundi suivant.
-
-
-# Gestion des Achats Ponctuels (Hors DCA)
-
-Pour intégrer un achat réalisé manuellement (hors automatisme du 16 du mois), aucune modification du code Python n'est requise. Il suffit de mettre à jour le registre d'état pour que le prochain rapport intègre vos nouvelles parts.
-
-## Procédure de mise à jour manuelle
-
-Le script utilise le fichier `portfolio_state.csv` comme source de vérité pour vos possessions. Si vous effectuez un achat (exemple : 1 action Air Liquide à 170 € frais inclus) :
-
-1. **Ouverture du fichier** : Ouvrez `portfolio_state.csv` avec un éditeur de texte ou Excel.
-2. **Identification** : Repérez la ligne correspondant à l'actif, ici `AI.PA`.
-3. **Mise à jour des quantités** : Modifiez la valeur `Quantity`. 
-   * *Exemple : passez de 1.0 à 2.0.*
-4. **Mise à jour de l'investissement** : Ajoutez le prix d'achat (frais inclus) au montant `Total_Invested` existant.
-   * *Calcul : $158.87 + 170.00 = 328.87$*
-5. **Synchronisation** : Enregistrez le fichier et poussez la modification sur votre dépôt GitHub :
-   ```bash
-   git add portfolio_state.csv
-   git commit -m "MAJ : Achat ponctuel AI.PA"
-   git push

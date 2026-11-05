@@ -1,0 +1,9 @@
+snapshot,scope,ticker,quantity,pru,value,gain,perf_pct,note
+2026-11-05 11:12,POSITION,DCAM.PA,470,5.95,2977.92,,,Fiche position TR
+2026-11-05 11:12,POSITION,PAASI.PA,8,37.61,290.92,,-3.30,Fiche position TR
+2026-11-05 11:13,POSITION,AI.PA,1,158.87,188.12,,18.41,Fiche position TR
+2026-11-05 11:13,POSITION,TTE.PA,2,,161.16,,14.55,Fiche position TR (PRU non affiché)
+2026-11-05 11:13,POSITION,ETH-EUR,,,432.60,54.98,,Écran crypto TR (Max)
+2026-11-05 11:12,ACCOUNT,PEA,,,3618.02,,,Écran Épargne TR
+2026-11-05 11:12,ACCOUNT,CRYPTO,,,432.53,,,Écran Épargne TR
+2026-11-05 11:12,ACCOUNT,TOTAL,,,4050.55,,,Écran Épargne TR

@@ -1,0 +1,36 @@
+{
+ "AI.PA": {
+  "dividends": {
+   "2026-05-18": 3.363636
+  },
+  "splits": {
+   "2026-06-08": 1.1
+  }
+ },
+ "DCAM.PA": {
+  "dividends": {},
+  "splits": {}
+ },
+ "ETH-EUR": {
+  "dividends": {},
+  "splits": {}
+ },
+ "PAASI.PA": {
+  "dividends": {},
+  "splits": {}
+ },
+ "TTE.PA": {
+  "dividends": {
+   "2025-10-01": 0.85,
+   "2025-12-31": 0.85,
+   "2026-03-31": 0.85,
+   "2026-06-30": 0.85,
+   "2026-09-30": 0.9
+  },
+  "splits": {}
+ },
+ "WPEA.PA": {
+  "dividends": {},
+  "splits": {}
+ }
+}

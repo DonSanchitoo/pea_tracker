@@ -1,40 +1,63 @@
-name: PEA Weekly Tracker
+name: PEA Tracker
 
+# Soir (jours de bourse) : cours de clôture -> dashboard.
+#   17h30 UTC = 18h30 à Paris l'hiver, 19h30 l'été.
+# Matin (lundi-vendredi) : plans exécutés la veille + mails.
+#   Mail hebdo le lundi, mail « plans exécutés » le jour ouvré qui suit l'exécution du 16.
+#   5h15 UTC = 6h15 à Paris l'hiver, 7h15 l'été.
+# GitHub peut décaler les tâches planifiées de 15 à 60 minutes.
 on:
   schedule:
-    - cron: '0 9 * * 1'
+    - cron: '30 17 * * 1-5'
+    - cron: '15 5 * * 1-5'
   workflow_dispatch:
+    inputs:
+      mail:
+        description: "Mail à envoyer"
+        type: choice
+        options: [none, auto, weekly, dca, weekly+dca]
+        default: none
+
+concurrency:
+  group: pea-tracker
+  cancel-in-progress: false
 
 jobs:
-  run-tracker:
+  update:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.12'
+          cache: pip
 
-      - name: Install dependencies
-        run: pip install yfinance pandas matplotlib seaborn plotly
+      - name: Dépendances
+        run: pip install -r requirements.txt
 
-      - name: Run Tracker
+      - name: Mise à jour (cours, plans, dashboard, mail)
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
-        run: python pea_tracker.py
+          MAIL_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mail || (github.event.schedule == '15 5 * * 1-5' && 'auto' || 'none') }}
+        run: python pea_tracker.py --mail "$MAIL_MODE"
 
-      - name: Save Data Only
+      - name: Enregistrer les données
+        if: always()
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          # On ajoute uniquement les fichiers de données
-          git add portfolio_state.csv pea_history.csv index.html
-          git commit -m "Update PEA data [skip ci]" || echo "No changes"
-          git push
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "Aucune donnée modifiée."
+          else
+            git commit -m "Mise à jour des données [skip ci]"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

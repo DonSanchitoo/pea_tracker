@@ -1,0 +1,173 @@
+{
+  "dashboard_url": "https://donsanchitoo.github.io/pea_tracker/",
+  "timezone": "Europe/Paris",
+  "accounts": {
+    "PEA": {
+      "label": "PEA",
+      "broker": "Trade Republic",
+      "opened": "2025-09-02",
+      "fiscal_maturity": "2030-09-02",
+      "deposit_ceiling": 150000
+    },
+    "CRYPTO": {
+      "label": "Wallet Crypto",
+      "broker": "Trade Republic"
+    }
+  },
+  "assets": {
+    "DCAM.PA": {
+      "name": "Amundi PEA Monde (MSCI World) UCITS ETF Acc",
+      "short": "PEA Monde",
+      "tr_name": "Pea Monde MSCI World EUR (Acc)",
+      "isin": "FR001400U5Q4",
+      "account": "PEA",
+      "kind": "ETF",
+      "asset_class": "Actions Monde (ETF)",
+      "ter": 0.2,
+      "slot": 1,
+      "zones": {
+        "Amérique du Nord": 74,
+        "Europe": 16,
+        "Japon": 5.5,
+        "Pacifique développé": 2.5,
+        "Autres": 2
+      }
+    },
+    "PAASI.PA": {
+      "name": "Amundi PEA MSCI Emerging Asia ESG Leaders UCITS ETF Acc",
+      "short": "Asie Émergente",
+      "tr_name": "MSCI Emerging Asia PEA ESG Leaders EUR (Acc)",
+      "isin": "FR0013412012",
+      "account": "PEA",
+      "kind": "ETF",
+      "asset_class": "Actions Asie émergente (ETF)",
+      "ter": 0.3,
+      "slot": 2,
+      "zones": {
+        "Chine": 28,
+        "Taïwan": 27,
+        "Inde": 24,
+        "Corée du Sud": 13,
+        "Autres émergents": 8
+      }
+    },
+    "AI.PA": {
+      "name": "Air Liquide",
+      "short": "Air Liquide",
+      "tr_name": "Air Liquide",
+      "isin": "FR0000120073",
+      "account": "PEA",
+      "kind": "Action",
+      "asset_class": "Actions françaises",
+      "ter": 0,
+      "slot": 3,
+      "zones": {
+        "France": 100
+      }
+    },
+    "TTE.PA": {
+      "name": "TotalEnergies",
+      "short": "TotalEnergies",
+      "tr_name": "TotalEnergies",
+      "isin": "FR0000120271",
+      "account": "PEA",
+      "kind": "Action",
+      "asset_class": "Actions françaises",
+      "ter": 0,
+      "slot": 4,
+      "zones": {
+        "France": 100
+      }
+    },
+    "ETH-EUR": {
+      "name": "Ethereum",
+      "short": "Ethereum",
+      "tr_name": "Ethereum",
+      "isin": "",
+      "account": "CRYPTO",
+      "kind": "Crypto",
+      "asset_class": "Crypto-actifs",
+      "ter": 0,
+      "slot": 5,
+      "zones": {
+        "Crypto (hors zone)": 100
+      }
+    },
+    "WPEA.PA": {
+      "name": "iShares MSCI World Swap PEA UCITS ETF Acc",
+      "short": "World Swap (iShares)",
+      "tr_name": "MSCI World Swap PEA EUR (Acc)",
+      "isin": "IE0002XZSHO1",
+      "account": "PEA",
+      "kind": "ETF",
+      "asset_class": "Actions Monde (ETF)",
+      "ter": 0.25,
+      "slot": 6,
+      "zones": {
+        "Amérique du Nord": 74,
+        "Europe": 16,
+        "Japon": 5.5,
+        "Pacifique développé": 2.5,
+        "Autres": 2
+      }
+    }
+  },
+  "plans": [
+    {
+      "ticker": "DCAM.PA",
+      "amount": 350,
+      "day": 16,
+      "start": "2026-03-16"
+    },
+    {
+      "ticker": "PAASI.PA",
+      "amount": 45,
+      "day": 16,
+      "start": "2026-03-16"
+    },
+    {
+      "ticker": "ETH-EUR",
+      "amount": 25,
+      "day": 16,
+      "start": "2026-05-18"
+    }
+  ],
+  "benchmark": {
+    "ticker": "DCAM.PA",
+    "label": "MSCI World"
+  },
+  "risk_free": {
+    "label": "Livret A",
+    "rate": 0.017
+  },
+  "tax": {
+    "ps_rate": 0.186,
+    "ir_rate_pfu": 0.128,
+    "ttf_rate": 0.004
+  },
+  "projection": {
+    "years": 20,
+    "scenarios": [
+      {
+        "key": "prudent",
+        "label": "Prudent",
+        "rate": 0.03
+      },
+      {
+        "key": "central",
+        "label": "Central",
+        "rate": 0.06
+      },
+      {
+        "key": "dynamique",
+        "label": "Dynamique",
+        "rate": 0.08
+      }
+    ]
+  },
+  "alerts": {
+    "drawdown_pct": -10,
+    "plan_residual_pct": 10,
+    "max_line_weight_pct": 90
+  }
+}
