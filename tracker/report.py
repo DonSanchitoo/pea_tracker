@@ -32,7 +32,7 @@ def _r2(series):
     return [round(float(v), 2) for v in series.values]
 
 
-def _insights(cfg, panel, pos, plans, alloc, risk, recon, ghosts_pea):
+def _insights(cfg, panel, pos, plans, alloc, risk, recon, ghosts_pea, reserve=None):
     out = []
     al = cfg.get("alerts", {})
     eur = lambda v: f"{v:,.2f} €".replace(",", " ").replace(".", ",")
@@ -77,8 +77,20 @@ def _insights(cfg, panel, pos, plans, alloc, risk, recon, ghosts_pea):
         out.append(dict(level="good" if recon["ok"] else "alert", id="recon",
                         title="Registre conforme à Trade Republic" if recon["ok"] else "Écart avec Trade Republic",
                         text=f"Contrôle du {pd.Timestamp(recon['date']).strftime('%d/%m/%Y')} : quantités, PRU et performances comparés aux écrans TR."))
+    if reserve:
+        best = [b for b in reserve["buyable"] if b["shares"] > 0]
+        txt = (" · ".join(f"{b['shares']} part{'s' if b['shares'] > 1 else ''} {de(b['short'])}" for b in best[:3])
+               if best else "pas encore de quoi acheter une part")
+        out.append(dict(level="good" if best else "info", id="reserve", title=f"Réserve de liquidité PEA : {eur(reserve['balance'])}",
+                        text=f"Disponible pour un achat ponctuel : {txt}. Elle grossit d'environ {eur(reserve['monthly_estimate'])} par mois "
+                             "avec les reliquats de tes plans."))
     order = {"alert": 0, "warn": 1, "good": 2, "info": 3}
     return sorted(out, key=lambda x: order[x["level"]])
+
+
+def de(name):
+    """« de PEA Monde » / « d'Asie Émergente »."""
+    return ("d'" if name[:1].upper() in "AEIOUYÉÈÊH" else "de ") + name
 
 
 def top_news(items, pos, plans, k=5, days=7):
@@ -182,6 +194,7 @@ def build(cfg, ledger, panel, recon_df, warnings, now, params=None, news=None, p
         d["qty"] = next(p["qty"] for p in pos if p["ticker"] == d["ticker"])
     fiscal = an.fiscal_info(panel)
     sim = an.sim_defaults(panel, pos)
+    reserve = an.cash_reserve(panel, pos)
     recon = an.reconciliation(panel, recon_df)
 
     kpi = {}
@@ -213,7 +226,7 @@ def build(cfg, ledger, panel, recon_df, warnings, now, params=None, news=None, p
     for r in ledger.itertuples(index=False):
         tx.append(dict(date=r.date.strftime("%Y-%m-%d"), account=r.account, type=r.type, ticker=r.ticker,
                        short=cfg["assets"][r.ticker]["short"], quantity=float(r.quantity), amount=float(r.amount),
-                       taxes=float(r.taxes), source=r.source, note=r.note,
+                       taxes=float(r.taxes), source=r.source, note=r.note, funding=getattr(r, "funding", ""),
                        price=(float(r.amount) - float(r.taxes)) / float(r.quantity) if r.quantity and r.type in ("BUY", "SELL", "TRANSFER_IN") else None))
     tx.reverse()
 
@@ -242,11 +255,11 @@ def build(cfg, ledger, panel, recon_df, warnings, now, params=None, news=None, p
         kpi=kpi, risk=risk, risk_series=risk_series, periods=periods, monthly=monthly, ghosts=ghosts_d,
         series=series, positions=pos, position_series=an.position_series(panel),
         allocation=alloc, plans=plans, dividends=divs, fiscal=fiscal, sim=sim, staking=staking,
-        reconciliation=recon, transactions=tx, planned=planned,
+        reconciliation=recon, transactions=tx, planned=planned, reserve=reserve,
         params=params or {}, config=editable, presets=PRESETS,
         news=dict(updated_at=news.get("updated_at"), items=news.get("items", [])[:120],
                   top=top_news(news.get("items", []), pos, plans)),
-        insights=_insights(cfg, panel, pos, plans, alloc, risk, recon, ghosts_d.get("PEA")),
+        insights=_insights(cfg, panel, pos, plans, alloc, risk, recon, ghosts_d.get("PEA"), reserve),
         events=_events(cfg, panel, plans, divs, fiscal, planned),
     )
     return _clean(data)

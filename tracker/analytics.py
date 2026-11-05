@@ -621,6 +621,81 @@ def sim_defaults(panel, pos):
                 maturity=cfg["accounts"]["PEA"]["fiscal_maturity"], years=int(pc.get("years", 20)), class_defaults=cd)
 
 
+def cash_reserve(panel, pos):
+    """Réserve de liquidité du PEA : point de départ relevé dans TR, puis
+    + reliquat de chaque exécution de plan (montant du plan - montant investi, parts entières)
+    + dividendes et ventes du PEA (crédités en liquidités chez TR)
+    - achats payés avec la réserve (colonne funding = reserve)."""
+    from .ledger import plan_executions
+    cfg, today = panel.cfg, panel.today
+    cr = cfg["accounts"]["PEA"].get("cash_reserve")
+    if not cr:
+        return None
+    start = pd.Timestamp(cr["date"])
+    lg = panel.ledger
+    pea = lg[(lg["account"] == "PEA") & (lg["date"] > start)]
+    moves = []
+    name = lambda t: cfg["assets"].get(t, {}).get("short", t)
+    for pl in cfg["plans"]:
+        t = pl["ticker"]
+        if cfg["assets"].get(t, {}).get("account") != "PEA":
+            continue
+        for ex in plan_executions(pl, start + pd.Timedelta(days=1), today, panel.trading_days):
+            rows = pea[(pea["ticker"] == t) & (pea["type"] == "BUY") & (pea["funding"] != "reserve")
+                       & ((pea["date"] - ex).abs() <= pd.Timedelta(days=2))]
+            if rows.empty:
+                continue  # plan pas encore enregistré, ou échoué (aucun argent ne bouge)
+            left = float(pl["amount"]) - float(rows["amount"].sum())
+            if left > 0.005:
+                n = float(rows["quantity"].sum())
+                moves.append(dict(date=ex.strftime("%Y-%m-%d"), kind="plan", amount=left,
+                                  label=f"Reliquat du plan {name(t)} ({pl['amount']:g} € → {n:g} part{'s' if n > 1 else ''} pour {rows['amount'].sum():.2f} €)"))
+    for r in pea.itertuples(index=False):
+        if r.type == "DIVIDEND" and cr.get("include_dividends", True):
+            moves.append(dict(date=r.date.strftime("%Y-%m-%d"), kind="dividende", amount=float(r.amount), label=f"Dividende {name(r.ticker)}"))
+        elif r.type == "SELL" and cr.get("include_sales", True):
+            moves.append(dict(date=r.date.strftime("%Y-%m-%d"), kind="vente", amount=float(r.amount), label=f"Vente {name(r.ticker)}"))
+        elif r.type == "FEE":
+            moves.append(dict(date=r.date.strftime("%Y-%m-%d"), kind="frais", amount=-float(r.amount), label=f"Frais {name(r.ticker)}"))
+        elif r.type == "BUY" and r.funding == "reserve":
+            moves.append(dict(date=r.date.strftime("%Y-%m-%d"), kind="achat", amount=-float(r.amount),
+                              label=f"Achat {name(r.ticker)} payé avec la réserve ({r.quantity:g} part{'s' if r.quantity > 1 else ''})"))
+    moves.sort(key=lambda m: m["date"])
+    bal, hist = float(cr["amount"]), [dict(date=start.strftime("%Y-%m-%d"), balance=float(cr["amount"]))]
+    for m in moves:
+        bal += m["amount"]
+        m["balance"] = bal
+        hist.append(dict(date=m["date"], balance=bal))
+    # ce que la réserve permet d'acheter tout de suite (parts entières)
+    buy, seen = [], set()
+    tick = [p["ticker"] for p in pos if p["open"] and p["account"] == "PEA"] + \
+        [pl["ticker"] for pl in cfg["plans"] if cfg["assets"].get(pl["ticker"], {}).get("account") == "PEA" and _plan_live(pl, today)]
+    for t in tick:
+        if t in seen:
+            continue
+        seen.add(t)
+        price = _last_price(panel, t)
+        if price == price and price > 0:
+            n = math.floor(bal / price + 1e-9)
+            buy.append(dict(ticker=t, short=name(t), price=price, shares=n, cost=n * price, missing=max(price * (n + 1) - bal, 0)))
+    monthly = 0.0
+    for pl in cfg["plans"]:
+        a = cfg["assets"].get(pl["ticker"], {})
+        if a.get("account") != "PEA" or not _plan_live(pl, today):
+            continue
+        price = _last_price(panel, pl["ticker"])
+        if price == price and price > 0:
+            from .ledger import monthly_equivalent
+            n = math.floor(pl["amount"] / price + 1e-9)
+            if n > 0:
+                monthly += (pl["amount"] - n * price) * monthly_equivalent(pl) / pl["amount"]
+    week = today - pd.Timedelta(days=7)
+    return dict(start_date=start.strftime("%Y-%m-%d"), start_amount=float(cr["amount"]), balance=bal,
+                week_change=sum(m["amount"] for m in moves if pd.Timestamp(m["date"]) > week),
+                monthly_estimate=monthly, moves=list(reversed(moves)), history=hist,
+                buyable=sorted(buy, key=lambda b: -b["cost"]), note=cr.get("note", ""))
+
+
 # ----------------------------------------------------------------- réconciliation TR
 
 def reconciliation(panel, recon):

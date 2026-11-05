@@ -1,4 +1,4 @@
-date,account,type,ticker,quantity,amount,taxes,source,note
+date,account,type,ticker,quantity,amount,taxes,source,note,funding
 2025-09-12,PEA,BUY,WPEA.PA,5,29.33,0,TR,Ordre d'achat
 2026-01-30,PEA,SELL,WPEA.PA,5,30.35,0,TR,Ordre de vente
 2026-01-30,PEA,BUY,AI.PA,1,159.50,0.63,TR,Ordre d'achat (TTF 0.4 % incluse)

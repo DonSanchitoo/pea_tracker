@@ -153,6 +153,8 @@
       ${nextPlan ? `<div class="side-card"><div class="lbl">Prochaine exécution</div>
         <div class="row"><span class="big">${dLong(nextPlan.date)}</span><span class="lbl">J−${Math.max(0, Math.round(spanDays(D.meta.today, nextPlan.date)))}</span></div>
         <div class="lbl" style="margin-top:2px">${eur(nextPlan.amount, 0)} · ${esc(nextPlan.detail)}</div></div>` : ''}
+      ${D.reserve ? `<a class="side-card" href="#overview" style="text-decoration:none;display:block"><div class="lbl">Réserve de liquidité PEA</div>
+        <div class="row"><span class="big">${eur(D.reserve.balance)}</span><span class="lbl">≈ +${eur(D.reserve.monthly_estimate, 0)}/mois</span></div></a>` : ''}
       <div class="side-card"><div class="lbl">Échéance fiscale PEA</div>
         <div class="row"><span class="big">${dShort(f.maturity)}</span><span class="lbl">${nf(0).format(f.days_left)} j</span></div>
         <div class="meter"><div style="width:${(f.progress * 100).toFixed(1)}%"></div></div>
@@ -209,8 +211,25 @@
     $('#ov-events').innerHTML = D.events.slice(0, 6).map((e) => `<li><span class="d">${dShort(e.date)}</span><span class="l">${esc(e.label)}<small>${esc(e.detail)}</small></span><span class="num">${e.amount != null ? eur(e.amount) : ''}</span></li>`).join('');
 
     renderReconMini();
+    renderReserve();
     const topN = D.news.top && D.news.top.length ? D.news.top.concat((D.news.items || []).filter((n) => !D.news.top.find((t) => t.url === n.url)).slice(0, 3)) : (D.news.items || []).slice(0, 8);
     $('#ov-news').innerHTML = newsItems(topN) || '<div class="empty">Pas encore d\'actus : elles arrivent au prochain passage du robot.</div>';
+  }
+
+  function renderReserve() {
+    const R = D.reserve;
+    if (!R) { $('#ov-reserve').innerHTML = '<div class="empty">Réserve non configurée (Mes données › Paramètres).</div>'; return; }
+    $('#ov-reserve-sub').textContent = `non investie · depuis le ${dShort(R.start_date)}`;
+    const wk = Math.abs(R.week_change) > 0.004 ? `${dEur(R.week_change)} cette semaine · ` : '';
+    $('#ov-reserve').innerHTML = `<div style="font-size:28px;font-weight:650;letter-spacing:-0.01em">${eur(R.balance)}</div>
+      <div style="font-size:12px;color:var(--text-2);margin-top:2px">${wk}≈ +${eur(R.monthly_estimate)} / mois avec les reliquats des plans</div>
+      <table class="t compact" style="margin-top:10px"><thead><tr><th>Achetable maintenant</th><th class="n">Parts</th><th class="n">Coût</th></tr></thead><tbody>
+      ${R.buyable.map((b) => `<tr><td><div class="name"><span class="dot" style="background:${assetColor(b.ticker)}"></span>${esc(b.short)}</div></td><td class="n">${b.shares}</td>
+        <td class="n">${b.shares ? eur(b.cost) : `<small style="color:var(--muted)">il manque ${eur(b.missing)}</small>`}</td></tr>`).join('')}</tbody></table>
+      <table class="t compact" style="margin-top:6px"><thead><tr><th>Derniers mouvements</th><th class="n">Montant</th></tr></thead><tbody>
+      ${R.moves.slice(0, 4).map((m) => `<tr><td style="white-space:normal">${dShort(m.date)} · ${esc(m.label)}</td><td class="n">${dEur(m.amount)}</td></tr>`).join('') ||
+        `<tr><td colspan="2" style="white-space:normal;color:var(--muted)">Départ : ${eur(R.start_amount)} relevés dans TR le ${dShort(R.start_date)}. Les reliquats des prochains plans s'ajouteront ici.</td></tr>`}</tbody></table>
+      <div class="note">Pour investir la réserve : « Mes données › Versement ponctuel », case « payé avec la réserve ». Montant à recaler sur TR dans « Paramètres ».</div>`;
   }
 
   function allocBlock(pos, tot) {
@@ -889,7 +908,7 @@
         <td><div class="name"><span class="dot" style="background:${assetColor(t.ticker)}"></span>${esc(t.short)}</div></td><td>${esc(t.account)}</td>
         <td class="n">${t.quantity ? qty(t.quantity) : '–'}</td><td class="n">${t.price != null ? eur(t.price, t.price < 10 ? 4 : 2) : '–'}</td>
         <td class="n">${t.type === 'BUY' || t.type === 'TRANSFER_IN' || t.type === 'FEE' ? '−' : t.amount ? '+' : ''}${eur(t.amount)}</td><td class="n">${t.taxes ? eur(t.taxes) : '–'}</td>
-        <td><span class="badge ${t.source === 'AUTO' ? 'b-auto' : t.source === 'ESTIME' ? 'b-est' : 'b-tr'}">${t.source === 'ESTIME' ? 'ESTIMÉ' : t.source}</span></td>
+        <td><span class="badge ${t.source === 'AUTO' ? 'b-auto' : t.source === 'ESTIME' ? 'b-est' : 'b-tr'}">${t.source === 'ESTIME' ? 'ESTIMÉ' : t.source}</span>${t.funding === 'reserve' ? ' <span class="badge b-div">RÉSERVE</span>' : ''}</td>
         <td style="white-space:normal;min-width:220px;color:var(--text-2)">${esc(t.note)}</td></tr>`; }).join('')}
       <tr class="total"><td colspan="6">${rows.length} opération(s) · achats ${eur(sum((t) => t.type === 'BUY'))} · ventes ${eur(sum((t) => t.type === 'SELL'))} · dividendes ${eur(sum((t) => t.type === 'DIVIDEND'))}</td><td colspan="4"></td></tr>
       </tbody></table>`;

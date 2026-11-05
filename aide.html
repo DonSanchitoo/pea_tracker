@@ -259,6 +259,14 @@ Revenu mensuel possible = net en euros d'aujourd'hui × 4 % / 12</div>
   </tbody></table>
   <p>Toutes ces opérations sont ajoutées au registre avec la source <b>AUTO</b> : elles apparaissent dans « Transactions », comptent dans les gains, et sont modifiables. Seuls tes achats et ventes ponctuels restent à saisir, depuis « Mes données ».</p>
 
+  <h3 id="reserve">Réserve de liquidité du PEA</h3>
+  <p>Dans le PEA, TR n'achète que des parts entières : le reste du montant de chaque plan reste en liquidités dans le PEA. La réserve additionne cet argent dormant pour que tu saches combien tu peux investir d'un coup.</p>
+  <div class="formula">Réserve = montant relevé dans TR (37,08 € le 05/11/2026)
+        + reliquat de chaque exécution de plan (montant du plan − montant investi)
+        + dividendes et ventes du PEA (crédités en liquidités)
+        − achats marqués « payé avec la réserve »</div>
+  <p>Exemple : plan Asie Émergente de 45 €, part à 38 € → 1 part achetée, +7 € dans la réserve. Le panneau « Réserve de liquidité » indique combien de parts de chaque ligne elle permet d'acheter tout de suite et combien il manque pour la suivante. Pour l'investir : « Mes données › Versement ponctuel », lien « tout investir », case « payé avec la réserve » cochée. Le robot calcule les parts entières et seul le montant réellement investi sort de la réserve. Si TR affiche un autre montant (frais, arrondis), recale-le dans « Mes données › Paramètres ».</p>
+
   <h3 id="staking">Staking</h3>
   <p>TR verse des récompenses en ETH sur l'ETH détenu. Le robot les calcule jour par jour (quantité détenue × taux annuel / 365) et les ajoute le 1er de chaque mois. Elles n'ont pas de coût d'achat : elles augmentent ta plus-value. Le taux (2,32 % par an) et la date de départ se règlent dans « Mes données › Paramètres ». Le registre contient aussi une ligne « estimée » de 3 € qui reprend le cumul affiché par TR le 05/11/2026.</p>
 
@@ -320,7 +328,7 @@ Revenu mensuel possible = net en euros d'aujourd'hui × 4 % / 12</div>
   <b>Le reste</b>
   <a href="#fiscalite">Fiscalité</a><a href="#projection">Simulateur</a><a href="#reconciliation">Contrôle TR</a><a href="#alertes">Alertes</a>
   <b>Automatique</b>
-  <a href="#auto">Ce qui se met à jour seul</a><a href="#staking">Staking</a><a href="#parametres">Paramètres live</a><a href="#actus">Actualités</a><a href="#mail">Le mail</a>
+  <a href="#auto">Ce qui se met à jour seul</a><a href="#reserve">Réserve de liquidité</a><a href="#staking">Staking</a><a href="#parametres">Paramètres live</a><a href="#actus">Actualités</a><a href="#mail">Le mail</a>
   <b>Modifier</b>
   <a href="#maj">Mes données</a><a href="#limites">Limites</a>
 </nav>

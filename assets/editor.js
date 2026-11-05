@@ -10,7 +10,7 @@
   const [OWNER, REPO] = (D.meta.repo || 'DonSanchitoo/pea_tracker').split('/');
   const API = 'https://api.github.com';
   const TOKEN_KEY = 'pea-gh-token';
-  const COLS = ['date', 'account', 'type', 'ticker', 'quantity', 'amount', 'taxes', 'source', 'note'];
+  const COLS = ['date', 'account', 'type', 'ticker', 'quantity', 'amount', 'taxes', 'source', 'note', 'funding'];
   const TYPES = [['BUY', 'Achat'], ['SELL', 'Vente'], ['DIVIDEND', 'Dividende'], ['TRANSFER_IN', 'Transfert entrant'], ['TRANSFER_OUT', 'Transfert sortant'],
     ['STAKING', 'Récompense de staking'], ['BONUS', 'Action gratuite'], ['FEE', 'Frais']];
   const TYPE_LABEL = Object.fromEntries(TYPES);
@@ -76,7 +76,7 @@
       const f = lines[i].split(',');
       const o = {};
       COLS.forEach((c, j) => { o[c] = f[j] !== undefined ? f[j] : ''; });
-      if (f.length > COLS.length) o.note = f.slice(COLS.length - 1).join(' ');
+      if (f.length > COLS.length) { o.funding = /^(reserve)?$/.test(f[f.length - 1]) ? f[f.length - 1] : ''; o.note = f.slice(8, o.funding === f[f.length - 1] ? f.length - 1 : f.length).join(' '); }
       rows.push(o);
     }
     return { head: lines[0], rows };
@@ -303,6 +303,7 @@
       ${field('TTF incluse (€)', `<input type="number" step="0.01" min="0" name="taxes" value="${esc(r.taxes)}">`, 'calculée seule pour les actions françaises')}
       ${field('Source', sel('source', [['TR', 'TR (montant exact)'], ['AUTO', 'Estimé'], ['ESTIME', 'Hypothèse']], r.source))}
       ${field('Note', `<input name="note" value="${esc(r.note)}">`)}
+      <div class="field"><label>Financement</label><label class="check-row"><input type="checkbox" name="reserve" ${r.funding === 'reserve' ? 'checked' : ''}> Payé avec la réserve de liquidité (PEA)</label></div>
       <div class="field" style="grid-column:1/-1"><div class="pk-sel" id="op-hint"></div></div>
       </form><div class="actions"><button class="btn primary" data-act="save-op">Enregistrer</button><button class="btn" data-act="cancel">Annuler</button>${e ? `<button class="btn danger" data-act="del-op" data-i="${e.index}">Supprimer cette opération</button>` : ''}</div></div></div>` : '';
     const rows = tx.rows.map((x, i) => [x, i]).reverse();
@@ -311,7 +312,7 @@
       <div class="panel-b flush tbl-wrap"><table class="t"><thead><tr><th>Date</th><th>Type</th><th>Ligne</th><th class="n">Quantité</th><th class="n">Montant</th><th class="n">TTF</th><th>Source</th><th>Note</th><th></th></tr></thead><tbody>
       ${rows.map(([x, i]) => `<tr data-row="edit-op" data-i="${i}" style="cursor:pointer"><td>${dShort(x.date)}</td><td>${esc(TYPE_LABEL[x.type] || x.type)}</td><td><div class="name"><span class="dot" style="background:${APP.assetColor(x.ticker)}"></span>${esc(assetName(x.ticker))}</div></td>
         <td class="n">${+x.quantity ? qty(+x.quantity) : (x.type === 'BUY' ? '<small>au cours du jour</small>' : '–')}</td><td class="n">${x.amount ? eur(+x.amount) : '–'}</td><td class="n">${+x.taxes ? eur(+x.taxes) : '–'}</td>
-        <td><span class="badge ${x.source === 'AUTO' ? 'b-auto' : x.source === 'ESTIME' ? 'b-est' : 'b-tr'}">${esc(x.source === 'ESTIME' ? 'ESTIMÉ' : x.source)}</span></td>
+        <td><span class="badge ${x.source === 'AUTO' ? 'b-auto' : x.source === 'ESTIME' ? 'b-est' : 'b-tr'}">${esc(x.source === 'ESTIME' ? 'ESTIMÉ' : x.source)}</span>${x.funding === 'reserve' ? ' <span class="badge b-div">RÉSERVE</span>' : ''}</td>
         <td style="white-space:normal;min-width:180px;color:var(--text-2)">${esc(x.note)}</td>
         <td style="white-space:nowrap"><button class="btn sm" data-act="edit-op" data-i="${i}">Modifier</button> <button class="btn sm danger" data-act="del-op" data-i="${i}">Supprimer</button></td></tr>`).join('')}
       </tbody></table></div></div>`;
@@ -330,7 +331,8 @@
     const cfg = JSON.parse(JSON.stringify(S.files.config.json));
     const a = cfg.assets[t] || S.newAssets[t];
     const row = { date: f.date.value, account: a.account, type: f.type.value, ticker: t, quantity: fmtNum(numIn(f.quantity.value), 8), amount: fmtNum(numIn(f.amount.value), 2),
-      taxes: fmtNum(numIn(f.taxes.value) || 0, 2), source: f.source.value, note: f.note.value };
+      taxes: fmtNum(numIn(f.taxes.value) || 0, 2), source: f.source.value, note: f.note.value,
+      funding: f.reserve.checked && f.type.value === 'BUY' && a.account === 'PEA' ? 'reserve' : '' };
     if (['BUY', 'SELL', 'DIVIDEND', 'TRANSFER_IN', 'FEE'].includes(row.type) && !(+row.amount > 0)) { msg('err', 'Indique un montant.'); return; }
     if (row.type !== 'BUY' && ['SELL', 'TRANSFER_IN', 'TRANSFER_OUT', 'STAKING', 'BONUS'].includes(row.type) && !(+row.quantity > 0)) { msg('err', 'Indique une quantité.'); return; }
     const rows = S.files.tx.rows.slice();
@@ -351,6 +353,8 @@
         ${field('Date d\'achat', `<input type="date" name="date" value="${today()}" required>`, 'une date future crée un versement « prévu »')}
         ${field('Montant total (€)', `<input type="number" step="1" min="0" name="total" value="">`)}
         ${field('Note', `<input name="note" value="Versement ponctuel">`)}
+        <div class="field"><label>Financement</label><label class="check-row"><input type="checkbox" name="reserve"> Payé avec la réserve de liquidité (PEA)</label>
+          ${D.reserve ? `<small>Réserve disponible : <b>${eur(D.reserve.balance)}</b> · <a href="#" data-act="use-reserve">tout investir</a></small>` : ''}</div>
       </div>
       <div style="margin-top:14px" id="alloc-rows"></div>
       <div class="actions"><button type="button" class="btn" data-act="alloc-add">+ Ligne</button><button type="button" class="btn" data-act="alloc-plans" ${plans.length ? '' : 'disabled'}>Répartir comme mes plans</button><span id="alloc-left" class="note" style="margin:0;align-self:center"></span></div>
@@ -386,7 +390,8 @@
     const rows = S.files.tx.rows.slice();
     parts.forEach((p) => {
       const a = cfg.assets[p.t] || S.newAssets[p.t];
-      rows.push({ date, account: a.account, type: 'BUY', ticker: p.t, quantity: '', amount: p.amt.toFixed(2), taxes: '0', source: 'AUTO', note });
+      rows.push({ date, account: a.account, type: 'BUY', ticker: p.t, quantity: '', amount: p.amt.toFixed(2), taxes: '0', source: 'AUTO', note,
+        funding: f.reserve.checked && a.account === 'PEA' ? 'reserve' : '' });
     });
     const changes = [];
     if (withNewAssets(cfg, parts.map((p) => p.t))) changes.push({ key: 'config', path: 'config.json', text: JSON.stringify(cfg, null, 2) + '\n' });
@@ -525,6 +530,12 @@
       <div class="panel-b flush tbl-wrap"><table class="t" id="t-params"><thead><tr><th>Paramètre</th><th class="n">Valeur live</th><th>Mode</th><th class="n">Valeur manuelle / de secours</th><th class="n">Utilisée</th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="grid">
       <div class="panel c6"><div class="panel-h"><h2>Staking</h2><span class="sub">taux net versé par TR</span></div><div class="panel-b flush"><table class="t" id="t-stak"><thead><tr><th>Crypto</th><th class="n">Taux annuel</th><th>Depuis</th></tr></thead><tbody>${stak}</tbody></table></div></div>
+      <div class="panel c12"><div class="panel-h"><h2>Réserve de liquidité PEA</h2><span class="sub">recale-la sur les liquidités affichées dans TR quand tu veux</span></div><div class="panel-b"><form id="f-res" class="form">
+        ${field('Montant relevé dans TR (€)', `<input type="number" step="0.01" min="0" name="amount" value="${(c.accounts.PEA.cash_reserve || {}).amount ?? ''}">`, D.reserve ? `solde calculé aujourd'hui : ${eur(D.reserve.balance)}` : '')}
+        ${field('Date du relevé', `<input type="date" name="date" value="${esc((c.accounts.PEA.cash_reserve || {}).date || today())}">`, 'les mouvements après cette date s\'ajoutent')}
+        <div class="field"><label>Compter aussi</label><label class="check-row"><input type="checkbox" name="divs" ${(c.accounts.PEA.cash_reserve || {}).include_dividends !== false ? 'checked' : ''}> Dividendes du PEA</label>
+          <label class="check-row"><input type="checkbox" name="sales" ${(c.accounts.PEA.cash_reserve || {}).include_sales !== false ? 'checked' : ''}> Ventes du PEA</label></div>
+      </form></div></div>
       <div class="panel c6"><div class="panel-h"><h2>Alertes et référence</h2></div><div class="panel-b"><form id="f-misc" class="form">
         ${field('Indice de référence (ticker)', `<input name="bench_t" value="${esc(c.benchmark.ticker)}">`)}
         ${field('Nom de l\'indice', `<input name="bench_l" value="${esc(c.benchmark.label)}">`)}
@@ -550,6 +561,12 @@
       const a = cfg.assets[tr.dataset.t]; const r = numIn($('[data-f=rate]', tr).value); const since = $('[data-f=since]', tr).value;
       if (r) a.staking = { rate: Math.round(r * 1000) / 100000, since: since || today() }; else delete a.staking;
     });
+    const fr = $('#f-res');
+    if (fr && numIn(fr.amount.value) != null) {
+      cfg.accounts.PEA.cash_reserve = Object.assign({}, cfg.accounts.PEA.cash_reserve || {}, {
+        amount: Math.round(numIn(fr.amount.value) * 100) / 100, date: fr.date.value || today(),
+        include_dividends: fr.divs.checked, include_sales: fr.sales.checked });
+    }
     const f = $('#f-misc');
     cfg.benchmark = { ticker: f.bench_t.value.trim() || cfg.benchmark.ticker, label: f.bench_l.value.trim() || cfg.benchmark.label };
     cfg.alerts = { drawdown_pct: numIn(f.dd.value) ?? -10, plan_residual_pct: numIn(f.resid.value) ?? 10, max_line_weight_pct: numIn(f.wmax.value) ?? 90 };
@@ -694,6 +711,12 @@
         msg('', ''); break;
       }
       case 'save-vers': saveVersement(); break;
+      case 'use-reserve': {
+        e.preventDefault();
+        const fv = $('#f-vers'); if (!fv || !D.reserve) break;
+        fv.total.value = (Math.floor(D.reserve.balance * 100) / 100).toFixed(2); fv.reserve.checked = true;
+        fv.note.value = 'Investissement de la réserve de liquidité'; updateLeft(); break;
+      }
       case 'edit-plan': S.edit = { kind: 'plan', index: i }; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); break;
       case 'stop-plan': {
         const cfg = JSON.parse(JSON.stringify(files.config.json));

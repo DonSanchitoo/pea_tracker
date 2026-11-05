@@ -15,6 +15,7 @@ import pandas as pd
 from .common import LEDGER_FILE
 
 COLUMNS = ["date", "account", "type", "ticker", "quantity", "amount", "taxes", "source", "note"]
+OPTIONAL = ["funding"]  # funding = "reserve" : achat payé avec la réserve de liquidité du PEA
 TYPES = {"BUY", "SELL", "DIVIDEND", "TRANSFER_IN", "TRANSFER_OUT", "STAKING", "BONUS", "FEE"}
 QTY_TYPES = {"SELL", "TRANSFER_IN", "TRANSFER_OUT", "STAKING", "BONUS"}
 DAY = pd.Timedelta(days=1)
@@ -29,7 +30,11 @@ def load_ledger(cfg, path=LEDGER_FILE):
     missing = [c for c in COLUMNS if c not in df.columns]
     if missing:
         raise LedgerError(f"Colonnes manquantes dans transactions.csv : {missing}")
-    df = df[COLUMNS].copy()
+    for c in OPTIONAL:
+        if c not in df.columns:
+            df[c] = ""
+    df = df[COLUMNS + OPTIONAL].copy()
+    df["funding"] = df["funding"].str.strip().str.lower()
     df = df[df["date"].str.strip() != ""]
     df["line"] = range(2, len(df) + 2)
     try:
@@ -63,6 +68,10 @@ def _validate(df, cfg):
             errors.append(f"{where} : quantité manquante ou nulle")
         if r["type"] in {"BUY", "SELL", "DIVIDEND", "TRANSFER_IN", "FEE"} and r["amount"] <= 0:
             errors.append(f"{where} : montant manquant")
+        if r["funding"] not in ("", "reserve"):
+            errors.append(f"{where} : funding « {r['funding']} » inconnu (vide ou reserve)")
+        elif r["funding"] == "reserve" and (r["type"] != "BUY" or r["account"] != "PEA"):
+            errors.append(f"{where} : seule un achat du PEA peut être payé avec la réserve")
     held, unknown = {}, set()
     for _, r in df.sort_values(["date", "line"], kind="mergesort").iterrows():
         q = held.get(r["ticker"], 0.0)
@@ -339,5 +348,5 @@ def append_rows(rows, path=LEDGER_FILE):
             note = str(r["note"]).replace(",", ";")
             f.write(",".join([
                 r["date"], r["account"], r["type"], r["ticker"], _fmt_qty(float(r["quantity"])),
-                f"{float(r['amount']):.2f}", f"{float(r['taxes']):g}", r["source"], note,
+                f"{float(r['amount']):.2f}", f"{float(r['taxes']):g}", r["source"], note, r.get("funding", ""),
             ]) + "\n")

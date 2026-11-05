@@ -8,7 +8,14 @@
       "broker": "Trade Republic",
       "opened": "2025-09-02",
       "fiscal_maturity": "2030-09-02",
-      "deposit_ceiling": 150000
+      "deposit_ceiling": 150000,
+      "cash_reserve": {
+        "amount": 37.08,
+        "date": "2026-11-05",
+        "note": "Liquidités non investies du PEA relevées dans Trade Republic",
+        "include_dividends": true,
+        "include_sales": true
+      }
     },
     "CRYPTO": {
       "label": "Wallet Crypto",

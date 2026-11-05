@@ -163,6 +163,20 @@ def build_html(cfg, data, kind, added, cid, dca_date=None):
 </tr></table></td></tr>"""
 
     body = hero + tiles
+    rv = data.get("reserve")
+    if rv:
+        best = [b for b in rv["buyable"] if b["shares"] > 0][:3]
+        de = lambda n: ("d'" if n[:1].upper() in "AEIOUYÉÈÊH" else "de ") + n
+        can = " · ".join(f"{b['shares']} part{'s' if b['shares'] > 1 else ''} {de(b['short'])} ({eur(b['cost'])})" for b in best) or "pas encore une part entière"
+        body += f"""
+<tr><td style="padding:12px 20px 0">
+  <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid {C['border']};background:{C['surface2']};border-radius:6px"><tr>
+    <td style="padding:10px 12px">
+      <div style="font-size:11px;color:{C['muted']}">Réserve de liquidité PEA (non investie)</div>
+      <div style="font-size:18px;font-weight:700;color:{C['text']};margin-top:2px">{eur(rv['balance'])}
+        <span style="font-size:12px;font-weight:500">{colored(rv['week_change'], eurS) if abs(rv['week_change']) > 0.004 else ''}{' cette semaine' if abs(rv['week_change']) > 0.004 else ''}</span></div>
+      <div style="font-size:12px;color:{C['text2']};margin-top:3px">De quoi acheter maintenant : {can}. ≈ +{eur(rv['monthly_estimate'])} par mois avec les reliquats des plans.</div>
+    </td></tr></table></td></tr>"""
 
     # plans exécutés
     if "dca" in kind or kind == "test":
