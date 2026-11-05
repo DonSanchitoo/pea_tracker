@@ -743,7 +743,14 @@
 
   // ------------------------------------------------------------ PROJECTION & FISCALITÉ
   const SIM_KEY = 'pea-sim-v2';
-  const MC_N = 10000;
+  const MC_N = 5000;
+  // Courbes de scénarios = centiles des 5 000 chemins (plus parlant qu'un taux fixe : la volatilité est incluse)
+  const SCEN = [
+    { k: 'p90', q: 0.9, label: 'Optimiste', hint: '1 chance sur 10 de faire mieux', color: () => cv('--up'), dash: 'dashed' },
+    { k: 'p50', q: 0.5, label: 'Classique', hint: '1 chance sur 2 : la valeur probable', color: () => cv('--ink'), dash: 'solid' },
+    { k: 'p25', q: 0.25, label: 'Réservé', hint: '1 chance sur 4 de faire moins bien', color: () => cv('--warn-text'), dash: 'dashed' },
+    { k: 'p10', q: 0.1, label: 'Mauvais', hint: '1 chance sur 10 de faire moins bien', color: () => cv('--down'), dash: 'dashed' },
+  ];
   const MONTHS_LONG = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   function simDefaults() {
     const S = D.sim;
@@ -855,8 +862,9 @@
   let mcJob = 0, lastMd = null, lastDet = null, lastQ = null, mcTimer = null;
   function runMC(md, det) {
     const job = ++mcJob;
-    const rec = [];
-    for (let m = 12; m <= md.M; m += 12) rec.push(m);
+    const rec = [], stepM = md.M <= 72 ? 3 : md.M <= 180 ? 6 : 12;
+    for (let m = stepM; m <= md.M; m += stepM) rec.push(m);
+    for (const m of [120, 240]) if (m <= md.M) rec.push(m);
     if (md.matIdx > 0) rec.push(md.matIdx);
     rec.push(md.M);
     const R = Array.from(new Set(rec)).sort((a, b) => a - b);
@@ -869,20 +877,21 @@
       for (; k < end; k++) runPath(md, g, R, res, k * R.length);
       $('#sim-status').innerHTML = `<span class="spin"></span> Fourchette : ${nf(0).format(k)} / ${nf(0).format(MC_N)} scénarios calculés…`;
       if (k < MC_N) { setTimeout(step, 0); return; }
-      const q = { rec: R, p10: [], p50: [], p90: [] };
+      const q = { rec: R };
+      SCEN.forEach((s) => { q[s.k] = []; });
       const col = new Float64Array(MC_N);
       for (let j = 0; j < R.length; j++) {
         for (let i = 0; i < MC_N; i++) col[i] = res[i * R.length + j];
         col.sort();
-        q.p10.push(col[Math.floor(MC_N * 0.1)]); q.p50.push(col[Math.floor(MC_N * 0.5)]); q.p90.push(col[Math.floor(MC_N * 0.9)]);
+        SCEN.forEach((s) => q[s.k].push(col[Math.floor(MC_N * s.q)]));
       }
       let loss = 0;
       const lj = R.length - 1;
       for (let i = 0; i < MC_N; i++) if (res[i * R.length + lj] < det.invested[md.M]) loss++;
       q.pLoss = loss / MC_N;
       lastQ = q;
-      renderHero(md, det, q); renderSimChart(md, det, q);
-      $('#sim-status').textContent = `Fourchette calculée sur ${nf(0).format(MC_N)} scénarios aléatoires (volatilité de chaque ligne). La zone grise contient 8 scénarios sur 10.`;
+      renderHero(md, det, q); renderSimChart(md, det, q); renderScen(md, det, q);
+      $('#sim-status').textContent = `Calculé sur ${nf(0).format(MC_N)} scénarios aléatoires (volatilité de chaque ligne). La zone grise, entre Mauvais et Optimiste, contient 8 scénarios sur 10.`;
     };
     setTimeout(step, 20);
   }
@@ -890,7 +899,7 @@
     const md = model(sim), det = runPath(md, null);
     lastMd = md; lastDet = det; lastQ = null; mcJob++;
     $('#sim-status').innerHTML = `<span class="spin"></span> Fourchette : calcul des ${nf(0).format(MC_N)} scénarios…`;
-    renderHero(md, det, null); renderSimChart(md, det, null); renderBreakdown(md, det);
+    renderHero(md, det, null); renderSimChart(md, det, null); renderScen(md, det, null); renderBreakdown(md, det);
     clearTimeout(mcTimer);
     if (withMC !== false) mcTimer = setTimeout(() => runMC(md, det), 350);
   }
@@ -905,6 +914,26 @@
     return out.slice(-4);
   }
   function qAt(q, m, key) { if (!q) return null; const j = q.rec.indexOf(m); return j >= 0 ? q[key][j] : null; }
+  // Taux annuel constant qui mènerait à `target` au mois m avec les mêmes versements
+  function impliedRate(det, m, target) {
+    const fv = (r) => { const g = Math.pow(1 + r, 1 / 12); let v = det.total[0]; for (let k = 1; k <= m; k++) v = v * g + (det.invested[k] - det.invested[k - 1]); return v; };
+    let lo = -0.9, hi = 2;
+    for (let i = 0; i < 70; i++) { const mid = (lo + hi) / 2; if (fv(mid) < target) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+  function renderScen(md, det, q) {
+    const el = $('#pj-scen');
+    if (!el) return;
+    if (!q) { el.innerHTML = ''; return; }
+    const P = sim, real = P.unit === 'real', defl = Math.pow(1 + P.infl, md.M / 12) ** (real ? 1 : 0);
+    const y = parseISO(md.dates[md.M]).getFullYear();
+    el.innerHTML = `<div class="scen-h">En ${y}${real ? ", en euros d'aujourd'hui" : ''}, selon le scénario :</div><div class="scen4">${SCEN.map((s) => {
+      const v = qAt(q, md.M, s.k), r = impliedRate(det, md.M, v);
+      return `<div style="border-top:3px ${s.dash === 'solid' ? 'solid' : 'dashed'} ${s.color()}"><div class="lbl">${s.label}</div>
+        <div class="big">${eur(v / defl, 0)}</div><small>≈ ${pct(r, 1)} par an · ${s.hint}</small></div>`;
+    }).join('')}</div>
+      <div class="note" style="margin-top:8px">Pourquoi Classique fait moins que les ${pct(avgRet(P), 1)} saisis ? Ce taux est une moyenne : les baisses coûtent plus que les hausses ne rapportent (après −20 %, il faut +25 % pour revenir).</div>`;
+  }
 
   function renderHero(md, det, q) {
     const P = sim, real = P.unit === 'real';
@@ -941,11 +970,16 @@
     if (q) {
       const xs = [md.dates[0]].concat(q.rec.map((m) => md.dates[m]));
       const ms = [0].concat(q.rec);
-      const lo = [det.total[0]].concat(q.p10), hi = [det.total[0]].concat(q.p90), med = [det.total[0]].concat(q.p50);
+      const col = (k) => [det.total[0]].concat(q[k]);
+      const lo = col('p10'), hi = col('p90');
       ser.push({ name: 'bas', type: 'line', stack: 'band', data: xs.map((x, i) => [x, lo[i] / f(ms[i])]), lineStyle: { opacity: 0 }, showSymbol: false, silent: true, emphasis: { disabled: true }, smooth: 0.3 });
-      ser.push({ name: 'Fourchette', type: 'line', stack: 'band', data: xs.map((x, i) => [x, (hi[i] - lo[i]) / f(ms[i])]), lineStyle: { opacity: 0 }, areaStyle: { color: hexA(ink, 0.09) }, showSymbol: false, silent: true, emphasis: { disabled: true }, smooth: 0.3 });
-      ser.push(line('Valeur probable (médiane)', xs.map((x, i) => [x, med[i] / f(ms[i])]), ink, { smooth: 0.3 }));
-      leg.push({ label: 'Valeur probable', color: ink }, { label: '8 scénarios sur 10', color: hexA(ink, 0.25), sq: true });
+      ser.push({ name: 'Fourchette', type: 'line', stack: 'band', data: xs.map((x, i) => [x, (hi[i] - lo[i]) / f(ms[i])]), lineStyle: { opacity: 0 }, areaStyle: { color: hexA(ink, 0.06) }, showSymbol: false, silent: true, emphasis: { disabled: true }, smooth: 0.3 });
+      SCEN.forEach((s) => {
+        const c = s.color(), d = col(s.k);
+        ser.push(line(s.label, xs.map((x, i) => [x, d[i] / f(ms[i])]), c, { smooth: 0.3, z: s.k === 'p50' ? 4 : 3, lineStyle: { width: s.k === 'p50' ? 2.5 : 1.6, color: c, type: s.dash } }));
+        leg.push({ label: s.k === 'p50' ? 'Classique (valeur probable)' : s.label, color: c });
+      });
+      leg.push({ label: '8 scénarios sur 10', color: hexA(ink, 0.2), sq: true });
     } else {
       ser.push(line('Trajectoire moyenne', md.dates.map((x, m) => [x, det.total[m] / f(m)]), ink));
       leg.push({ label: 'Trajectoire moyenne', color: ink });
@@ -961,9 +995,16 @@
         const m = Math.max(0, Math.min(md.M, Math.round((d - parseISO(md.dates[0])) / (864e5 * 30.44))));
         let h = `<div style="font-weight:650;margin-bottom:4px">${dLong(md.dates[m])}</div>`;
         const row = (k, v) => `<div style="display:flex;justify-content:space-between;gap:14px"><span>${k}</span><b>${eur(v, 0)}</b></div>`;
-        const med = qAt(q, m, 'p50');
-        h += row(med != null ? 'Valeur probable' : 'Trajectoire moyenne', (med != null ? med : det.total[m]) / f(m)) + row('Capital versé', det.invested[m] / f(m));
-        if (q && qAt(q, m, 'p10') != null) h += `<div style="color:var(--muted);margin-top:3px">8 chances sur 10 entre ${eur(qAt(q, m, 'p10') / f(m), 0)} et ${eur(qAt(q, m, 'p90') / f(m), 0)}</div>`;
+        let j = -1;
+        if (q) { let best = 1e9; q.rec.forEach((r, i) => { if (Math.abs(r - m) < best) { best = Math.abs(r - m); j = i; } }); if (best > 6) j = -1; }
+        if (j >= 0) {
+          const mm = q.rec[j];
+          h = `<div style="font-weight:650;margin-bottom:4px">${dLong(md.dates[mm])}</div>`;
+          SCEN.forEach((s) => { h += row(`<span style="color:${s.color()}">●</span> ${s.label}`, q[s.k][j] / f(mm)); });
+          h += row('Capital versé', det.invested[mm] / f(mm));
+        } else {
+          h += row('Trajectoire moyenne', det.total[m] / f(m)) + row('Capital versé', det.invested[m] / f(m));
+        }
         return h;
       } }) }), true);
   }
@@ -1135,7 +1176,7 @@
     if (!sim) return;
     sim.unit = b.dataset.u; saveSim();
     $$('#sim-unit button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    if (lastMd) { renderHero(lastMd, lastDet, lastQ); renderSimChart(lastMd, lastDet, lastQ); }
+    if (lastMd) { renderHero(lastMd, lastDet, lastQ); renderSimChart(lastMd, lastDet, lastQ); renderScen(lastMd, lastDet, lastQ); }
   }));
 
   // ------------------------------------------------------------ TRANSACTIONS

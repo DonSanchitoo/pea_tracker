@@ -398,3 +398,12 @@ details.adv[open] > summary { border-bottom: 1px solid var(--border); }
 .tax2 .big { font-size: 24px; font-weight: 700; margin: 2px 0; }
 .tax2 small { color: var(--text-2); font-size: 11.5px; }
 @media (max-width: 600px) { .tax2 { grid-template-columns: 1fr; } .hcard .hv { font-size: 26px; } }
+
+/* scénarios de projection */
+#pj-scen .scen-h { font-size: 12.5px; font-weight: 650; color: var(--text-2); margin: 10px 0 8px; }
+.scen4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.scen4 > div { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
+.scen4 .lbl { font-size: 12px; font-weight: 650; }
+.scen4 .big { font-size: 20px; font-weight: 700; margin: 2px 0; font-variant-numeric: tabular-nums; }
+.scen4 small { color: var(--muted); font-size: 11px; line-height: 1.35; display: block; }
+@media (max-width: 700px) { .scen4 { grid-template-columns: 1fr 1fr; } }
