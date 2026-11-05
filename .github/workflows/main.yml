@@ -15,7 +15,7 @@ on:
       mail:
         description: "Mail à envoyer"
         type: choice
-        options: [none, auto, weekly, dca, weekly+dca]
+        options: [none, auto, weekly, dca, weekly+dca, test]
         default: none
 
 concurrency:

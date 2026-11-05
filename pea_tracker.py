@@ -63,6 +63,9 @@ def run(args):
             print(f"Aperçu du mail ({kind}) écrit dans {args.preview}")
         else:
             mailer.send(msg)
+            if kind == "test":  # un mail de test ne compte pas dans le calendrier
+                print("Mail de test envoyé.")
+                return 0
             st = load_state()
             if "weekly" in kind:
                 st["last_weekly_mail"] = today.strftime("%Y-%m-%d")
@@ -77,7 +80,7 @@ def decide_mail(mode, cfg, data, today):
     """Retourne None, 'weekly', 'dca' ou 'weekly+dca'."""
     if mode in (None, "none"):
         return None
-    if mode in ("weekly", "dca", "weekly+dca"):
+    if mode in ("weekly", "dca", "weekly+dca", "test"):
         return mode
     st = load_state()
     kinds = []
@@ -97,7 +100,7 @@ def decide_mail(mode, cfg, data, today):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--mail", choices=["none", "auto", "weekly", "dca", "weekly+dca"], default="none")
+    p.add_argument("--mail", choices=["none", "auto", "weekly", "dca", "weekly+dca", "test"], default="none")
     p.add_argument("--no-fetch", action="store_true", help="ne pas interroger Yahoo, utiliser le cache")
     p.add_argument("--preview", metavar="DIR", help="écrire le mail dans DIR au lieu de l'envoyer")
     try:

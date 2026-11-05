@@ -135,7 +135,8 @@ def build_html(cfg, data, kind, added, cid):
     url = cfg.get("dashboard_url", "#")
     today = data["meta"]["today"]
     asof = data["meta"]["asof"].get("PEA", today)
-    titles = {"weekly": "Synthèse hebdomadaire", "dca": "Plans d'épargne exécutés", "weekly+dca": "Synthèse hebdomadaire et plans exécutés"}
+    titles = {"weekly": "Synthèse hebdomadaire", "dca": "Plans d'épargne exécutés", "weekly+dca": "Synthèse hebdomadaire et plans exécutés",
+              "test": "Mail de test"}
     w = per["TOTAL"]["1S"]
 
     # hero
@@ -164,9 +165,11 @@ def build_html(cfg, data, kind, added, cid):
     body = hero + tiles
 
     # plans exécutés
-    if "dca" in kind:
-        month = pd.Timestamp(today).strftime("%Y-%m")
+    if "dca" in kind or kind == "test":
         plan_t = {p["ticker"] for p in cfg["plans"]}
+        month = pd.Timestamp(today).strftime("%Y-%m")
+        if kind == "test":  # test : derniers plans exécutés, quel que soit le mois
+            month = max(t["date"] for t in data["transactions"] if t["type"] == "BUY" and t["ticker"] in plan_t)[:7]
         rows, tot = [], 0.0
         execd = [t for t in data["transactions"] if t["type"] == "BUY" and t["date"][:7] == month and t["ticker"] in plan_t]
         for t in sorted(execd, key=lambda t: t["ticker"]):
@@ -185,7 +188,8 @@ def build_html(cfg, data, kind, added, cid):
             p = resid[0]
             note += (f'<div style="font-size:12px;color:{C["text2"]};margin-top:6px">⚠ Plan {p["short"]} : ≈ {eur(p["residual"])} '
                      f'non investis par mois (parts entières). Montant conseillé : {" ou ".join(str(s["amount"]) + " €" for s in p["suggest"])}.</div>')
-        body += _section("Plans exécutés ce mois-ci",
+        last = max((t["date"] for t in execd), default=today)
+        body += _section(f"Plans exécutés le {dshort(last)}",
                          _table(["Ligne", "Date", "Quantité", "Prix", "Montant", "Source"], rows, ["left", "left", "right", "right", "right", "left"]) + note)
 
     # graphique
@@ -283,7 +287,9 @@ def build_message(cfg, data, panel, kind, added):
     k = data["kpi"]["TOTAL"]
     w = {p["key"]: p for p in data["periods"]["TOTAL"]}["1S"]
     d = pd.Timestamp(data["meta"]["today"]).strftime("%d/%m")
-    if kind == "dca":
+    if kind == "test":
+        subject = f"[Test] PEA · {eur(k['value'], 0)} · synthèse + plans exécutés"
+    elif kind == "dca":
         subject = f"PEA · plans exécutés · {eur(k['value'], 0)} ({pctS(k['roi'], 1)} au total)"
     else:
         subject = f"PEA · {eur(k['value'], 0)} · {pctS(w['twr'], 1)} sur 7 j · synthèse du {d}"
