@@ -1,36 +1,69 @@
 {
- "updated_at": "2026-11-10 13:31 UTC",
+ "updated_at": "2026-11-10 22:28 UTC",
  "errors": 0,
  "items": [
   {
-   "title": "Global Stocks Strengthen as Oil Dips Below $90 a Barrel",
-   "source": "WSJ",
-   "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNenIxdW5Pb0VWNEJqczZCWGd6SU5rbjdqbkt1Mk1VSjRNNElrektwekFNQUN4T01xZGIzd3BWTDMxOFowNzQzcHUyWWNORWNwMWNsdnVVbDJ2cHQxX0h4b0hnZ1p1N1JOLXNNR1YxSFo0ZHFsQ2RpcWdWdjFuSDN3RHNUUUE4eGFPdjBKZVF3ZlRzazhtT1l3RkRSWFVuSXM?oc=5",
-   "date": "2026-11-10T12:43:00Z",
-   "lang": "en",
-   "score": 33.45,
-   "tickers": [
-    "DCAM.PA"
-   ]
-  },
-  {
-   "title": "Wall Street bonuses to rise for a third consecutive year, consultancy says",
+   "title": "Wall Street regulator poised to bring charges against Kalshi, Politico reports",
    "source": "Reuters",
-   "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxNelAzY19aSkN0WXhaemRjY3VDS1VxY2ZrUFU4UDlzbnN0SUhhRTQ3RjRJdWFkTHlBTm5ieEVaRS1Fa3hUX1VPTWVVVlFDT2hHOVF5U0VvV1B3cDhTMXBXTElnTjhqSFNLbm54VWdDUXo5bS1mLWpHYVdvSGFqWFdQamZPQ2lwQ0FaVE5PVkRsU1AtLUtaWGhTbUh6RGpGVndQQXdHVVBwZk9iSFg2dmhOd2swVGZ4YlF1?oc=5",
-   "date": "2026-11-10T11:07:43Z",
+   "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNRV9IbFc0V0h2V01MLXhDVVRZMEN6OVNJN2swOWJNLV9OSjMtZDVtVzJOcDA4LV95clR6R0lWTFdZa3EwcjlaN19ER2Zja0dCSnpxeTdMLTc2Q2xzbXBvUHhMRGgxcENYZkNxcDVLUnEtWEg4c2FyRXMyRGJpcDdhVzYzelpXSGlkM2Q3bTdpTWRjTk95b1V4bEppZkhYMlZTSVlmanVhbF9BaUVoV0R4d1JXdkhOODRJNmxB?oc=5",
+   "date": "2026-11-10T21:53:44Z",
    "lang": "en",
-   "score": 33.35,
+   "score": 33.46,
    "tickers": [
     "MARCHE"
    ]
   },
   {
-   "title": "Wall Street Pay Set to Climb After Volatile Markets and IPOs Fuel Bank Profits",
+   "title": "Hot Inflation Revives Wall Street’s Rate Hike Fears",
    "source": "WSJ",
-   "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNdDNkd21wam9KaXJSN3p1Yjg3cUg2YkFXTzVwQ0RBWUVfMjV5eldkY3RrM2tJYTRrNkk3N19yQzlZTk1nSlZMSWREVWJIdW00dzQ3bHVueFViYnhGald3eDJTMC14V19xY2ZOd1JGSGRKclNST0tWdEJmanF4QlhBaEEwdEhkRTRWcDFmVHV3V0pWdXdsaVVfQ3ZHbmlVUVBMU0xaeUsxUjJucTROSUYtR0dfMWVMZw?oc=5",
-   "date": "2026-11-10T11:00:00Z",
+   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxQbVpnYlhfQ3NfUkEwUElWVElGN2ZHaVJYSkhNWHVrOGUybEpBYnFFaGdLZk5ndUpqNElZWnhnTkpjNGpfQTVXOVdQM2FvV29nV3ZScWEzdUtUVWxiYzUxQ2JuNGk5VG1QQmtUeWswUHRJbWw0Z2NUMlZaTWxHZEFCWDk0UlVsc3gwNWZzVHRVaV91TTZUT05vSklmZEJUQQ?oc=5",
+   "date": "2026-11-10T21:30:00Z",
+   "lang": "en",
+   "score": 33.44,
+   "tickers": [
+    "MARCHE"
+   ]
+  },
+  {
+   "title": "CoreWeave Meets Wall Street Expectations, Shares Rise",
+   "source": "WSJ",
+   "url": "https://news.google.com/rss/articles/CBMilgFBVV95cUxORXZHb0p5N004NFVNNVA1OU9JSDVseExtMURtc3plQk9pU3o3ZGd1enh3UEtLSHhQMndCQTR5aE4wREd3WUV2am81c1FuMDh1bnl6S0pCYmVPRlVMYWxWRk8zM2x5T2ZWWWktT1ZuV1FzUTZLeHJKaU9adlBVakliRUt4TWRwajJIc2cyV0hfR0F5TG9ucmc?oc=5",
+   "date": "2026-11-10T21:21:15Z",
+   "lang": "en",
+   "score": 33.43,
+   "tickers": [
+    "MARCHE"
+   ]
+  },
+  {
+   "title": "EXCLUSIVE: Anthropic eyes $1.4 trillion IPO valuation in test of Wall Street's AI fervor",
+   "source": "Reuters",
+   "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNaUtnS210c1pKNVpEZXJ1V1JpdUdyZ0h5OGh2SzVCXzJaVGRwaDZnb0NQZUxFS0ZFWmxwbU53ZlJtdlBkOWplZHdaNkloU0xwV3hvdlpjNnh0R1FISXdMOExfc09JckJqTWxjSWlZSjZpN0RWR1kyRUF6YUlXN0dqSm5XQU5TUmFmbWpFbGlzT3FZRllaMGU4cld0cDlsaFVYY0IzV2ZNYmwxYW0yd1FDaw?oc=5",
+   "date": "2026-11-10T19:55:19Z",
    "lang": "en",
    "score": 33.34,
+   "tickers": [
+    "MARCHE"
+   ]
+  },
+  {
+   "title": "IA : Anthropic vise une valorisation de 1.400 milliards de dollars à Wall Street",
+   "source": "Les Echos",
+   "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxOeWhhTWRzdm1rdm1yb2hhcmdLdERVTHJWMVNfa0xLUVdzczlTRWY0dE5wc1ZYS29nckYwUG5FeUhzMTExcTNzLUNndkZCVjI4S2NWRVp5eEoycjF1dm1SQVVJUEtBaUZXWTFHRnVjLUxXbEM0dzZPeXhYNkhjYk1seGFVTVRsVERhX3ZEczJkTVRCVWtkVkhSdXJjM2NIQXVjRkM2b0NxVkZtdGk2UVV0U2RBNTlSMEhITEQzZkZVTUwzakdJd2xnUW94ZzRrSEhEX2FVR0k0WXdaLUc0R1hRMA?oc=5",
+   "date": "2026-11-10T17:08:24Z",
+   "lang": "fr",
+   "score": 33.17,
+   "tickers": [
+    "MARCHE"
+   ]
+  },
+  {
+   "title": "« Une correction tout ce qu'il y a de plus classique » : pourquoi Wall Street a déjà tourné la page du coup de semonce sur la tech",
+   "source": "Les Echos",
+   "url": "https://news.google.com/rss/articles/CBMimgJBVV95cUxQRU1tM1NCUC1tMjY1bjU3NlFabHU4N2t0dUdXOWtNRHRXVVZnUGZPMXJzTTBzREt1SkxMdC1EOWZ1TmUwemswV2lIdlN6RDdCdnRmYkhFeWlIdm82Q3dzTTQxeVZ6aTY3a25raDhiMWpzMDJ6XzcyZ3A0QmhJaFkzXy1zUG4xYy1LSWh4bTVFQUdNOEVDRFFxaTducFB3VTJjTlBoVlBIeEpHX0dXRENVNjVHdjgxeHlpWmhwaVRKUmwyYTlOVDBBaERMSUp4VklRVmMxRXJqSnNqbmlrQVZaOUZTb29QN0ZlWERqSEZMWjlDR25wOThUanFLXy1EQzVLUzR6TXlBcWdfYkZZQlB0WjFRbzY3cXBVanc?oc=5",
+   "date": "2026-11-10T16:45:06Z",
+   "lang": "fr",
+   "score": 33.14,
    "tickers": [
     "MARCHE"
    ]
@@ -41,52 +74,51 @@
    "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQZTl4RFBiVmtuZ2J2V1pkS3I0QlRTbWl2NF9aSnBDMG93anZFVEhpU0FHTEJiVGVUYnJzM1RibGZ6cEdja3NVZ1czeUtGeG5oMDV5X2o0bnVaQTAtZTNqQWtITG9kS2pXTy1zMnJXdTF0UFlKc2lCLUhmdW5DY3puWFN2dEVuNDNZcFBzTGdTY0tDNnJ3bzk2MkcyOWNXLVFkVVJTNks2bnhtMmNOUHc?oc=5",
    "date": "2026-11-10T07:12:00Z",
    "lang": "en",
-   "score": 33.11,
+   "score": 32.55,
    "tickers": [
     "PAASI.PA"
    ]
   },
   {
-   "title": "World stocks bounce as oil slides heading into US CPI print",
+   "title": "Stocks Fall as Inflation Comes in Hotter Than Expected",
+   "source": "WSJ",
+   "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNenIxdW5Pb0VWNEJqczZCWGd6SU5rbjdqbkt1Mk1VSjRNNElrektwekFNQUN4T01xZGIzd3BWTDMxOFowNzQzcHUyWWNORWNwMWNsdnVVbDJ2cHQxX0h4b0hnZ1p1N1JOLXNNR1YxSFo0ZHFsQ2RpcWdWdjFuSDN3RHNUUUE4eGFPdjBKZVF3ZlRzazhtT1l3RkRSWFVuSXM?oc=5",
+   "date": "2026-11-10T19:25:00Z",
+   "lang": "en",
+   "score": 30.31,
+   "tickers": [
+    "DCAM.PA"
+   ]
+  },
+  {
+   "title": "Wall Street termine en baisse alors que les chiffres élevés de l'inflation et les déclarations de la Fed raviv",
+   "source": "Boursorama",
+   "url": "https://news.google.com/rss/articles/CBMi1AJBVV95cUxQRi1xbkhfNXVqa05OeGZKTlJpeHlVUnNiZTlUc0paVlpsNXRPQ1hNRDJsT1ZLZDdzU21KZDBJeUVFUlBDc1BhWFFfb3BjRndPRnZrWGMtV2dKU29LVzRrMVBNU214RDdzTEx6NzJUdDFJWkVEOXF0S0ROUkZSOUJZN2FkZFAxYlFfQ0ZGUTRkUDFRZ3J1ZDBQMjBNWWEwRGdMWDZOV2RtcTgteks2Q0k4NmtNMkdOczZHUklhZ2U1LWk0bmJVbkFLWnRoZTJRVEJOdlk2eTJkMTlBNFA5QXZCZUJhc1BMOGdEN0x4VG5CeEluNGRlbWtZVEFQeVhqd1owYlo5QnBMMFQ5SXZaQl9ZUTl2OGx4LTJ4dU43bHJrRXhrWjdKSTZrMDBJQ2U3Sk5xMFpSTmM0WWVkaVZLZ1hCLTFlNWY5UmlGNlI2NUlRSHMwSHlW0gHaAkFVX3lxTE5VTjR6OWhCOEhFN21Wb1NsUXIycVVfbFFfTXVDcVNSSFlicDdrTC02bnRFWmZ6ckVobFdMd3RpQWM0UHAzUE42cWk4ZU1OUTBFM05XRDZha2xNb3lqc1JxN2hDck9ZVXNkRmJTeVlNX08xaUN5alBZS0pWdmYwcjNDUVFJa0FjY3VLYl9KT1M4VnJVVFlEN2ZMTTBhVGNnWjJfbFNVSUkwSUhFMnF4OFJ0N1Y2OGNsY25KbXM5SW96SWRnaFd4STdTQV9JMU1vMDg4cHd6ZHVWSlJvSnNfOWRpWVRCc3ZJOG5PWGVkVHZoaHhkMlViUl9TU3pvdWJjeHNJcVIyS1lJR2hwQ2RRQXJvN2RaWGVvcURnb1BRaGlkeWxTWUpmQjI2ZERzaDJOS1JYdFRyTFY0aW9SQnZBTkI2UWdlSEZPQ20zWVRCbi1GOVNKZVhZYlE1T0E?oc=5",
+   "date": "2026-11-10T21:27:37Z",
+   "lang": "fr",
+   "score": 29.44,
+   "tickers": [
+    "MARCHE"
+   ]
+  },
+  {
+   "title": "US yields climb, stocks fall as inflation data boosts chances for larger Fed rate hike",
    "source": "Reuters",
    "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTE9CVDNSVXJpWURQMkF1dUt1amw1WkxILXhVSjZyZkQxdGlBdWZvT0tqclhabXRKZC1xNlRIRmJSdkhINDVsYXlRdk9paVRCa085WWVKRTJFcm9CZWo2VzNaYU5lQ2RXbDdqb3QxdkY4SDFRb2JMVE8yemVJMA?oc=5",
    "date": "2026-11-10T02:23:00Z",
    "lang": "en",
-   "score": 32.8,
+   "score": 29.24,
    "tickers": [
-    "DCAM.PA",
     "PAASI.PA"
    ]
   },
   {
-   "title": "Trump administration's embrace of \"perp\" futures sets off risk alarms for Wall Street stalwarts",
-   "source": "Reuters",
-   "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNYVZsYWtjTnU4dVhYU3o4LWJCeVdPOUNhNGdUVUhLdG1iZTE3REw3QmR6RHRzblFjc3RKYmlvS1JkRlFJakFpMExqdGx2ZDU1OGcxME5OazNFVTVGYTRQLTlSTjFhTk5Wc041TnV5dUtRdGdWWVQwWXRhMzdMaE9sdmdWOFROSGVoOTR1Z201THNOb25PTmdzWkdraGNkWEg2bFljcld6SDM0MzJvdG84amJkNGRBYjJyMDRCemVFMVhUMzZvcTZR?oc=5",
-   "date": "2026-11-09T17:23:42Z",
-   "lang": "en",
-   "score": 32.24,
-   "tickers": [
-    "MARCHE"
-   ]
-  },
-  {
-   "title": "Tech set to still sway US stock market's course despite AI-driven swoon",
-   "source": "Reuters",
-   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNOXdISHo5SVE3RnA1bXZ4V05tYlAzSk5ZcUgwRUpycnVmOHlPeHQwbURpeHF2am5xQjU3ZVhMY0tweVVndXNjMUVpQUdCcXEyZlg5a1ZFVW9TNkkxdGJLaGllT3ZiM3pqLUxYVnRaNDVWZG1USmItMlJkU0pnc3Z0U2Zwd0l3UnowbDQ0UVN5cEJDQU9nS3FxbDFEc2RJRjV3NkpSeEdUNDEwWXJIUkVwR2ZB?oc=5",
-   "date": "2026-11-09T16:55:16Z",
-   "lang": "en",
-   "score": 32.21,
-   "tickers": [
-    "MARCHE"
-   ]
-  },
-  {
-   "title": "Wall Street vue prudente avant l'inflation, le pétrole continue de reculer",
+   "title": "L'Europe finit en hausse, tumulte à Wall Street après l'inflation",
    "source": "Boursorama",
-   "url": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxPS2htTVJfYk1GeThDcDJVZVl6WjJmMGticmVJZGxnMVpDSjJtdXJnTHFDTjFGR3lTMk9sWC1nYXZCa0o0Y05rY2E0LV9TOG5FUW1fN0JlanBPdEdiRHFuXy1BVkZGUnh6MFVOUE04NHFrVDZzcHlSck5Ea010bzRCQXR1U3pUM3FKYVB3UnhJdVJJWDM0WlFVNTdfR1ZURnN4R0xXdVlOQzMzYTVIZnZhMXVSM0xfQUFVTldaNVR2bV9TZ3dsLXdsU18yMjFwQzZPZWFtRGREZWROMUlRMk03SnZEbHBrd9IB6wFBVV95cUxNSHk0bTZUSmFWYVRHZEJIcWhSTXZQLXUzRjlxSFBhZ1oxWDBLaWc1bjFWRlRUd2tyT1A2UWY4LVVmQlVlbWY0WXI0ZGxoM0UtbW84dWJNampZdGhTLW5YaFR2UWYtZHREaG95QkVqM1ZZMTgxbURQeGJsUlJqYnZYTmpndW9FdDZKZ0xYalpnYnB3TlU3aVRJMElYeVFiQUpTZHlLSHNZMEdmeDFucndydXZ2cEhST2dfUFJDaXpjcm15V2ZkMDZqdVlHTzBDVE9rNWo3TUV3Smd3UW1JbkVJdFVvaW5NQ3B4MXY0?oc=5",
-   "date": "2026-11-10T13:04:12Z",
+   "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNRlMzQldWMXEzYXF0NFB1a1dqODBTUDdSNGg2Rlk2bFRJWnF3Tm9GbnZmbVktTWxfQ2wxUnpKektNYVVqeDFZSHJBMjhidXBXOUhZOGhSNWpzVFNZOWpycE5Iazl4cHNOVEp3dkVkelRVNG1UWjBILUs0T3FwdEQ5dmNWV1h4MlJEMl9lNjFnM0NIX2tRUWJVWlBEbTd1d2RMMVpWcmd5ZXUyaDhfejQ5dW5HNWF5dUotV0F6b09pWjZ0WEZrU0lWTWh0a0hNLTRZQ3gtZF9KQU1JZ9IB3wFBVV95cUxOWWQ5TTl0OGZacDgxdVd0LTR0U19WY00tdXNlYlphc1Q5QU42aTdHZDZnRmVab2t0WFJwUnNwc1RDcHRFRlJ0bl9mZUdyUnNhUmp2ODViMUQtSlp2VnQzckxuc3lQRVRpU2VpSjAySWQ4eFJYc01DZVhSTXcwLV9TNFpiNUxqYUFPTERaSkthTlBiRmhPVkxXOVgtZHJJM0pJQmxQc0x2bWVKNE0xQlR1cWJzZzFMYTZhSEJndzlublA1Q1dxRlQtYTgzZ2twUWppMXl4cTFadGl4LS1fSXBn?oc=5",
+   "date": "2026-11-10T17:30:48Z",
    "lang": "fr",
-   "score": 29.47,
+   "score": 29.19,
    "tickers": [
     "MARCHE"
    ]
@@ -97,9 +129,20 @@
    "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxNMFp5dGo0UGpFMlFnYWZNd2d6REFNc18zYXotQkc0cFJKQzI0MWZNVVJOdnlLZnd1cTBoVjdCRG9rVXpaY0hwVDRjcHhDZlpfd0VCeFpVWlVkNE5BUldJeEJfRms2OTZmV1JoY3RoaEdoOWZwcGNQbnJ4MjBTLVNLc2ZlWTBsR1dBMWlKQnBnMXRWQWFNWjgtOV9TNmhJbEFRNkJLNUhOd2hOR1lGTmhuaVFJX0lJemI0b3luYW1SdzZQc2Q0SGNNWVc1RndPbkVKaVVuMVVTQmVVczVNdThYRg?oc=5",
    "date": "2026-11-10T12:38:43Z",
    "lang": "fr",
-   "score": 29.45,
+   "score": 28.89,
    "tickers": [
     "TTE.PA"
+   ]
+  },
+  {
+   "title": "Air Liquide procède à une émission obligataire en CHF",
+   "source": "Boursorama",
+   "url": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxPZ3ZhWVpTLU5jNGRHenBNNTRheVlnc3U2bk51ZkRWWXZlU0JfYlVodFVvS29ZNEVRWTJkNER4X3VnY3dmVmtCOXRvcWU3ZTk4MFhYUHFnS1BCdUQ2NThodzZGcXotYWQ2OEVrVjM5YW94YWZUTE9adk05VkFXOFc2NWl4WGdOREJqb21rUkxvR3ZFdFFEMjhFOTVmTVR1Qnh4bkhzT1NVM1VfaElKc2hFX2JSdW1GTmM3b2xHX2xVOHFWd1E5VHFvYjJJWXFDd29t0gHQAUFVX3lxTE9ndmFZWlMtTmM0ZEd6cE01NGF5WWdzdTZuTnVmRFZZdmVTQl9iVWh0VW9Lb1k0RVFZMmQ0RHhfdWdjd2ZWa0I5dG9xZTdlOTgwWFhQcWdLUEJ1RDY1OGh3NkZxei1hZDY4RWtWMzlhb3hhZlRMT1p2TTlWQVc4VzY1aXhYZ05EQmpvbWtSTG9HdkV0UUQyOEU5NWZNVHVCeHhuSHNPU1UzVV9oSUpzaEVfYlJ1bUZOYzdvbEdfbFU4cVZ3UTlUcW9iMklZcUN3b20?oc=5",
+   "date": "2026-11-10T12:22:00Z",
+   "lang": "fr",
+   "score": 28.87,
+   "tickers": [
+    "AI.PA"
    ]
   },
   {
@@ -108,42 +151,20 @@
    "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxNdFprVXZCTEM4bFBDb19GeEpMcVVLcUNoODI4TWQ3X3kwRXJsTXpia2w3QThOZ1REbTVobTlvRlU4bk9JNzlaenlKZ2ppdjR4U0w2UnhDZW55cnBiZENQWlBBNWV0aDZhWlU1SWlseWZfSWFaOW8xXzJIclNyLWdSaDBNM3pHT3hHN0hYLUNKRFdEcXdMRV9iYnZjZDZuU2I1RjlUZ2xCMXFSMmU1MDZIREJFXzlPZVF2QmVRNWtianlLRjFnNDhTdXp6dw?oc=5",
    "date": "2026-11-10T07:01:06Z",
    "lang": "fr",
-   "score": 29.09,
+   "score": 28.53,
    "tickers": [
     "ETH-EUR"
    ]
   },
   {
-   "title": "Tempête parfaite sur Wall Street : ces dix facteurs qui expliquent l'extrême nervosité de la Bourse",
-   "source": "Les Echos",
-   "url": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxPZlhNUVhjZHdYUGhTVExrUWRlTTEwWFZQYkpWVkxvZTZFOEhmVHkySXllamlPdE45YnNpY1FwQ3gwa08wRW1QeHB3OG5EUTZyV1QzLXoxZi1ZbmpnbElaYzJmSFpERDdaZDBZdWVLOURIQUpXLXJCbkFQOFNKMHNNWDdxcEVYMldhd1FwMnJEOF8xd0k5ZlFGbXpBYnYzQWVVUUprOUdkV3hvTjVldDMzY2dndW9NcURVQ1hvekZUei1WbnNiN3hTQTVpNnZlX2dRLWZ4YVRhODBkaWd0VnFWN1l0a1BXNVNEbk9LSXpsWnR0Z3RESUE?oc=5",
-   "date": "2026-11-07T06:16:13Z",
-   "lang": "fr",
-   "score": 28.55,
-   "tickers": [
-    "MARCHE"
-   ]
-  },
-  {
-   "title": "Wall Street bondit alors que la chute des cours du pétrole apaise les craintes inflationnistes ; Nvidia s'effo",
-   "source": "Boursorama",
-   "url": "https://news.google.com/rss/articles/CBMimgJBVV95cUxQcnBaeG9wQUQzUWtOSmFOMzlNbURpZTczU2QwMjRfalBkRTBaUlFEcWtCaG1rdmFMQVpUdEd1ZmZHZ0JWcWRBSFR2NUZWSWwxYWlhazlfUXliendqVXg3MVUtLXRkZ3paT0RMMHp6X2NMck1XQ1pFQzhReHd0ZkpucTZ3ZjNESHNBaHlOc085bTdjeS0xR3M3TkRsZXdVYk0xY1Yxb0pyQnRrbXNRT3ItMFpOY0t1YzJlTkIwU3dVZURaSF9rQ0RSUDVjRTQ2Qkt4eHdGMFhBaGJ4Zmo3WHN5RjZfOHc1aEJ0Sm5HREJGRUIyWEpaZHlZWEYyaTZ4d3pfTHF5TXk0OUh4MDRJNkR5SlllN2o2RnV6OWfSAZ8CQVVfeXFMT0RFZnpReV9yRjM4aGNGeTBjcEx1ZVpLWUJBT3dfcTRmeWNXcHZCVnp6Sm1zYlMxUW0tb2NqVjJzRUZjU05UQTVUWFNfdWhmSlZlMDFyN2NPWXJnMi12ZTREVVJsQ0FiOGhKV2pEZmVmVDM4eEN2ZkFOYmdKNUxuYVdyb05ZWjVENnloQTZFYnFGZUZ2WUREN1ZhRHV3Nnh2cVk1QkNJN0Z3a0FyN29LVEZKNWJ6Q1c1WjRfNUlTQXd1SGpBTTZ3Nk1JTkwyZlFCQWpxcnYzWGR6NkpadXFXSkVrNEZTMXRQaHNib0FqSXp6MWNaUk8xdFNzWVJKbXRJQU1tUmNYV2Vwc3p4NWZPMUNJUmFWLXpxcUg5aDUwNEU?oc=5",
-   "date": "2026-11-09T21:26:50Z",
-   "lang": "fr",
-   "score": 28.5,
-   "tickers": [
-    "MARCHE"
-   ]
-  },
-  {
-   "title": "Wall Street clôture en nette hausse, l'IA à nouveau recherchée",
+   "title": "Les marchés asiatiques suivent la hausse de Wall Street liée à l'IA",
    "source": "Le Figaro",
-   "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNQkhhUjdkQm1VWUllVlFpQ2JldG5WMXZ2NkhyNThBaDI2UGZWUUVRNHV4ajZYT2NwamJHblJfdkRlcFM2NWJqX0IyT1U2dlhZMl9nTFdUNHFXbnlRcF8xWEQ3Q3cwUjUzOEZSeTFWVTBOLVUxSFF0YlV1Y1ZpeVQ0S04zZkxZNFhjcUg0blhEZTAyRWFXTWtsdUtlOVNEYnRSM1lSdjFvMA?oc=5",
-   "date": "2026-11-09T21:10:54Z",
+   "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPTDRPMERiTlliRFpHMlQwRU90Und5NElIVVUyUkZPRjZrc3ZYU09aVG1aSzljdTRFbWMyd0NlUHRWRl90a3E0VjhmNURUNGhmaGxCRUh0ZDZQM1dta09GYWppcDBVeFkyTksxdC1rQ01HY2NCLXNRWjlGcnFtN1VEOFlwWGdYY3lPbE5YODhBemJrNjBJMy1QcUlXMU9mbXpEUk9kZkdxN3NFWVVBc08w?oc=5",
+   "date": "2026-11-10T05:37:05Z",
    "lang": "fr",
-   "score": 28.48,
+   "score": 28.45,
    "tickers": [
-    "MARCHE"
+    "PAASI.PA"
    ]
   },
   {
@@ -152,20 +173,53 @@
    "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxQWHEzQjNVM0hCVHUxV3NxbWpTSDFrQzZ2MkwwWW13Q0Vubm82dW1IU0wyT2xfMWpCa1VpcFNKQ3lGS3FnYjZmMHcyZG1kQjQtaDczbVZCSGItak53QklrVVZqOEVfQzRMY1Y2ak0tQnFOcW15dGgxdlZaR1R4UXdocl9nbWE?oc=5",
    "date": "2026-11-09T04:54:55Z",
    "lang": "en",
-   "score": 28.46,
+   "score": 27.9,
    "tickers": [
     "PAASI.PA"
    ]
   },
   {
-   "title": "TOTALENERGIES : La consolidation peut se poursuivre",
-   "source": "Boursorama",
-   "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxNLVd1dnpOTjVKTEUwUjUxYnlXZnJ4OVNfeS1idTQ0Z3FqTzczdG9kQVBneWt6SG1KR1psdllERGN3cFk4LUVRRjE3OUcwYlJoVUl4czVtSHFJRExsUmJCbmxpb1RPZTVjM3JSLUpqOXlYOFJvSXFmbklta25sQjhlZE1CQmRzbndXS0tFNFhWekVnNXB1SFlXek9qclVkbG5MSG51OUpvTVNiYnRHZkQ1SmZPdnRBVmdWWWZwQms0VzdYQ1BjVm9INEJLc9IBywFBVV95cUxNLVd1dnpOTjVKTEUwUjUxYnlXZnJ4OVNfeS1idTQ0Z3FqTzczdG9kQVBneWt6SG1KR1psdllERGN3cFk4LUVRRjE3OUcwYlJoVUl4czVtSHFJRExsUmJCbmxpb1RPZTVjM3JSLUpqOXlYOFJvSXFmbklta25sQjhlZE1CQmRzbndXS0tFNFhWekVnNXB1SFlXek9qclVkbG5MSG51OUpvTVNiYnRHZkQ1SmZPdnRBVmdWWWZwQms0VzdYQ1BjVm9INEJLcw?oc=5",
-   "date": "2026-11-09T07:44:00Z",
+   "title": "Chinese energy storage firm RelyEZ ends 59% higher on Hong Kong debut",
+   "source": "Reuters",
+   "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNTzMxOWdyVlZaWTN0b3BSSDN4bUc2b0NkdGM4aWEwTWdJZFJOSjl0THBhdVVHVUhjUDUwWkRnaTZZTFg5VjlzMk51VEw0aVFZSEJzdE0yeDl0Sk5fWVRDWGg3dGFLRlNqaGktZUl3MDE5LXdjLUcyVmJ5OGotdGlwZTdBMjZlSnY2ZExicU5mOW5HRGJfSmFYaHFldVRPSGVVd2diUm9aYUtXZmZQdmRKbw?oc=5",
+   "date": "2026-11-09T01:36:00Z",
+   "lang": "en",
+   "score": 27.7,
+   "tickers": [
+    "PAASI.PA"
+   ]
+  },
+  {
+   "title": "TotalEnergies et les signataires de l'OGDC accélèrent leurs efforts de décarbonation directe",
+   "source": "Zonebourse",
+   "url": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQUlV2S3pqeUhsT2U4TXU1SGh5M3hTVXl6bXptTVZBcVhMRkt0dXpsZTdsUW5UcTc1SFVNc1lSTkJXeDhMbjVZYUlvWENzTTZqSjgxSUFkSXBtY3pqUzNMcGl2bGRpRjlkZzNEZ3ZyenlWWlpydGhTOHo1M0JseHNmaHkxZVZqOHZJNnk0cjJ6OFlfcDdkcEpEbXBtQnRxNlkzWFNmVV9DYW9KY1ZhX2tBVW5mdVk1MG80TjhkMmYyRzlCMExXSFk3bE5kcHBuSENFZkkxZUdXbDJUbG0zUWM2a0duYmhGTjBV?oc=5",
+   "date": "2026-11-10T16:01:28Z",
    "lang": "fr",
-   "score": 27.64,
+   "score": 27.1,
    "tickers": [
     "TTE.PA"
+   ]
+  },
+  {
+   "title": "TOTALENERGIES : La consolidation peut se poursuivre",
+   "source": "Boursorama",
+   "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNejJydjN3LUtNYmJOTE1POFpGT2VEd2pXY0ptbnljZmdoazdMc2pyLUl5ZU5QV0IwQjFtUzU2QTZGbkdvSWZVWUt6QnRfRUNidlVwdk5xeWFzVGtSZVlmUVljenZqODVSMWJxbjNkMFZLYUFkRlUyY3BwVGx5WTJCUTNIek1KTzdoajNBYUNTY05tUmpid1I1SmNzX1ZXWm4wdHZoRmhBeHVvUE9jQWNwOHRBMEFxV0prZzVySzVDWFlIMDRHMHfSAcsBQVVfeXFMTS1XdXZ6Tk41SkxFMFI1MWJ5V2ZyeDlTX3ktYnU0NGdxak83M3RvZEFQZ3lrekhtSkdabHZZRERjd3BZOC1FUUYxNzlHMGJSaFVJeHM1bUhxSURMbFJiQm5saW9UT2U1YzNyUi1Kajl5WDhSb0lxZm5JbWtubEI4ZWRNQkJkc253V0tLRTRYVnpFZzVwdUhZV3pPanJVZGxuTEhudTlKb01TYmJ0R2ZENUpmT3Z0QVZnVllmcEJrNFc3WENQY1ZvSDRCS3M?oc=5",
+   "date": "2026-11-09T07:44:00Z",
+   "lang": "fr",
+   "score": 27.08,
+   "tickers": [
+    "TTE.PA"
+   ]
+  },
+  {
+   "title": "Marchés mondiaux: Europe dans le vert, Etats-Unis sous la tech et l'inflation",
+   "source": "Zonebourse",
+   "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxNWGM2NDNPdzdtQ2hZR3dlb2JTVkp6Rl9YUWVjcEJHUHRvVjU0aTV5aG1uX0diODAtZUZ4V1lLc1lZZG1yS0NmUzdodHExQ0FQOHd6UVBFeEN0Z3hIQ0V0WXItRGUxMDdPMS1zNGtqc2d5ZE9mbVdGeERBXzF6Q01XN2tFTGNzMEtwdEtqTElJcUYzeUc4bU9vSnRfTlNrZkhpNi1pQ0M1SU1WVHUxLThhQ0FGaUxtaEFIZVI5VmJsdWtoYTVodG9EX0xvbnhTS2RPWVE?oc=5",
+   "date": "2026-11-10T15:15:30Z",
+   "lang": "fr",
+   "score": 27.05,
+   "tickers": [
+    "DCAM.PA"
    ]
   },
   {
@@ -174,7 +228,7 @@
    "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPZW16bnNDYzNxRThmRDR0ZVVlVEMtZkR2Y3VCc1FjcF9hUXQwMTdJSS1LcEtYMjJwMU1ZT3dsS3R1V2YzQWxWYnh3WENGOEZmYWdpN1RiQkVSTU5BWkM0Qy1mMkNPTnp3YmFoZ3FRZFUtNS00cHBGQUxFZ1NNcF9uOHBHbEk2b3pLM3ZVRmJKNkI2UHVHNDRmbE1mSFlJX21uY0dSUXh0b0U4WllzUUkybHUyMVd5bkxfRHlrUkUyalZ1UmluV08ydFg2YUN4aFpwOGpOWkxOTmRFMDVuUXhFb0tBbnc?oc=5",
    "date": "2026-11-09T07:00:00Z",
    "lang": "fr",
-   "score": 27.59,
+   "score": 27.03,
    "tickers": [
     "DCAM.PA"
    ]
@@ -185,7 +239,7 @@
    "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE15azFPZkpKMy1ueVJiUHg0OVVYZFdWVFR1YlJzUHFMQWNzdzVRZ2RpMTFuSTNhM3JBM1l5M1hieVN0V2VlSi1qYjljNGVoSnIyaVUxWlNIQVBidURScFZ4UjVrb3hBOWM?oc=5",
    "date": "2026-11-06T13:35:41Z",
    "lang": "en",
-   "score": 27.5,
+   "score": 26.95,
    "tickers": [
     "DCAM.PA"
    ]
@@ -196,7 +250,7 @@
    "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNOFQ2bkdqR19MYU5hSG9kaF9ESTliQkhRY092UWVlZjhxV3pRZ1Bpa295MEJnLTBobzBsWlpKc09HTUFIUmRYcW00OURPanZhT1Bla0tKd0szR1AtWnNzVmxHVVRlUTc0aEdOVTdWeEtWNTA1dV9QQlY3emhnMDgyVnJhdEhWYm9odnVXZDVVd3FhbENpai1CRlRlNm04aEZvd3c2SERlbDVWYjZxM0dlN2hqZTF4TnNQNUo0?oc=5",
    "date": "2026-11-09T05:16:54Z",
    "lang": "fr",
-   "score": 27.49,
+   "score": 26.93,
    "tickers": [
     "ETH-EUR"
    ]
@@ -207,40 +261,18 @@
    "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPazAtR1N0RjZNRmo3a0F6WVNhVEpKaGVoaTc5STNHNG5ZM1FFUkVfU2FFUjVPUURGQ05HeDc1N2Y0QTBGQ3dMSDF2amNFSDVYMThtRTVBT2hodmRPY0ZXdlFUd2Q2NG1DUG8wdlMxa0F2dm96c19jWGlHaWhMekN4Uzg1MzY?oc=5",
    "date": "2026-11-06T11:05:13Z",
    "lang": "en",
-   "score": 27.35,
+   "score": 26.79,
    "tickers": [
     "DCAM.PA"
    ]
   },
   {
-   "title": "People and partnerships power Hang Seng’s fintech innovation",
-   "source": "South China Morning Post",
-   "url": "https://news.google.com/rss/articles/CBMi7wFBVV95cUxQYnlPa0RhV08xUnVqNEs3eENVN1JzUjAtaHBDQWNDcTJKLVFqankyLUJDZVF1N2pZZzF0ZmhlWTVTOXNucWFsakhZMkFocFpHN29CVEQwY1J5NjFEYW51U1pKWGFoT2dwVnpuM3R2c2tUdzhBMV9paUY4MUJwVExhWTNoOXI1bnZWekpMUGhSVnRuUjJDeDFxMWJMRzk0SzBTbGcyS2h5RkRzVlJ6SlhNd0xJOGoxMDR2b2pLVzA2LTdZcUtBbDRSRTFVSUpoQU9GVHMyN09XYjVyVFVpOF9CNmZfSTVrbmVjb3V2UGxIcw?oc=5",
-   "date": "2026-11-10T07:00:12Z",
-   "lang": "en",
-   "score": 27.09,
-   "tickers": [
-    "PAASI.PA"
-   ]
-  },
-  {
-   "title": "Les marchés asiatiques suivent la hausse de Wall Street liée à l'IA",
+   "title": "TotalEnergies SE: Déclaration des Transactions sur Actions Propres",
    "source": "Zonebourse",
-   "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPc1RUMmlDS3Y3d0lvUGxaVXBfdzQ3LUxOYUdNemNhTDZCU0RiM0ZqMlh2WTlZQUtVa0VOYTV5RU1aRjdJaElLbFJmTGs5VDB0dm16eU45ZmJ3Y3NnVkpia2lfbGJNT2tGUzRISXMxZjhUQVJsYmgwUDJDUHAtMUpLZWpEa1Z2X2JMZjN4QTBYdjk3ai10Y1FUQUhTZTZyaXFqak1lck9VQ20wZWxueTd3WU8wTWhKS0RZRVZqUGpKdUtvLXpCSWdn?oc=5",
-   "date": "2026-11-10T05:05:45Z",
+   "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPVjJZT1ZVZUFDMC1qdWliUTF6MERsN0M4U1BMM2szQ2pQQVJLM0ZGR1RYV3h5RlVqNVFRMVNwMzROYXlNTjMxd19jajZaSVpnYWotUGdtcWtTUC1OWHE5RkIyNFlvU0lZQVVJWjNVWWFXaXB2MTRER3I3alBXSmlOcVBjbjdkMjlmTDhtcUdCZjBJb19KeEVfeXFoV3U4T3oyTEZCa253N0ZHTHp0S3JCRllrSzkyMldvVDZsZWh2ZXB2TUxP?oc=5",
+   "date": "2026-11-10T07:01:07Z",
    "lang": "fr",
-   "score": 26.97,
-   "tickers": [
-    "PAASI.PA"
-   ]
-  },
-  {
-   "title": "TotalEnergies devient propriétaire à 100% de l'usine de recyclage de plastiques de Grandpuits",
-   "source": "Boursorama",
-   "url": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxQTzlmNW16cUQ2WU1XLUpQRmVHdTF2RndXTXFrcW0yZDc5Wk56SHhvVG9zOXFnRF81TEYzNE9zZllhU3htNFc1bWdLNDJwbEs5bmJHZlFmdGJQZVdBX3IwVWpqRU9BV0NtTFQ4RFdFb2xubVFVQXBqQ0FRWlo4dFc3WEYzcGpKS3JmNWQwRTI2NzlXbTRsa0NqV1ZraGFwdExBRzFyZG9tbE5iX21FY213eEVtcUE1aTN0ZWpFXzFmZk14SzBaZmVVLVBCLTVPNkZHakxkVTlPemZZT1QzNDBRMTgwOFMwZnFhYlFEc0l0U21keFdSZFlxYl94SmZka2vSAYQCQVVfeXFMTnZRNk9aYTJzb0xQYk9jdUtJTDNsd3RORHcxZzQtOWJ6UzdZZzRadHE3Ym5Fc05RUXlfa0t6WkZ5UW01bXBwVlFOMHpNQnJnOU1oeXRkdENhRkgzZkVCWThxZTQ4bkZLV3FWdTRuS042SU5tWnNzcWQ3X1ZvUmRyMFlrRXdqWjd6WGVXS0xPYnZOYUNEQzNrUUc2ZHRtQkxXRE9tLUF2Mi1UYVhPMFJrdTFDS0NSUEk1MjdoejZRUW8tNkZpMkRlMi1IaUM0Q1BMaEFiZmNycFdYenJZN1dHc2JlbmdKSUFZVWpBVHlpYzdmZlZZWU9NZEVTN0U2UG5HSUhFY2g?oc=5",
-   "date": "2026-11-08T14:39:33Z",
-   "lang": "fr",
-   "score": 26.57,
+   "score": 26.53,
    "tickers": [
     "TTE.PA"
    ]
@@ -251,20 +283,9 @@
    "url": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxOWGxJMUU0dDhPcVpEcUJ4Q2dRVXNqM3A5SzBWd1h6NW9hWkFYYU1obEVyTXBjUTVWVk9sSjJpYlU1R1RRSGNleDJ0ZFBHei12NWZrRDlid3JVOXJYd2NZWWZsenBVcTFzeGduSWFFc1o1RmhSd2ZObDNiVkJ6SEtIektkb0d1YmVZQmhRNC1SNGRiVERBNVktOUxnTDNGOHhlNzhUNUd1MkFjNlZxbk5MVFdxTTRBVUhRdGZCb1hSZldwcy1ucl91bHFfQXNYb0lTRVlZVGE2TExtVmdmNERvdnVNUm96OTg4bWRBeFhn?oc=5",
    "date": "2026-11-09T17:38:22Z",
    "lang": "fr",
-   "score": 26.26,
+   "score": 25.7,
    "tickers": [
     "AI.PA"
-   ]
-  },
-  {
-   "title": "Tom Lee's Bitmine nears 5% Ethereum supply target with $20 million ETH buy as he predicts tokenization and AI 'supercycle'",
-   "source": "The Block",
-   "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxQaHpjZEVXQ0NvMURLeE5mQlJxaXFEUmQ0czE2MkRyZGVUWHVkT1JBQ2dKQ25ZMTkwZjhNWTI2ajMzMTRzQVpHdUQ1UnFuMVFuVnpNM0psOVB2VmFXRWhSTVI0aEJCMjZQbTE4UTh4LV83QnZiRmVsQWRNdkpoMWNnYjdUa3p1cmo2anV1cmF1bDZTZE5UT0hpZkt6RGE1ZXNvSWp4Tmtsc1VjWVJ3WGhaMzJnbVVCVUdWeFVPUkNTWFN1eXEtQ05kREVWSUIwMFphS1FoRFRLV09UQQ?oc=5",
-   "date": "2026-11-09T14:32:00Z",
-   "lang": "en",
-   "score": 26.06,
-   "tickers": [
-    "ETH-EUR"
    ]
   },
   {
@@ -273,29 +294,29 @@
    "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNOFpFbVJqQXVmWEFNREpnYmJEREQxeUtrUEtYWm1xU0dWQnhIbWw1dkZpZ29kbDVSNkVlTHRlYUM0Xy1DdDFVTUFaQWZDX05tMWZnall0OTlrUGtvbXhNZHlmS1R1M2NDVy1DMkxndzFGcU12dXJfXzdmVWhFcDlGM3hsdVRlLUczdXM5N1pvZldUcDA0TFFTYVF4bGxkbTBxWmg2YTR2a2liVmFNTTJ3RjA1eFFMS212blBTRnFGeG82Zmtq?oc=5",
    "date": "2026-11-09T12:41:28Z",
    "lang": "fr",
-   "score": 25.95,
+   "score": 25.39,
    "tickers": [
     "AI.PA"
    ]
   },
   {
-   "title": "Cyclisme : l'équipe TotalEnergies devient XEFI et repart pour trois ans",
-   "source": "France 24",
-   "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNYUdJMTVzMnlWY2tFSnFxejVrNEhlX2xnR2Y0MDZkTlE5eXF2MGdqUlBYOUNFRHFwSWRfeVVfZmRfeGItOThCUDR5cHd0QTB1SzkzeXFZTTVCdURPLTRwbWZlX3ZnTGdOTVRsZFo0SXZXZHpwMDZDQnFtRHNhdjhEdlhWS1lkTUJGMUd5ZGtyMG85bVVORnExdXZ2RzgtXzgtTFhiVVdLQldTaXM2QmFKZDh4WGx3dXZqazR3UHk2eUNhbFk5N1E?oc=5",
-   "date": "2026-11-10T12:58:04Z",
-   "lang": "fr",
-   "score": 25.47,
+   "title": "ETH price on November 15, 4:59PM UTC",
+   "source": "Decrypt",
+   "url": "https://news.google.com/rss/articles/CBMifkFVX3lxTE1VaDFPbmVxSU9Wc01CUEJ3TlZDakVuajVCb1VuTUFKbUYwNTNMZ1FLQ2FidzNhdG1WVnF6Y0xPUDU2NjdoQUZQc1NCN0VlM01FOWlpbDZZc2w1V3N1SGJSTXVGak1XS1NnMlMwc0N1ZDlrTlNXTmtWN3JLSnZxdw?oc=5",
+   "date": "2026-11-10T20:06:00Z",
+   "lang": "en",
+   "score": 25.35,
    "tickers": [
-    "TTE.PA"
+    "ETH-EUR"
    ]
   },
   {
-   "title": "Current price of Ethereum for Nov. 10, 2026",
+   "title": "Current price of Ethereum for November 10, 2026",
    "source": "Fortune",
    "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5pdjdsNTdZVnZ6NWU0MkpYeDNJd1U4aUZNbFBOb1diOFh2Sk9NT29ZMjRPcUlHWjQtcm1UZjk5NWU5d2dCQ05Vdmo1S2lySzRNUUx6cnJ4c3NZNjRxVzFGRzY5bFhpWWZz?oc=5",
-   "date": "2026-11-10T12:30:00Z",
+   "date": "2026-11-10T16:31:26Z",
    "lang": "en",
-   "score": 25.44,
+   "score": 25.13,
    "tickers": [
     "ETH-EUR"
    ]
@@ -306,7 +327,7 @@
    "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPcFlybFZkeVJWMXlLZDhjRGNPdkZxcmRScEhtc3ZVcEVYZlRaZDZiMS1iZUNGY0VuRXBweGxyMkJGZ2I5OFltdlVxdzJaTjFiWDJwM0d1aWJ2Unhua0FOb1IyVWd0SjZuUzZTeWsyVTlDWENJazlLY1FoOWNOVnBxajF6dHFUTS1tekRXUEV4N3pkaS1iRFkwck9kc0xJcE5fblJ5Tnd0UEpDXy1KNHYydDZRdXlCb1V4SEUwSVNlQW9IQ3Z5aWpnSzJ2dVg0Z2tsdVk3TEVxdG0?oc=5",
    "date": "2026-11-09T01:56:16Z",
    "lang": "fr",
-   "score": 25.28,
+   "score": 24.72,
    "tickers": [
     "PAASI.PA"
    ]
@@ -317,7 +338,7 @@
    "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQYzNRbGhjb2NpdEZrNmpHblZaa0gwRFkydXpQWjR1dkN3S0RsbTNueU5IazNXTHhfUlU1dUlhX253RlA4NFVwX1BmTVk5bWZiMFNNZXB0WmM4QmVKNThObTVFNk9VMkRLejRBdTVIcTJkQW5XdGV4R0VWbDJ1U3M4dFZ0dmo2elIxWlZnSi1za0x2LXhrNlVTNE1oLTZJR0tYdzk0YWRrbW1sSzN6c0E?oc=5",
    "date": "2026-11-10T07:00:00Z",
    "lang": "en",
-   "score": 25.09,
+   "score": 24.53,
    "tickers": [
     "TTE.PA"
    ]
@@ -328,7 +349,7 @@
    "url": "https://news.google.com/rss/articles/CBMi-gJBVV95cUxOQTNZZlhpbjhQclNhb1lHTXVWUTI5LWFpUjFUZDRBamVuVWpaNWFqcmJKN2ozeFhsODNmeS1HcjRfSmJBTFpVODU5eFVCcEFCcU00N0dYLUNFcmZlYXZlNlZZWUQ1OUs2ak5RZm55SnNfNEFPRjVJOHRZSFpRd3dYdUxtd1RCVTlCTVZqRHNpc0cwamI0MU9sRUdmTnp3a1JucEFhVkd5d25ZVjBaZHNsSFVjRnpSMWdUU1hEZ3FiQk0xeHY0RWdCNWZTSE9jZlFzSXo2dGlDUXE5RGsweGVxdzUzYjd6MEQtd2FMZ3NoTGdRVmk1WGdWWk4zdEJQVE1PTnVaYzlISVYyeWVPcXFLZU8yQTYwT04ycGczQzRMOHhQSlY1RU9XOHRwZTRjRnF2SVVBa0VKVWl1LW5JVFEtT05UUV91SGJHa0VTdFpGMGVXbDFwNEpCVzZkVHMtSU12VXdrS1hqZ21iYkpETXYyY1ZlRC1QMnlJSnfSAfoCQVVfeXFMTkEzWWZYaW44UHJTYW9ZR011VlEyOS1haVIxVGQ0QWplblVqWjVhanJiSjdqM3hYbDgzZnktR3I0X0piQUxaVTg1OXhVQnBBQnFNNDdHWC1DRXJmZWF2ZTZWWVlENTlLNmpOUWZueUpzXzRBT0Y1STh0WUhaUXd3WHVMbXdUQlU5Qk1WakRzaXNHMGpiNDFPbEVHZk56d2tSbnBBYVZHeXduWVYwWmRzbEhVY0Z6UjFnVFNYRGdxYkJNMXh2NEVnQjVmU0hPY2ZRc0l6NnRpQ1FxOURrMHhlcXc1M2I3ejBELXdhTGdzaExnUVZpNVhnVlpOM3RCUFRNT051WmM5SElWMnllT3FxS2VPMkE2ME9OMnBnM0M0TDh4UEpWNUVPVzh0cGU0Y0ZxdklVQWtFSlVpdS1uSVRRLU9OVFFfdUhiR2tFU3RaRjBlV2wxcDRKQlc2ZFRzLUlNdlV3a0tYamdtYmJKRE12MmNWZUQtUDJ5SUp3?oc=5",
    "date": "2026-11-09T04:55:56Z",
    "lang": "fr",
-   "score": 24.46,
+   "score": 23.9,
    "tickers": [
     "PAASI.PA"
    ]
@@ -339,7 +360,18 @@
    "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxQZVNEeFpkbjRXWUFQbU1mVEtKYk5PSWNlYm9qM0U4aGtUcVd1NzA4Yzl2QzczcWJFdFAtS2lQeENFdUVpUGtzRl9UMjdkMFFXUWJ5X19BWTA5SFpCcS1rRzZCX2JLWU1WTHN1dDZFSmZZaVZnVm5rNnV3UmpFNFVSOTI1aEtNZEJ5al9kcXdSMFlaaDkzVWRPRzZvLUtEdw?oc=5",
    "date": "2026-11-09T17:01:15Z",
    "lang": "en",
-   "score": 24.22,
+   "score": 23.66,
+   "tickers": [
+    "ETH-EUR"
+   ]
+  },
+  {
+   "title": "Bitcoin, Ethereum, XRP Whipsaw On Nvidia Scandal, Iran Tensions: Crypto Sell-Off Sparks $1B Liquidation Wave",
+   "source": "Yahoo Finance",
+   "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNd0ZsNHpodlBpbU80cTZXNkRQVWd2RmNaUWFZVGF3T3hDVlQ5clVLZnhKdUVKc3ZzRXJoVDVFRjF5OGI3RFgzT2hUVnVqa0R1WTBaUDJBTjZhalV5OWNGeTJUaGxRb2ZqT0J6RFZSSFNCVHA1emdUU1pKWXUwNGJTUFlET2FvUDNGN2pjYnc1RXRYdm1NX2c5UUJia2YwU0R0alE?oc=5",
+   "date": "2026-11-09T10:29:12Z",
+   "lang": "en",
+   "score": 23.25,
    "tickers": [
     "ETH-EUR"
    ]
@@ -350,7 +382,7 @@
    "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQenRpbHJZQ0ZSU20wa28yNEVzLWNwU3N0andiNDlsbzRXR0c0R3RLWVcwNlN3aGRVdW1Xa04xMjJ5TzVUVXg1RC1YV1NMc1RUZm1kSjloV0VHTC0xRmdFQ242ZGpqZS13aVZmOUNfRC13cFhYOUg1LXRUUzdBYzE3ZFpPSHc0Q3h3ZnYzcWFtbVE2Z0dHWnVCdUc1RVZuMlRSREJqUU1WWkE5aTBaQlRpQjVvT1hQYndNejVqZFVtONIBvwFBVV95cUxQenRpbHJZQ0ZSU20wa28yNEVzLWNwU3N0andiNDlsbzRXR0c0R3RLWVcwNlN3aGRVdW1Xa04xMjJ5TzVUVXg1RC1YV1NMc1RUZm1kSjloV0VHTC0xRmdFQ242ZGpqZS13aVZmOUNfRC13cFhYOUg1LXRUUzdBYzE3ZFpPSHc0Q3h3ZnYzcWFtbVE2Z0dHWnVCdUc1RVZuMlRSREJqUU1WWkE5aTBaQlRpQjVvT1hQYndNejVqZFVtOA?oc=5",
    "date": "2026-11-06T07:46:00Z",
    "lang": "fr",
-   "score": 23.14,
+   "score": 22.58,
    "tickers": [
     "AI.PA"
    ]
@@ -361,7 +393,7 @@
    "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPQzk0QV9jeWtCc1VNbVJoRHZ2S3pCakZEVzZscGdyUXRDZmw0TDR4ZnVxcTRiQUF1YlNUV2lrZ2lueUc1RlRHVHJGaGVzNnBnY2dNSDdmalhtRHZuc3JGaUdBWWM3U1poMU5iOXdUVk5jNXdaS1pFTXhHMlItT09ISDRmOGlfRkVSdTNHSS1BRFlDZ3NTNnFEaXdUOU5xUk1m?oc=5",
    "date": "2026-11-08T19:09:44Z",
    "lang": "en",
-   "score": 22.85,
+   "score": 22.29,
    "tickers": [
     "TTE.PA"
    ]
@@ -372,7 +404,7 @@
    "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNRHlwWWNjcl9INTI5a1Y2cXNiQTllbklaSWNLX3EyMzNVVHpQUURLWUhXeUFPbHRJV284UXVaNVZZeUlOUTdxVXBFWEZpQWpIV0w4YjZQaXBIWnNfcGtBZUwybnkyWTk0ZXhVcFdZT3BaVXBRTm9qczZCaktBRDNkeEJ2c29KemJPTWhsT2FaOVhHLWE0MDhOUw?oc=5",
    "date": "2026-11-09T17:51:42Z",
    "lang": "fr",
-   "score": 22.27,
+   "score": 21.71,
    "tickers": [
     "ETH-EUR"
    ]
@@ -383,20 +415,9 @@
    "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOcDlfbkxOYWxrUmdQNXZaVHJ6TldZMjdWN2U5U2RRekhiTHo1QzZ5ZFlaMk1lSWlfUzAydEhFZmkyM0pQT0tCZG1RU2J3LW5ENG1vcGw5Um9pR2VpX3R5cWQ0T1FHc1ZmSVl0LWpfQTM0dVdmRTZ4WkxsTmJWWjJqV2xlUm1mZw?oc=5",
    "date": "2026-11-09T10:51:14Z",
    "lang": "fr",
-   "score": 21.83,
+   "score": 21.27,
    "tickers": [
     "ETH-EUR"
-   ]
-  },
-  {
-   "title": "Air Liquide: Graphique de cours statique | AI | FR0000120073",
-   "source": "Zonebourse",
-   "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE1URzZOOFRwSVg5bC1kdkNGRzBFOVJfNUJ5Mlp6ZlFiREVobU5oMXdIaDZtd0hzdk9KMkZVWGd4NzNSb2JFekNPUzJYWGJ1YnpHYXB2NnBLN014c3JwT2xUZUxwcy1SWXRqNHZXSW1WUkY5aWM5Rm9SbTRiVlZpeEk?oc=5",
-   "date": "2026-11-06T16:55:00Z",
-   "lang": "fr",
-   "score": 21.71,
-   "tickers": [
-    "AI.PA"
    ]
   },
   {
@@ -405,20 +426,9 @@
    "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPSnFuR293ODZYR3ZoSV9PbVk0SHJTX2JyTWRnTkZLQmk2Sl9ZQlM4blQtcG42NTJVaFhzYW9idG96N1RLVkVUS1N0TFRLa2xGVzVPcmJ6dXJrMTFmX3V4aTZlZHZKSXRkU0tFaERwZlNwaUJqbVNEOHFCU0ZvX0hKSFlkOExtX0pKRlZ1aWZwT3QydUVmSmZHczNSM0FmNTV5OG5OUXY1QllFSmdKNGVJNFR1ekZEWi1aWVNTbmlfYWVvTGxzY1NV?oc=5",
    "date": "2026-11-06T16:11:37Z",
    "lang": "fr",
-   "score": 21.67,
+   "score": 21.11,
    "tickers": [
     "DCAM.PA"
-   ]
-  },
-  {
-   "title": "Vitalik Buterin says ETH should be valued as a store of value, not a fee-burning token",
-   "source": "The Block",
-   "url": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxNaGlONVQtQWJZS1U1RXJoQjlkSGVVcE5kZ0FhNzZRdER4N1A3c3hNZnpxaFRZbjhxb25GYURlUWlVWDdteUhYdGdYVlp3ZEdDN2dWMEhMaGhPRWpMbEI2QjVXMERkaDR4LU5kcEJBNWwwRmkzR2liZDRDS1g4UGFnNjVzYk1MZG9IRHR1U3JoQzNSLW15Y1F5Y2dvY3hydlpHYU1yYU9kTU9PUXRyMHQ5RDJueTVreEVjTWFGd3gzaHV0ajF0NDJuRVJ4ZzRqU1I0UjB6ZmJma3RMejQ?oc=5",
-   "date": "2026-11-08T15:57:00Z",
-   "lang": "en",
-   "score": 21.65,
-   "tickers": [
-    "ETH-EUR"
    ]
   },
   {
@@ -427,7 +437,7 @@
    "url": "https://news.google.com/rss/articles/CBMizgFBVV95cUxPZ1NtSEswUjAxVFo4THZDQml0R1JEZVNkLWlPQVBVTXNhX3ZpZU84cTN0a0dCck9rLU1hWU1BakhQVjNaUXJ0Rkw4eDJ1dWd5eXVzb2x6Zy14Rm1HSUd1TlpFcEFaaEpoTUFDUFk4LXZMallrQnBxdVRQMkYwLVRVOHQ4SmNwQkRlbWlNR0lxZ1VZckJwdVV5Z3lacVM2RUUwUHNNbE13MlVhejNoeXh0OW8xQnlaVEF2WUpsTGpGb19FMDZWZEtDT0ZIclNrUQ?oc=5",
    "date": "2026-11-04T09:21:00Z",
    "lang": "fr",
-   "score": 21.24,
+   "score": 20.68,
    "tickers": [
     "DCAM.PA"
    ]
@@ -438,42 +448,53 @@
    "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxQckJsNXA3c0N2TlBHMFZRblhneDdvSmN3Wm1kOGdUTHJhTUUyQTFMUXhEckdYZDBpY09pTEZ1R29ud3lNUmNmaGgzYm1udW0wNlczRWNVeWxPT0tPYlh3am9oYVFPa25qM1VTSmx1T2Z6TGR3My1fOEphZHZrSnVrVzdpRmxyVVpnMnFrUzMzTDQzVExWeVNsVWw0alJfNmtkV1NpT0pMSURXWWF3WVpPTXJRbTBlSV9KTFMzNENpel9pWmhGQUZvYw?oc=5",
    "date": "2026-11-06T07:31:22Z",
    "lang": "fr",
-   "score": 21.13,
+   "score": 20.57,
    "tickers": [
     "PAASI.PA"
    ]
   },
   {
-   "title": "Les Bourses mondiales en hausse après la victoire démocrate aux \"midterms\", le pétrole plonge",
-   "source": "Boursorama",
-   "url": "https://news.google.com/rss/articles/CBMi_AFBVV95cUxNMDdBeGtBNWxJR3UtemtZSDF1U0pvdmE3QkJtLTBiZXllTW9waXFudjAxd3JoVFhhOVBjRnRSMTdYU0xNUmczeUNPaHVSS1h1STI3NFU1YzZmemRoT2ZrS0IzUzNXeE16VlZJN1l4YVFKaTFIYi1XbEU2ZEhibE9IUTIxNlZrN1JNSGYxam5UX2dZSnU0TVItWXR2LTRzNFNMYTBvWWJrREtYTzhvNEZib0NOMjQyc2h2Wk9ZSEhYdkxzN3dXQUl1bmpQYm52VnVzSldCVUNaVWwwRUo0akJodDZCQ1R4R1hyRHB3QmxCVW9HWlNDMWlUSzRfb2_SAYICQVVfeXFMT3pzTmJNQkN5cU04QU1QTGkwWDhWNl9kcDRMN084ZURQY3JBakVyT0RKUmRqNnA4RGIwMjlUNW9oaGxHX2RlUHg3Nm9YakJHWEc4cmxieHV1V2h5UkZyc0FJT1RWYnNVVUpDWnMyWGQtZmRjZ2JSaUQ0ZHRGWmdqRnNqN3JOWFZDQ0tocUFQMmI4eWhlRUpMMVVNVnJCTTVVclRlX1g0Z3hYUmJlS1pteWVOWWdpcU1pa2dCM1FRR29qWUNLM1NvN3VQVDk4LXF0YUJmN2xiMzhtLXNtUWVGTVRrOUEtYnowQXduTTlEdG5TeDZlUGdHd21Mdmh3SzBfTEpn?oc=5",
-   "date": "2026-11-04T21:46:00Z",
-   "lang": "fr",
-   "score": 21.02,
+   "title": "Global stocks fall amid ‘big worries over AI’ after Democrats’ midterms triumph | Stock markets",
+   "source": "The Guardian",
+   "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNUk01aHk3MkRMSGk4UWdNN19aTnNuaEV1MEpvNGtXdUViNmsyTk84OFNEVktLbjlpV2FEQ1FhYi1lenJjTkh1eEpCUG1YODk1NFI0dlBZTXd5VlpSM2ZqSEtfZWVxTU9iYVpDaGI0YTF3cjhvc0R6a0JuUmxVNGJkb3JHOFN1NUFhaXpSM296Z2JRdWFiNVZ4SHBiS2NiNU9KbnR0VnA4RWwxMmJ3NjhtSEIwcWFscFBGX2xKdkN3bzNVdw?oc=5",
+   "date": "2026-11-06T08:58:00Z",
+   "lang": "en",
+   "score": 18.66,
    "tickers": [
     "DCAM.PA"
    ]
   },
   {
-   "title": "The Zacks Analyst Blog Highlights ConocoPhillips, Viper Energy, TotalEnergies, Suncor Energy and Ecopetrol",
-   "source": "Yahoo Finance",
-   "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNZFdOdnoySldfTXY2M0RkSkJJNHdocFBJNUdhd1RNUlZfVWt0RWJ6eTFfa3ZEQm1mZGlVcy1zczJZR3ZocGthSTFFcnkxempUb1VZY00xNXlQV3dGb3RhQWk5b2kzaDF2cmx3V29aaHRRMW8xVHE4OFlkeHVqWWppVWM2X1VscUtSWHItYjNPZzBPQzRUOUxUSGhMYXBmZFcwcFI0?oc=5",
-   "date": "2026-11-05T06:38:00Z",
+   "title": "African giants face crucial tests as TotalEnergies CAF AFCON PAMOJA 2027 Qualifiers resume this week",
+   "source": "CAFOnline.com",
+   "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxPUE4xMGpxalVmcG55LVZaelRSLWNRNm4wY2hYb0lxS0JNRW1meFhqczY4M3FaNmQwX1pUY28zY2lPdDlFekJDX2d3YXpCNkx1elhCdGY1T3lLU0lzZXpCcWtaaHdaU0tqUjc4aFZqRnJMZ09wUERqN2VuRE42c3djSlI2Y1hXbmt0eFRqVXlxZ01rYnp0VkJhN2ZreUVFMjNuc2RvQUhsR054RjNjUGlKcEUwY3VuU3k2eHMxa0t0V1lRTW1hanhwTVh6eVVQaUhrQ1Z1VDhtSkNjdw?oc=5",
+   "date": "2026-11-10T19:53:13Z",
    "lang": "en",
-   "score": 17.57,
+   "score": 17.34,
    "tickers": [
     "TTE.PA"
    ]
   },
   {
-   "title": "Avient : Advances Sustainability Goals with Renewable Electricity from TotalEnergies Solar Installation",
-   "source": "www.marketscreener.com",
-   "url": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxNRDhmbFFFU1ZoWmkyZ1pHY042azhxcHNEYVFzdlM3aGhULVF1eWtVSWhQdkY5b2U2bDRyRUdSX1pBeGI0YlNnb3U5ODVGdmFTVklZOHZkT0dnb1Q3bndIOGZMaFppSXUtdDZ6NHNvOG44SlhUYS00c3lQWmlHSm5ubWYwdE1mN2I0Z3hISEtMLXo0N2ZQSHV5WkJGdEU0cU12Z3NTbzVtbllrVlhURmU4bnNralZ4SjN1bVhMSGVhd0E2dUFSWks1VFd2dTUtaURQTklqUUY2TnQwX01qN2NjcnQxMVB0dw?oc=5",
-   "date": "2026-11-10T13:15:16Z",
+   "title": "TotalEnergies saved from extinction as historic French team becomes XEFI in three-year deal",
+   "source": "CyclingUpToDate.com",
+   "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxQc1dlSHVZcTc2QVNUTFZHVlNIb19qZWVXRU1VSnJ2TzRhREx1OWRZN3MxRmxkaXl0T2Ntcm9LSGIyVnp4UllOal9YOTF0cUZSVVBrZEhlUTZrTlVKVWYwS2dkNldIZlE5MVVwUEgwb1MxTkpvVkkxX0tQNXZnOEpPVGpjbmpCT0ZfYmlrbFZyVHRkWFp6RDFfWUlua2xDMkE5R2s4azkzbmRHM0x3UVRnZkFQb0I3Zkkxa0ZiM2pzTnE1bFRwckE?oc=5",
+   "date": "2026-11-10T19:00:00Z",
    "lang": "en",
-   "score": 17.48,
+   "score": 17.28,
    "tickers": [
     "TTE.PA"
+   ]
+  },
+  {
+   "title": "Air Liquide stock: Electronics growth backs buyback and outlook",
+   "source": "ad-hoc-news.de",
+   "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxNckZPOC1BX3pfY3V6VTJfSkdENWIxRm9FNjBjVUVLZzQtN1JWeGkyWTJnUXZxdmI1bGF3TnR4QktZU1QxSnVqQ1E3MzBZVWhqSVpKZzAtUFZyXzJPemNpOXJmU1gtMVVqVl9CekhseGlyNERya2xhZ0VDdjNUQTB1Qm9SWFNMZ2MzX1Y1dno3UEo1R3NpQkFZUnNzX0NsUFAzMFRoSjM0OWFxa1MyUW5QZzN0M2VQaFVkalNibktYaGFycGc?oc=5",
+   "date": "2026-11-10T16:41:33Z",
+   "lang": "en",
+   "score": 17.14,
+   "tickers": [
+    "AI.PA"
    ]
   },
   {
@@ -482,7 +503,7 @@
    "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOaHdmN0ZBTmZ5cC1zMUtMbFJkM2syQVlkR0ZJX1kwamdKRGhwb3hWVjhEUm91Z1lrVTRGMFVsazJCVlMza2VtdFZrRDIycWpvRHZFME5kdHNUVGpZV1Q0VHktRzN5U1FQT2ktTUhJQVBWeUlFT3FrTmRDVVJHcmU3V1JDbkV2RmxZSXFFZGctX0JPZw?oc=5",
    "date": "2026-11-10T12:24:22Z",
    "lang": "en",
-   "score": 17.43,
+   "score": 16.87,
    "tickers": [
     "AI.PA"
    ]
@@ -493,7 +514,7 @@
    "url": "https://news.google.com/rss/articles/CBMizwFBVV95cUxPZEZ5SVViNW16dVNIWEdrSmhsdl8zRTZTWjVlbHpiNEJkUm1aajljQ00tekZCMm9EZnhVbFU3RlcxcmZZWlFfc0NhMmxPd01SV2lCZ3BRZV9pMUkxUVlEQ2xPcElBVlNadnNSY3hjNUN0NGYtQWxqdmo0VWp6Y0E2ZFZybnFHU3NWZGRZU2hjeEYzYVp6RmJQVGJaZngyNFJ0OGNKMlpEREszSUJNbkkza1FvaW9HdVBZMklIaldKa2Y0ZDh5LTlqMHdHZ2ZNSjg?oc=5",
    "date": "2026-11-10T09:24:35Z",
    "lang": "en",
-   "score": 17.24,
+   "score": 16.68,
    "tickers": [
     "AI.PA"
    ]
@@ -504,18 +525,7 @@
    "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxOQi0tT054b0FKdTdsYjE3WXF0MXdSb0ZRcEJjLXA3cHg3RlJzYy1VZW5QQ0EzaTc3M2phRG9MdHFfdkltX2VyRWV5QzFjM1BEMnQ4MnplNVNNaXg3dzlTZDl0ak9QOEZfeFJ2QW4zVTJWb1pIRlk3OWZuVlcyaDV5N3pKNFBleVRfWjlfZGY5SEJBeDRjZGQyUm1RTGNZWWtFSEtKMG5YNlFmNC1hOTV4UUJwemJ6QkFMQmVucnoySGJ4amNmQ2Jz?oc=5",
    "date": "2026-11-10T09:20:42Z",
    "lang": "en",
-   "score": 17.24,
-   "tickers": [
-    "AI.PA"
-   ]
-  },
-  {
-   "title": "Hydrogen Top-Level Plans Roll Out Densely as Hyundai Motor and Air Liquide Sign \"Vehicle, Station, Gas\" Cooperation Agreement at CIIE",
-   "source": "BigGo Finance",
-   "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9zRTZXcFhrOG1WYWc5TGU4a2RneDZCbzFIQUdweFExbldmcy1rVHh2SHg4S2t3amlGZlRxV19JMGZ3dTlULWNwVkhoWVRFTFZVN3dHOHJyeHQyakl2TW05cU5vNlNRN2dvRTdmVkhIQS1wN004MFE?oc=5",
-   "date": "2026-11-10T07:25:00Z",
-   "lang": "en",
-   "score": 17.12,
+   "score": 16.68,
    "tickers": [
     "AI.PA"
    ]
