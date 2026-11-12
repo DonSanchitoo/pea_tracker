@@ -1,24 +1,24 @@
 {
  "estr": {
-  "fetched_at": "2026-11-12 13:49 UTC",
+  "fetched_at": "2026-11-12 22:50 UTC",
   "source": "BCE, €STR du 2026-11-11",
   "url": "https://data.ecb.europa.eu/main-figures/ecb-interest-rates-and-exchange-rates/euro-short-term-rate",
   "value": 0.02439
  },
  "inflation": {
-  "fetched_at": "2026-11-12 13:49 UTC",
+  "fetched_at": "2026-11-12 22:50 UTC",
   "source": "Eurostat, IPCH France, glissement sur 12 mois (2026-10)",
   "url": "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table",
   "value": 0.038
  },
  "livret_a": {
-  "fetched_at": "2026-11-12 13:49 UTC",
+  "fetched_at": "2026-11-12 22:50 UTC",
   "source": "service-public.gouv.fr (Livret A)",
   "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F2365",
   "value": 0.017
  },
  "ps_rate": {
-  "fetched_at": "2026-11-12 13:49 UTC",
+  "fetched_at": "2026-11-12 22:50 UTC",
   "source": "service-public.gouv.fr (prélèvements sociaux sur revenus de placement)",
   "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F2329",
   "value": 0.186
