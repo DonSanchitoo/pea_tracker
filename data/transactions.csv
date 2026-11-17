@@ -34,3 +34,6 @@ date,account,type,ticker,quantity,amount,taxes,source,note,funding
 2026-10-16,PEA,BUY,PAASI.PA,1,38.05,0,TR,Plan d'épargne
 2026-10-16,CRYPTO,BUY,ETH-EUR,0.011531,25.00,0,TR,Plan d'épargne (quantité estimée au cours moyen du jour)
 2026-11-01,CRYPTO,STAKING,ETH-EUR,0.001394,0,0,ESTIME,Récompenses de staking cumulées (environ 3 €)
+2026-11-16,PEA,BUY,DCAM.PA,55,348.92,0,AUTO,Plan d'épargne (estimé : 55 parts à ~6.3440 €) : remplace par le montant TR,
+2026-11-16,PEA,BUY,PAASI.PA,1,36.12,0,AUTO,Plan d'épargne (estimé : 1 parts à ~36.1225 €) : remplace par le montant TR,
+2026-11-16,CRYPTO,BUY,ETH-EUR,0.015076,25.00,0,AUTO,Plan d'épargne (quantité estimée au cours moyen ~1658.31 €),
